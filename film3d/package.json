@@ -1,0 +1,16 @@
+{
+  "name": "odd-haus-film3d",
+  "private": true,
+  "type": "module",
+  "description": "ODD HAUS 50s brand film - real-time Three.js production",
+  "scripts": {
+    "serve": "node tools/serve.mjs",
+    "shot": "node tools/capture.mjs"
+  },
+  "dependencies": {
+    "three": "0.186.1"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1"
+  }
+}

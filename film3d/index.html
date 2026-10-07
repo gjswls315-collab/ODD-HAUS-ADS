@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ODD HAUS — 3D</title>
+<style>
+  :root { --bg: #050608; --fg: #efe6d6; --muted: #9b917f; --accent: #e3a95c; --panel: rgba(12, 12, 14, 0.78); }
+  html, body { margin: 0; height: 100%; background: var(--bg); color: var(--fg); overflow: hidden;
+    font-family: InterUI, "Inter", system-ui, sans-serif; }
+  #view { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; }
+  .ui { position: fixed; z-index: 2; }
+  #bar { left: 50%; bottom: 16px; transform: translateX(-50%); display: flex; gap: 6px; padding: 6px;
+    background: var(--panel); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; backdrop-filter: blur(8px);
+    transition: opacity .4s; flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 32px); }
+  #bar button { all: unset; cursor: pointer; padding: 8px 12px; border-radius: 8px; font-size: 13px; letter-spacing: .02em;
+    color: var(--muted); white-space: nowrap; }
+  #bar button:hover { color: var(--fg); background: rgba(255,255,255,0.06); }
+  #bar button.on { color: #1a1206; background: var(--accent); }
+  body.film #bar { opacity: 0; } body.film #bar:hover { opacity: 1; }
+  #debug { left: 12px; top: 12px; padding: 10px 12px; background: var(--panel); border-radius: 10px; font: 12px/1.55 ui-monospace, "DejaVu Sans Mono", monospace;
+    white-space: pre; display: none; border: 1px solid rgba(255,255,255,0.08); }
+  body.debug #debug { display: block; }
+  #labels { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+  .tag { position: absolute; transform: translate(-50%, 0); font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--fg); text-shadow: 0 1px 3px #000; white-space: nowrap; text-align: center; }
+  .tag small { display: block; color: var(--accent); font-size: 10px; letter-spacing: .02em; text-transform: none; }
+  #hint { right: 12px; top: 12px; font-size: 12px; color: var(--muted); background: var(--panel); padding: 8px 10px; border-radius: 10px; display: none; }
+  body.free #hint { display: block; }
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; font-size: 13px; letter-spacing: .2em; color: var(--muted); z-index: 3; }
+  @media (max-width: 600px) { #bar button { padding: 7px 9px; font-size: 12px; } }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="view"></canvas>
+<div id="labels"></div>
+<div id="loading">LOADING ODD HAUS</div>
+<div id="debug" class="ui"></div>
+<div id="hint" class="ui">Drag to orbit · Right-drag to pan · Scroll to zoom · WASD/QE to fly · L labels</div>
+<div id="bar" class="ui"></div>
+<script>
+  addEventListener("error", (e) => { window.__error = String(e.message || e); });
+  addEventListener("unhandledrejection", (e) => { window.__error = String(e.reason && (e.reason.stack || e.reason.message) || e.reason); });
+</script>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>

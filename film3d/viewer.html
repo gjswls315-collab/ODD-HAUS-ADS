@@ -1,0 +1,51 @@
+<title>ODD HAUS 3D Review</title>
+<style>
+  /* Full-bleed film viewer: dark single-look stage, small review bar docked at the bottom. */
+  :root {
+    color-scheme: dark;
+    --bg: #050608; --fg: #efe6d6; --muted: #9b917f; --accent: #e3a95c; --panel: rgba(12, 12, 14, 0.8);
+    --ui: InterUI, system-ui, -apple-system, "Segoe UI", sans-serif;
+    --mono: ui-monospace, "SFMono-Regular", Menlo, "DejaVu Sans Mono", monospace;
+  }
+  html, body { height: 100%; }
+  body { margin: 0; background: var(--bg); color: var(--fg); overflow: hidden; font-family: var(--ui); }
+  #view { position: fixed; inset: 0; width: 100vw; height: 100vh; display: block; touch-action: none; }
+  .ui { position: fixed; z-index: 2; }
+  #bar { left: 50%; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); display: flex; gap: 4px; padding: 5px;
+    background: var(--panel); border: 1px solid rgba(239, 230, 214, 0.1); border-radius: 12px; backdrop-filter: blur(8px);
+    transition: opacity .4s; flex-wrap: wrap; justify-content: center; max-width: calc(100vw - 32px); box-sizing: border-box; }
+  #bar button { all: unset; cursor: pointer; padding: 8px 12px; border-radius: 8px; font-size: 13px; letter-spacing: .02em; color: var(--muted); white-space: nowrap; }
+  #bar button:hover, #bar button:focus-visible { color: var(--fg); background: rgba(239, 230, 214, 0.08); outline: none; }
+  #bar button.on { color: #1a1206; background: var(--accent); }
+  body.film #bar { opacity: 0; }
+  body.film #bar:hover, body.film #bar:focus-within { opacity: 1; }
+  #debug { left: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); padding: 10px 12px; background: var(--panel); border-radius: 10px;
+    font: 12px/1.55 var(--mono); white-space: pre; display: none; border: 1px solid rgba(239, 230, 214, 0.1); color: var(--fg); max-width: calc(100vw - 48px); overflow-x: auto; }
+  body.debug #debug { display: block; }
+  #labels { position: fixed; inset: 0; pointer-events: none; z-index: 1; }
+  .tag { position: absolute; transform: translate(-50%, 0); font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--fg);
+    text-shadow: 0 1px 3px #000; white-space: nowrap; text-align: center; }
+  .tag small { display: block; color: var(--accent); font-size: 10px; letter-spacing: .02em; text-transform: none; }
+  #hint { right: 12px; top: calc(12px + env(safe-area-inset-top, 0px)); font-size: 12px; color: var(--muted); background: var(--panel); padding: 8px 10px; border-radius: 10px; display: none; max-width: calc(100vw - 48px); }
+  body.free #hint { display: block; }
+  #loading { position: fixed; inset: 0; display: grid; place-items: center; font-size: 12px; letter-spacing: .24em; color: var(--muted); z-index: 3; background: var(--bg); }
+  @media (max-width: 600px) { #bar button { padding: 7px 9px; font-size: 12px; } #hint { display: none !important; } }
+  @media (prefers-reduced-motion: reduce) { #bar { transition: none; } }
+</style>
+<canvas id="view" aria-label="ODD HAUS real-time 3D view"></canvas>
+<div id="labels"></div>
+<div id="loading">LOADING ODD HAUS · BUILDING 3D MODELS</div>
+<div id="debug" class="ui"></div>
+<div id="hint" class="ui">Drag to orbit · right-drag to pan · scroll to zoom · WASD / QE to fly · L labels</div>
+<div id="bar" class="ui"></div>
+<script>
+  addEventListener("error", (e) => { window.__error = String(e.message || e); const l = document.getElementById("loading"); if (l) l.textContent = "Could not start the 3D view: " + window.__error; });
+  addEventListener("unhandledrejection", (e) => { window.__error = String(e.reason && (e.reason.stack || e.reason.message) || e.reason); const l = document.getElementById("loading"); if (l) l.textContent = "Could not start the 3D view: " + window.__error; });
+</script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+} }
+</script>
+<script type="module" src="./src/main.js"></script>
