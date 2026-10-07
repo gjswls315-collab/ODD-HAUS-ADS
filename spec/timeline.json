@@ -1,0 +1,580 @@
+{
+  "_doc": "ODD HAUS 50s brand film - single source of truth. Production fields (action/camera/lighting/characters) are for the 3D/AI production team; each shot's `animatic` block is consumed by animatic/render.py, and `audio` by animatic/audio.py. Times are absolute seconds. Animatic crop keyframes are [t, cx, cy, w] in ORIGINAL source pixels (height = w / aspect).",
+  "meta": {
+    "title": "ODD HAUS — Nothing Is Useless",
+    "title_ko": "ODD HAUS — 쓸모없는 것은 없다",
+    "duration": 50.0,
+    "fps": 24,
+    "resolution": [1920, 1080],
+    "active_aspect": 2.0,
+    "copy_en": ["Nothing is useless.", "Everyone needs a home."],
+    "copy_ko": ["쓸모없는 것은 없다.", "모두에게는 집이 필요하다."]
+  },
+  "sources": {
+    "poster": "reference/keyvisual_poster.webp",
+    "board": "reference/storyboard_board.webp"
+  },
+  "cleanup": [
+    {"src": "board", "box": [24, 36, 482, 194], "thresh": 0.30, "_why": "erase the board's ODD HAUS title so the header lineup can be framed wide"},
+    {"src": "board", "box": [40, 196, 300, 332], "thresh": 0.30, "_why": "erase the board's left captions (stays clear of Picker at x>=375)"},
+    {"src": "board", "box": [1200, 150, 1486, 285], "thresh": 0.30, "_why": "erase the board's right-side copy"}
+  ],
+  "grades": {
+    "black":      {"exposure": 0.0,  "saturation": 0.6,  "contrast": 0.2,  "shadow_tint": [0.00, 0.01, 0.03], "highlight_gain": [0.95, 1.00, 1.08], "lift": 0.0,   "vignette": 0.6},
+    "night":      {"exposure": 0.70, "saturation": 0.55, "contrast": 0.30, "shadow_tint": [0.00, 0.02, 0.05], "highlight_gain": [0.92, 1.00, 1.12], "lift": 0.012, "vignette": 0.75},
+    "tension":    {"exposure": 0.63, "saturation": 0.45, "contrast": 0.40, "shadow_tint": [0.00, 0.015, 0.045], "highlight_gain": [1.00, 0.97, 1.02], "lift": 0.008, "vignette": 0.9},
+    "night_warm": {"exposure": 0.78, "saturation": 0.75, "contrast": 0.28, "shadow_tint": [0.00, 0.012, 0.035], "highlight_gain": [1.04, 1.00, 0.96], "lift": 0.012, "vignette": 0.65},
+    "warm":       {"exposure": 0.95, "saturation": 0.95, "contrast": 0.22, "shadow_tint": [0.015, 0.008, 0.02], "highlight_gain": [1.07, 1.00, 0.88], "lift": 0.015, "vignette": 0.5},
+    "golden":     {"exposure": 1.02, "saturation": 1.0,  "contrast": 0.20, "shadow_tint": [0.02, 0.01, 0.015], "highlight_gain": [1.10, 1.00, 0.84], "lift": 0.02,  "vignette": 0.45}
+  },
+  "scenes": [
+    {
+      "id": "S01",
+      "start": 0.0, "end": 7.0,
+      "title_en": "A BIG HOUSE, SMALL MISFITS",
+      "title_ko": "큰 집, 작은 것들",
+      "emotion_ko": "고요한 경이 → 첫 긴장",
+      "set_ko": "ODD HAUS 1층 홀. 끝없이 넓어 보이는 왁스 광택 마룻바닥, 2층 발코니로 오르는 계단, 빗방울 맺힌 창, 벽시계. 멀리 계단 밑 문틈에서 새어 나오는 따뜻한 빛 한 줄(이 영화 전체의 '목적지').",
+      "lighting_ko": "창밖 달빛(차가운 블루) 키 라이트 + 계단 밑 문틈의 2700K 앰버 한 줄. 블루 80 : 앰버 20.",
+      "camera_ko": "바닥 2cm 높이 미니어처 시점, 24mm, f/2.8 얕은 심도. 아주 느린 푸시인.",
+      "characters": [
+        {"id": "vin",    "placement": "선두, 화면 좌하단 → 중앙", "anim": ["걸레받이 틈에서 굴러 나옴", "멈춰서 두리번"]},
+        {"id": "picker", "placement": "Vin 바로 뒤", "anim": ["깡충깡충 뛰어 이동", "팔짱 끼고 투덜"]},
+        {"id": "aa",     "placement": "무리 중앙", "anim": ["몸을 움츠림", "겁먹으면 배터리 표시 빨갛게 깜빡"]},
+        {"id": "locke",  "placement": "무리 뒤쪽", "anim": ["뒤돌아 망을 봄"]},
+        {"id": "rex",    "placement": "맨 뒤", "anim": ["망토를 질질 끌며 가장 느림", "왕관을 바로잡으며 위엄 유지"]},
+        {"id": "mr_odd", "placement": "원경 문틀 너머, 실루엣만", "anim": ["5.8s 문 너머를 지나가며 그림자가 바닥을 훑음"]}
+      ],
+      "shots": [
+        {
+          "id": "1A", "start": 0.0, "end": 4.2,
+          "action_ko": "암전에서 페이드인. 바닥 높이 초광각 와이드 — 끝없는 마룻바닥, 저 멀리 계단과 문틈의 따뜻한 빛. 정적, 시계 초침, 빗소리.",
+          "camera": "floor-level ultra wide, 24mm, slow push-in",
+          "note_ko": "암전 → 바닥 높이 와이드. 큰 집, 멀리 계단 밑 문틈의 빛.",
+          "animatic": {
+            "src": "board",
+            "cam": [[0.0, 255, 499, 452], [4.2, 290, 488, 380]],
+            "grade": [[0.0, "night"]],
+            "fx": [
+              {"type": "fade", "t0": 0.0, "t1": 1.8, "from": 0.0, "to": 1.0},
+              {"type": "glow", "at": [262, 445], "radius": 70, "color": [255, 170, 90], "strength": 0.45, "pulse": 0.35}
+            ]
+          }
+        },
+        {
+          "id": "1B", "start": 4.2, "end": 7.0,
+          "action_ko": "걸레받이 틈에서 Vin이 굴러 나오고 Picker, A.A., Locke, Rex(망토를 끌며)가 뒤따른다. 서로 몸을 기대 뭉친다. 5.8초, 문 너머로 거대한 실루엣이 지나가며 그림자가 바닥을 훑고 — 모두 움찔.",
+          "camera": "floor-level lateral tracking, rack focus to the shadow",
+          "note_ko": "작은 친구들 등장 → 5.8s 거대한 그림자가 지나가자 움찔.",
+          "animatic": {
+            "src": "board",
+            "cam": [[4.2, 160, 535, 280], [7.0, 185, 530, 260]],
+            "grade": [[4.2, "night"]],
+            "fx": [
+              {"type": "shadow", "t0": 5.8, "t1": 6.9, "from": [1.4, 0.45], "to": [-0.4, 0.55], "size": [0.75, 1.0], "strength": 0.65},
+              {"type": "shake", "t": 5.8, "amp": 2.0, "decay": 0.25},
+              {"type": "shake", "t": 6.4, "amp": 2.0, "decay": 0.25}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "S02",
+      "start": 7.0, "end": 15.0,
+      "title_en": "HIDING IN PLAIN SIGHT",
+      "title_ko": "보이지 않게 숨어서",
+      "emotion_ko": "숨 막히는 긴장 + 귀여운 코미디",
+      "set_ko": "거실 레코드 선반 — 빼곡한 LP 슬리브, 두꺼운 'MUSIC' 책, 책 사이 틈. 선반 위로 램프 빛이 좁게 떨어진다.",
+      "lighting_ko": "선반 틈 사이의 좁은 빛줄기. 그림자가 지나갈 때 키 라이트 70% 감광, 지나가면 복귀.",
+      "camera_ko": "50mm 매크로, 선반 틈으로 들여다보는 POV. 발소리에 맞춘 미세한 흔들림.",
+      "characters": [
+        {"id": "vin",    "placement": "LP 슬리브 사이", "anim": ["레코드들 틈에 끼어 '레코드인 척' 위장"]},
+        {"id": "picker", "placement": "화면 좌측, A.A. 옆", "anim": ["11.6s A.A.의 빨간 불을 두 손으로 가려줌"]},
+        {"id": "aa",     "placement": "화면 중앙", "anim": ["11.6s 배터리 표시 빨갛게 깜빡깜빡", "13.6s 깜빡임 멈춤"]},
+        {"id": "locke",  "placement": "중앙 우측", "anim": ["눈만 내밀고 그림자를 따라 시선 이동"]},
+        {"id": "rex",    "placement": "'MUSIC' 책 위 우측", "anim": ["왕관이 미끄러져 다급히 붙잡음"]},
+        {"id": "mr_odd", "placement": "화면 밖 (그림자만)", "anim": ["10.8–13.3s 그림자가 선반을 좌→우로 훑음", "발소리 3회"]}
+      ],
+      "shots": [
+        {
+          "id": "2A", "start": 7.0, "end": 10.6,
+          "action_ko": "일행이 LP와 책 사이로 미끄러져 숨는다. Vin은 레코드 틈에 끼어 '레코드인 척'. Rex는 책 위에서 왕관을 바로잡는다.",
+          "camera": "50mm macro through the shelf gap, slow push",
+          "note_ko": "LP와 책 사이에 숨는다. Vin은 레코드인 척.",
+          "animatic": {
+            "src": "board",
+            "in": {"type": "dissolve", "dur": 0.5},
+            "cam": [[7.0, 735, 499, 452], [10.6, 700, 505, 380]],
+            "grade": [[7.0, "night"], [10.6, "tension"]],
+            "fx": []
+          }
+        },
+        {
+          "id": "2B", "start": 10.6, "end": 13.6,
+          "action_ko": "쿵… 쿵… 쿵. 거대한 그림자가 선반을 천천히 쓸고 지나간다. LP가 진동한다. 겁에 질린 A.A.의 배터리 표시가 빨갛게 깜빡 — Picker가 손으로 가려준다.",
+          "camera": "tight 2-shot, micro shake on each footstep",
+          "note_ko": "그림자가 선반을 훑고 지나간다. A.A. 빨간불 → Picker가 가려줌.",
+          "animatic": {
+            "src": "board",
+            "cam": [[10.6, 670, 500, 300], [13.6, 680, 498, 280]],
+            "grade": [[10.6, "tension"]],
+            "fx": [
+              {"type": "shadow", "t0": 10.8, "t1": 13.3, "from": [-0.5, 0.45], "to": [1.5, 0.5], "size": [0.95, 1.2], "strength": 0.62},
+              {"type": "shake", "t": 10.8, "amp": 2.5, "decay": 0.3},
+              {"type": "shake", "t": 11.6, "amp": 2.5, "decay": 0.3},
+              {"type": "shake", "t": 12.4, "amp": 2.5, "decay": 0.3},
+              {"type": "blink", "at": [657, 512], "radius": 16, "color": [255, 40, 30], "t0": 11.6, "t1": 13.2, "hz": 3.0, "strength": 1.0}
+            ]
+          }
+        },
+        {
+          "id": "2C", "start": 13.6, "end": 15.0,
+          "action_ko": "그림자가 지나간다. 모두 '후—' 하고 숨을 내쉰다. Rex의 왕관이 툭 떨어졌다가 다시 쓰인다.",
+          "camera": "pull-out to medium",
+          "note_ko": "그림자 통과. 모두 안도의 한숨.",
+          "animatic": {
+            "src": "board",
+            "cam": [[13.6, 715, 500, 400], [15.0, 735, 499, 452]],
+            "grade": [[13.6, "tension"], [15.0, "night"]],
+            "fx": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "S03",
+      "start": 15.0, "end": 22.0,
+      "title_en": "A FAITHFUL GUIDE",
+      "title_ko": "충직한 길잡이",
+      "emotion_ko": "안도 → 신뢰",
+      "set_ko": "홀 중앙의 페르시안 러그 가장자리, 삐걱대는 마룻장 하나, 계단으로 이어지는 길.",
+      "lighting_ko": "램프 반사광이 털 끝에 림 라이트. 블루 60 : 앰버 40으로 따뜻해지기 시작.",
+      "camera_ko": "작은 친구 눈높이 35mm 로우앵글 히어로샷 → Buddy 발걸음과 동기된 측면 트래킹.",
+      "characters": [
+        {"id": "buddy",  "placement": "화면 중앙~좌, 작은 친구들보다 3.5배 큰 스케일", "anim": ["15.4s 태그 짤랑", "16.6s 위층 삐걱 → 귀 쫑긋, 앞발을 들어 일행 정지", "18.6s 마룻장을 피해 러그 가장자리로 안내, 꼬리를 깃발처럼"]},
+        {"id": "vin",    "placement": "Buddy 앞발 옆", "anim": ["Buddy 앞발에 부딪혀 멈춤"]},
+        {"id": "picker", "placement": "무리 우측", "anim": ["Buddy를 올려다보며 경계 → 뒤따름"]},
+        {"id": "aa",     "placement": "무리 중앙", "anim": ["Buddy 그림자 안으로 쏙 들어감"]},
+        {"id": "locke",  "placement": "무리 중앙", "anim": ["Buddy의 시선 방향을 따라 봄"]},
+        {"id": "rex",    "placement": "무리 맨 뒤", "anim": ["망토가 Buddy 꼬리에 걸려 끌려감(코믹)"]}
+      ],
+      "shots": [
+        {
+          "id": "3A", "start": 15.0, "end": 18.6,
+          "action_ko": "털복숭이 Buddy 등장 — 작은 친구들 시점에서 올려다본 크고 다정한 개. 16.6초, 위층 마룻바닥이 삐걱 — 귀가 쫑긋, 앞발을 들어 일행을 멈춘다.",
+          "camera": "35mm low-angle hero, punch-in on the ear perk",
+          "note_ko": "Buddy 등장. 16.6s 삐걱 소리 → 귀 쫑긋, 앞발로 일행을 멈춤.",
+          "animatic": {
+            "src": "board",
+            "in": {"type": "dissolve", "dur": 0.6},
+            "cam": [[15.0, 1225, 499, 452], [18.6, 1160, 470, 330]],
+            "grade": [[15.0, "night"], [18.6, "night_warm"]],
+            "fx": [
+              {"type": "punch", "t": 16.6, "amount": 0.08, "dur": 0.45}
+            ]
+          }
+        },
+        {
+          "id": "3B", "start": 18.6, "end": 22.0,
+          "action_ko": "Buddy가 삐걱대는 마룻장을 피해 러그 가장자리로 길을 안내한다. 일행은 Buddy의 그림자 안에 붙어 걷는다. 'BUDDY' 태그가 반짝, 줄무늬 넥타이가 흔들린다.",
+          "camera": "side tracking synced to Buddy's paws, tilt down to the BUDDY tag",
+          "note_ko": "Buddy가 길을 안내. BUDDY 태그·넥타이 디테일.",
+          "animatic": {
+            "src": "poster",
+            "cam": [[18.6, 490, 760, 420], [22.0, 465, 830, 400]],
+            "grade": [[18.6, "night_warm"]],
+            "fx": [
+              {"type": "glow", "at": [445, 868], "radius": 22, "color": [255, 210, 120], "strength": 0.6, "pulse": 1.2}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "S04",
+      "start": 22.0, "end": 30.0,
+      "title_en": "A BIGGER FRIEND",
+      "title_ko": "더 큰 친구",
+      "emotion_ko": "놀람 → 웃음 → 든든함",
+      "set_ko": "러그를 지나 계단 앞까지 이어지는 탁 트인 바닥 — 작은 친구들에게 가장 위험한 '공터'.",
+      "lighting_ko": "따뜻한 사이드 라이트, Bully의 금발에 림. 블루 40 : 앰버 60.",
+      "camera_ko": "18mm 바닥 로우앵글 → 틸트 업 리빌. 작은 친구 POV 오버숄더. 로우 와이드 트래킹(12fps 느낌의 짧은 슬로모).",
+      "characters": [
+        {"id": "bully",  "placement": "화면을 꽉 채우는 스케일 — 작은 친구의 10배, Buddy의 약 3배. 모자는 모든 컷에서 실루엣이 읽혀야 함", "anim": ["22.0s 스니커즈 쿵 (위협 페이크)", "틸트 업 → 뒤로 쓴 모자와 삐딱한 웃음", "25.0s 모자를 벗어 뒤집어 바닥에", "27.4s 모자를 바구니처럼 들고 계단으로, 기타 리프"]},
+        {"id": "buddy",  "placement": "Bully 다리 옆", "anim": ["22.3s 꼬리 흔들기 = '친구야' 신호", "27.4s Bully 옆에서 종종걸음"]},
+        {"id": "picker", "placement": "모자 앞", "anim": ["팔짱 끼고 버팀 → 26.6s 결국 모자로 다이빙"]},
+        {"id": "vin",    "placement": "모자 안", "anim": ["가장 먼저 굴러 들어감"]},
+        {"id": "aa",     "placement": "모자 안", "anim": ["Locke 손을 잡고 올라탐"]},
+        {"id": "locke",  "placement": "모자 안", "anim": ["A.A.를 끌어올림"]},
+        {"id": "rex",    "placement": "모자 챙 위", "anim": ["망토 휘날리며 챙에 걸터앉음(왕좌처럼)"]}
+      ],
+      "shots": [
+        {
+          "id": "4A", "start": 22.0, "end": 24.8,
+          "action_ko": "쿵! 거대한 스니커즈가 눈앞에 내려앉는다(위협 페이크). 틸트 업 — 카고 반바지, 붉은 플라잉V 기타, 해골 티셔츠, 뒤로 눌러쓴 모자, 삐딱한 웃음. Buddy는 꼬리를 흔든다.",
+          "camera": "18mm floor-level, hard shake on impact, tilt up to the cap",
+          "note_ko": "쿵! 스니커즈 → 틸트 업, 뒤로 쓴 모자의 Bully.",
+          "animatic": {
+            "src": "poster",
+            "in": {"type": "cut"},
+            "cam": [[22.0, 260, 905, 420], [22.6, 262, 900, 420], [24.8, 405, 555, 420]],
+            "grade": [[22.0, "night_warm"], [24.8, "warm"]],
+            "fx": [
+              {"type": "shake", "t": 22.0, "amp": 9.0, "decay": 0.35},
+              {"type": "fade", "t0": 22.0, "t1": 22.12, "from": 0.25, "to": 1.0}
+            ]
+          }
+        },
+        {
+          "id": "4B", "start": 24.8, "end": 27.4,
+          "action_ko": "Bully가 쪼그려 앉아 모자를 벗어 바닥에 뒤집어 놓는다 — '타.' 작은 친구들이 모자 안으로 올라탄다. Picker만 버티다 결국 뛰어든다.",
+          "camera": "small-character POV over-the-shoulder, 35mm",
+          "note_ko": "Bully가 손/모자를 내밀어 '타.' 친구들이 올라탄다.",
+          "animatic": {
+            "src": "board",
+            "cam": [[24.8, 203, 843, 363], [27.4, 215, 858, 320]],
+            "grade": [[24.8, "warm"]],
+            "fx": []
+          }
+        },
+        {
+          "id": "4C", "start": 27.4, "end": 30.0,
+          "action_ko": "Bully가 모자를 바구니처럼 들고 계단 쪽으로 성큼성큼. Buddy가 옆에서 종종걸음. 기타 리프 한 소절 — 가장 '힙'한 순간.",
+          "camera": "low wide tracking, short slow-mo",
+          "note_ko": "모자에 친구들을 태우고 계단으로. 기타 리프 — 힙한 순간.",
+          "animatic": {
+            "src": "board",
+            "cam": [[27.4, 1050, 142, 290], [30.0, 1048, 140, 268]],
+            "grade": [[27.4, "warm"]],
+            "fx": [
+              {"type": "punch", "t": 27.45, "amount": 0.05, "dur": 0.3},
+              {"type": "punch", "t": 28.6, "amount": 0.04, "dur": 0.3}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "S05",
+      "start": 30.0, "end": 38.0,
+      "title_en": "A SCARY GIANT…?",
+      "title_ko": "무서운 거인…?",
+      "emotion_ko": "공포 → 의문 → 반전의 시작",
+      "set_ko": "계단 아래. 계단 밑 벽면, 걸레받이 높이에 달린 아주 작은 스위치(사람 손 높이가 아니다). 그 옆, 지붕이 뾰족한 '집 모양' 작은 문.",
+      "lighting_ko": "5A 강한 역광 실루엣 / 5B 아래에서 받는 차가운 반사 + 눈에만 캐치라이트 / 5C 스위치 '딸깍'과 동시에 앰버 2700K가 화면 오른쪽에서 번져 들어옴 — 영화 전체의 블루→앰버 전환점.",
+      "camera_ko": "14mm 초로우 앵글 틸트 업 → 85mm 익스트림 클로즈업 슬로 푸시 → 스위치 인서트 매크로 → 미디엄.",
+      "characters": [
+        {"id": "mr_odd", "placement": "화면 중앙, 프레임 밖까지 넘치는 스케일", "anim": ["30.0s 계단 앞 등장, 그림자가 모두를 덮음", "33.0s 허리를 숙여 얼굴을 들이밂, 콧수염 실룩", "35.6s 손을 뻗어… 그들을 지나쳐 걸레받이 스위치 '딸깍'", "36.8s '흠.' 머그잔 홀짝, 시선 피하며 돌아섬"]},
+        {"id": "bully",  "placement": "화면 좌측", "anim": ["모자를 등 뒤로 숨김", "어색한 웃음"]},
+        {"id": "buddy",  "placement": "Mr. ODD 발치", "anim": ["꼬리를 천천히 흔들며 앉음(이미 그를 안다는 힌트)"]},
+        {"id": "aa",     "placement": "모자 가장자리", "anim": ["34.0s 빨간불 깜빡"]},
+        {"id": "vin",    "placement": "모자 가장자리", "anim": ["눈만 빼꼼"]},
+        {"id": "picker", "placement": "모자 가장자리", "anim": ["눈을 질끈"]},
+        {"id": "locke",  "placement": "모자 가장자리", "anim": ["스위치 쪽을 먼저 발견"]},
+        {"id": "rex",    "placement": "모자 챙", "anim": ["왕관으로 얼굴을 가림"]}
+      ],
+      "shots": [
+        {
+          "id": "5A", "start": 30.0, "end": 33.0,
+          "action_ko": "음악 뚝. 계단 앞에 거대한 그림자. 틸트 업 — 붉은 체크 로브, 머그잔, 콧수염. Mr. ODD. 역광 실루엣. Bully는 모자를 등 뒤로 숨긴다.",
+          "camera": "14mm ultra-low tilt up, heavy footsteps",
+          "note_ko": "음악 컷. Mr. ODD 등장 — 거대한 역광 실루엣.",
+          "animatic": {
+            "src": "poster",
+            "in": {"type": "cut"},
+            "cam": [[30.0, 812, 335, 460], [33.0, 792, 172, 420]],
+            "grade": [[30.0, "tension"]],
+            "fx": [
+              {"type": "shake", "t": 30.0, "amp": 4.0, "decay": 0.35},
+              {"type": "shake", "t": 30.9, "amp": 4.0, "decay": 0.35}
+            ]
+          }
+        },
+        {
+          "id": "5B", "start": 33.0, "end": 35.6,
+          "action_ko": "그가 허리를 숙인다. 익스트림 클로즈업 — 짙은 눈썹, 콧수염 끝이 실룩. 모자 가장자리로 고개 내민 작은 친구들, 덜덜. A.A. 빨간불 깜빡.",
+          "camera": "85mm ECU, slow push",
+          "note_ko": "ECU — 짙은 눈썹, 실룩이는 콧수염. 모두 얼어붙는다.",
+          "animatic": {
+            "src": "poster",
+            "cam": [[33.0, 768, 120, 320], [35.6, 765, 112, 280]],
+            "grade": [[33.0, "tension"]],
+            "fx": [
+              {"type": "glow", "at": [600, 40], "radius": 90, "color": [255, 170, 90], "strength": 0.25, "pulse": 0.0}
+            ]
+          }
+        },
+        {
+          "id": "5C", "start": 35.6, "end": 38.0,
+          "action_ko": "그는 손을 뻗어… 그들을 지나쳐, 걸레받이 높이의 작은 스위치를 '딸깍'. 계단 밑 집 모양 작은 문의 윤곽을 따라 따뜻한 빛이 켜진다. 'Hmph.' 머그잔을 홀짝이며 시선을 피해 돌아선다. [옵션 대사: '…늦었군.']",
+          "camera": "insert macro on the switch → medium",
+          "note_ko": "35.9s '딸깍' — 작은 친구 높이의 스위치. 따뜻한 빛이 켜진다.",
+          "animatic": {
+            "src": "board",
+            "cam": [[35.6, 576, 843, 361], [38.0, 592, 850, 330]],
+            "grade": [[35.6, "tension"], [35.9, "tension"], [37.4, "warm"]],
+            "fx": [
+              {"type": "flash", "t": 35.9, "dur": 0.25, "strength": 0.25},
+              {"type": "glow", "at": [740, 800], "radius": 130, "color": [255, 175, 95], "strength": [[35.9, 0.0], [36.8, 0.85]], "pulse": 0.0}
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "S06",
+      "start": 38.0, "end": 46.0,
+      "title_en": "A PLACE OF THEIR OWN",
+      "title_ko": "그들만의 자리",
+      "emotion_ko": "경이 → 기쁨 → 소속감",
+      "set_ko": "계단 밑 숨은 공간 'ODD HAUS'. 나무 간판, 갓 램프, 붉은 체크 담요와 니트 쿠션, 레코드 상자, 꼬마전구. 서툰 대문자 손글씨 이름표가 붙은 자리들 — VIN(장난감 턴테이블) · PICKER(기타 스탠드 옆 작은 쿠션) · A.A.(꼬마전구 배터리팩의 빈 칸) · LOCKE(문 옆 열쇠걸이) · REX(왕 하나가 빠진 체스판) · BUDDY(개 방석) · BULLY(앰프 겸 의자).",
+      "lighting_ko": "풀 앰버 프랙티컬(램프·꼬마전구) + 부드러운 보케. 블랙은 들어올려 포근하게.",
+      "camera_ko": "열쇠구멍 매크로 → 24mm 크레인 업 + 돌리 인 → 비트(0.8s)마다 매치컷 몽타주.",
+      "characters": [
+        {"id": "locke",  "placement": "작은 문 앞 중앙", "anim": ["38.0s 열쇠구멍에 몸을 맞춤 → 찰칵 회전 → 문이 열림"]},
+        {"id": "aa",     "placement": "꼬마전구 배터리팩", "anim": ["42.0s 빈 칸에 쏙 → 전구 점등"]},
+        {"id": "vin",    "placement": "장난감 턴테이블", "anim": ["42.8s 턴테이블에 착지 → 회전, 비트 시작"]},
+        {"id": "rex",    "placement": "체스판", "anim": ["43.6s 빈칸에 착 — 세트 완성, 망토 휘날림"]},
+        {"id": "picker", "placement": "Bully 손가락 사이", "anim": ["44.4s 손가락 사이로 쏙 → 첫 스트럼"]},
+        {"id": "bully",  "placement": "앰프 위, 화면 우측", "anim": ["44.4s 기타 스트럼, 고개 까딱"]},
+        {"id": "buddy",  "placement": "BUDDY 방석", "anim": ["45.2s 방석에 털썩, 꼬리 툭툭"]}
+      ],
+      "shots": [
+        {
+          "id": "6A", "start": 38.0, "end": 40.2,
+          "action_ko": "Locke가 앞으로 나선다. 지붕이 뾰족한 '집 모양' 작은 문(로고의 집 아이콘과 같은 실루엣)의 열쇠구멍이 정확히 Locke의 모양. 찰칵 — 문이 열리며 황금빛이 일행의 얼굴로 쏟아진다.",
+          "camera": "keyhole macro → light floods the lens",
+          "note_ko": "Locke가 집 모양 작은 문을 연다 — '맞는 문이 없던 열쇠'의 문.",
+          "animatic": {
+            "src": "poster",
+            "in": {"type": "cut"},
+            "cam": [[38.0, 825, 690, 400], [40.2, 825, 680, 440]],
+            "grade": [[38.0, "night"], [39.6, "warm"]],
+            "fx": [
+              {"type": "door", "t0": 38.25, "t1": 39.7, "center": 0.5}
+            ]
+          }
+        },
+        {
+          "id": "6B", "start": 40.2, "end": 42.0,
+          "action_ko": "공간 리빌 — 'ODD HAUS' 간판, 램프, 체크 담요, 레코드 상자, 꼬마전구. 그리고 서툰 손글씨 이름표가 붙은 자리들: VIN · PICKER · A.A. · LOCKE · REX · BUDDY. 그가 이미 모두의 자리를 만들어 두었다.",
+          "camera": "24mm crane up from blankets to the ODD HAUS sign",
+          "note_ko": "리빌: 이름표가 붙은 각자의 자리. 그가 이미 준비해 두었다.",
+          "animatic": {
+            "src": "poster",
+            "in": {"type": "dissolve", "dur": 0.3},
+            "cam": [[40.2, 840, 925, 440], [42.0, 822, 625, 440]],
+            "grade": [[40.2, "warm"]],
+            "fx": [
+              {"type": "sparkle", "region": [610, 420, 1050, 880], "count": 26, "size": 9, "t0": 40.2, "t1": 42.0, "strength": 0.9}
+            ]
+          }
+        },
+        {
+          "id": "6C1", "start": 42.0, "end": 42.8,
+          "action_ko": "A.A.가 꼬마전구 배터리팩의 빈 칸에 쏙 — 전구가 켜진다.",
+          "camera": "beat cut 1/5",
+          "note_ko": "①A.A. → 꼬마전구 점등 (반쯤 닳은 건전지의 쓸모)",
+          "animatic": {
+            "src": "poster",
+            "in": {"type": "flash", "dur": 0.18},
+            "cam": [[42.0, 556, 985, 300], [42.8, 556, 985, 275]],
+            "grade": [[42.0, "golden"]],
+            "fx": [
+              {"type": "glow", "at": [560, 1005], "radius": 45, "color": [255, 220, 120], "strength": [[42.0, 0.0], [42.25, 0.9], [42.8, 0.5]], "pulse": 0.0}
+            ]
+          }
+        },
+        {
+          "id": "6C2", "start": 42.8, "end": 43.6,
+          "action_ko": "Vin이 장난감 턴테이블에 착지 — 튀던 '지지직'이 비트가 되어 음악이 시작된다.",
+          "camera": "beat cut 2/5",
+          "note_ko": "②Vin → 턴테이블, 튀는 소리가 비트로 (스크래치 레코드의 쓸모)",
+          "animatic": {
+            "src": "board",
+            "in": {"type": "flash", "dur": 0.15},
+            "cam": [[42.8, 955, 255, 250], [43.6, 955, 255, 228]],
+            "grade": [[42.8, "golden"]],
+            "fx": [{"type": "punch", "t": 42.8, "amount": 0.06, "dur": 0.35}]
+          }
+        },
+        {
+          "id": "6C3", "start": 43.6, "end": 44.4,
+          "action_ko": "Rex가 왕 하나가 빠진 체스판의 빈칸에 선다 — 세트 완성.",
+          "camera": "beat cut 3/5",
+          "note_ko": "③Rex → 빈칸을 채워 체스 세트 완성 (판 잃은 왕의 쓸모)",
+          "animatic": {
+            "src": "poster",
+            "in": {"type": "flash", "dur": 0.15},
+            "cam": [[43.6, 762, 935, 280], [44.4, 762, 935, 255]],
+            "grade": [[43.6, "golden"]],
+            "fx": []
+          }
+        },
+        {
+          "id": "6C4", "start": 44.4, "end": 45.2,
+          "action_ko": "Picker가 Bully의 손가락 사이로 쏙 — 첫 스트럼.",
+          "camera": "beat cut 4/5",
+          "note_ko": "④Picker → Bully의 첫 스트럼 (잃어버린 피크의 쓸모)",
+          "animatic": {
+            "src": "board",
+            "in": {"type": "flash", "dur": 0.15},
+            "cam": [[44.4, 1000, 832, 250], [45.2, 1004, 832, 228]],
+            "grade": [[44.4, "golden"]],
+            "fx": []
+          }
+        },
+        {
+          "id": "6C5", "start": 45.2, "end": 46.0,
+          "action_ko": "Buddy가 'BUDDY' 방석에 털썩 — 꼬리가 바닥을 툭툭.",
+          "camera": "beat cut 5/5",
+          "note_ko": "⑤Buddy → 자기 이름이 적힌 방석 (떠돌이 개의 집)",
+          "animatic": {
+            "src": "poster",
+            "in": {"type": "flash", "dur": 0.15},
+            "cam": [[45.2, 478, 742, 300], [46.0, 478, 745, 280]],
+            "grade": [[45.2, "golden"]],
+            "fx": []
+          }
+        }
+      ]
+    },
+    {
+      "id": "S07",
+      "start": 46.0, "end": 50.0,
+      "title_en": "TOGETHER. AT HOME.",
+      "title_ko": "함께, 집에서",
+      "emotion_ko": "따뜻한 여운",
+      "set_ko": "계단 밑 ODD HAUS 공간 전경 + 문 밖 계단. 집 모양 문틀이 프레임 안의 프레임이 된다.",
+      "lighting_ko": "골든 아워 같은 실내 앰버, 부드러운 하이라이트와 들어올린 블랙.",
+      "camera_ko": "천천히 뒤로 빠지는 돌리 아웃 → 집 모양 문틀 → 로고 'HAUS'의 A 속 집 아이콘으로 매치컷.",
+      "characters": [
+        {"id": "bully",  "placement": "중앙 우측, 앰프 위", "anim": ["느린 스트럼"]},
+        {"id": "buddy",  "placement": "Bully 무릎 옆", "anim": ["Bully 무릎에 턱을 괴고 눈을 감음"]},
+        {"id": "vin",    "placement": "턴테이블 위, 좌측", "anim": ["천천히 회전"]},
+        {"id": "picker", "placement": "Bully 손", "anim": ["스트럼마다 살짝 휘청, 그래도 웃음"]},
+        {"id": "aa",     "placement": "꼬마전구 배터리팩", "anim": ["배터리 표시 초록 100%"]},
+        {"id": "locke",  "placement": "문 옆 열쇠걸이", "anim": ["걸려서 졸기 시작"]},
+        {"id": "rex",    "placement": "체스판 위", "anim": ["망토를 담요처럼 덮음"]},
+        {"id": "mr_odd", "placement": "문 밖 계단, 화면 상단 (가장 큰 스케일, 프레임 일부만)", "anim": ["신문을 보는 척", "머그잔 홀짝", "48.0s 콧수염 아래 아주 작은 미소"]}
+      ],
+      "shots": [
+        {
+          "id": "7A", "start": 46.0, "end": 48.4,
+          "action_ko": "와이드 — 모두가 한 공간에. Bully는 기타를 치고 Buddy는 그의 무릎에 턱을 괸다. 작은 친구들은 각자의 자리에. 문 밖 계단의 Mr. ODD는 신문을 보는 척 머그잔을 홀짝 — 콧수염 아래 아주 작은 미소. 카메라는 천천히 뒤로 빠져 집 모양 문틀 밖으로.",
+          "camera": "slow dolly out through the house-shaped door frame",
+          "note_ko": "모두 함께. Mr. ODD의 아주 작은 미소. 카피 인.",
+          "animatic": {
+            "src": "board",
+            "in": {"type": "dissolve", "dur": 0.35},
+            "cam": [[46.0, 725, 175, 700], [48.4, 800, 175, 700]],
+            "grade": [[46.0, "golden"]],
+            "fx": [
+              {"type": "scrim", "t0": 46.3, "t1": 48.4, "center": [0.2, 0.17], "radius": [0.42, 0.34], "strength": 0.6}
+            ]
+          }
+        },
+        {
+          "id": "7B", "start": 48.4, "end": 50.0,
+          "action_ko": "집 모양 문틀이 'HAUS'의 A 속 집 아이콘으로 매치컷 — ODD HAUS 로고 + 태그라인.",
+          "camera": "match cut to logo",
+          "note_ko": "매치컷 → ODD HAUS 로고 + 태그라인.",
+          "animatic": {
+            "src": "board",
+            "cam": [[48.4, 800, 175, 700], [50.0, 812, 175, 700]],
+            "grade": [[48.4, "golden"]],
+            "fx": [
+              {"type": "blur", "t0": 48.4, "t1": 48.9, "from": 0, "to": 22},
+              {"type": "fade", "t0": 48.4, "t1": 48.9, "from": 1.0, "to": 0.22},
+              {"type": "fade", "t0": 49.7, "t1": 50.0, "from": 1.0, "to": 0.0}
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "supers": [
+    {
+      "id": "copy_main", "t0": 46.5, "t1": 48.45, "fade_in": 0.5, "fade_out": 0.3,
+      "anchor": [0.045, 0.075],
+      "lines": [
+        {"text": "NOTHING IS USELESS.", "families": ["hand"], "size": 62, "tracking": 0.05},
+        {"text": "EVERYONE NEEDS A HOME.", "families": ["hand"], "size": 62, "tracking": 0.05, "gap": 16},
+        {"text": "쓸모없는 것은 없다.", "families": ["kr-serif"], "size": 31, "tracking": 0.06},
+        {"text": "모두에게는 집이 필요하다.", "families": ["kr-serif"], "size": 31, "tracking": 0.06}
+      ]
+    },
+    {
+      "id": "end_logo", "type": "logo", "t0": 48.55, "t1": 50.0, "fade_in": 0.45, "fade_out": 0.0,
+      "src": "poster", "box": [18, 76, 568, 212], "key": [0.6, 0.8],
+      "height": 230, "center": [0.5, 0.40]
+    },
+    {
+      "id": "end_tagline", "t0": 48.85, "t1": 50.0, "fade_in": 0.45, "fade_out": 0.0,
+      "anchor": "center", "offset_y": 0.2,
+      "lines": [
+        {"text": "NOTHING IS USELESS.  EVERYONE NEEDS A HOME.", "families": ["hand"], "size": 40, "tracking": 0.06},
+        {"text": "쓸모없는 것은 없다. 모두에게는 집이 필요하다.", "families": ["kr-serif"], "size": 26, "tracking": 0.06}
+      ]
+    }
+  ],
+  "audio": {
+    "sample_rate": 48000,
+    "groove_bpm": 75,
+    "master_rms_db": -17.5,
+    "_beds_doc": "gain_db = target RMS for continuous beds (room, rain), target PEAK for impulsive beds (clock, crackle); pre-master.",
+    "beds": [
+      {"bed": "room",    "t0": 0.0,  "t1": 50.0, "gain_db": -40},
+      {"bed": "rain",    "t0": 0.0,  "t1": 38.5, "gain_db": -37, "fade_out": 2.5},
+      {"bed": "clock",   "t0": 0.5,  "t1": 30.0, "gain_db": -26},
+      {"bed": "crackle", "t0": 0.0,  "t1": 42.8, "gain_db": -34},
+      {"bed": "crackle", "t0": 42.8, "t1": 50.0, "gain_db": -25}
+    ],
+    "music": [
+      {"part": "low_note",   "t0": 0.4,  "t1": 4.0},
+      {"part": "sneak",      "t0": 3.4,  "t1": 10.6},
+      {"part": "hold",       "t0": 10.6, "t1": 13.6},
+      {"part": "sneak_tail", "t0": 13.6, "t1": 15.0},
+      {"part": "buddy",      "t0": 15.0, "t1": 22.0, "rest": [16.6, 17.4]},
+      {"part": "riff",       "t0": 22.8, "t1": 24.6},
+      {"part": "groove_hip", "t0": 24.6, "t1": 30.0},
+      {"part": "drone",      "t0": 30.0, "t1": 36.0},
+      {"part": "swell",      "t0": 36.05, "t1": 40.2},
+      {"part": "musicbox",   "t0": 38.2, "t1": 42.0},
+      {"part": "lofi",       "t0": 40.2, "t1": 48.4, "drums_from": 42.8},
+      {"part": "logo_chord", "t0": 48.4, "t1": 50.0}
+    ],
+    "sfx": [
+      {"t": 4.4,  "sfx": "tiny_steps", "dur": 2.6},
+      {"t": 5.8,  "sfx": "footstep", "gain_db": -16, "distant": true},
+      {"t": 6.4,  "sfx": "footstep", "gain_db": -16, "distant": true},
+      {"t": 10.8, "sfx": "footstep", "gain_db": -9},
+      {"t": 11.6, "sfx": "footstep", "gain_db": -8},
+      {"t": 12.4, "sfx": "footstep", "gain_db": -9},
+      {"t": 11.6, "sfx": "blip"}, {"t": 12.0, "sfx": "blip"}, {"t": 12.4, "sfx": "blip"}, {"t": 12.8, "sfx": "blip"},
+      {"t": 13.6, "sfx": "exhale"},
+      {"t": 15.4, "sfx": "jingle"},
+      {"t": 16.6, "sfx": "creak"},
+      {"t": 18.6, "sfx": "tiny_steps", "dur": 3.2},
+      {"t": 19.0, "sfx": "jingle"}, {"t": 20.6, "sfx": "jingle"},
+      {"t": 22.0, "sfx": "thud"},
+      {"t": 25.0, "sfx": "whoosh"},
+      {"t": 30.0, "sfx": "footstep", "gain_db": -4},
+      {"t": 30.9, "sfx": "footstep", "gain_db": -4},
+      {"t": 30.6, "sfx": "heartbeat", "dur": 5.0},
+      {"t": 34.0, "sfx": "blip"}, {"t": 34.4, "sfx": "blip"},
+      {"t": 35.9, "sfx": "switch"},
+      {"t": 38.1, "sfx": "key"},
+      {"t": 38.4, "sfx": "door_creak"},
+      {"t": 38.5, "sfx": "whoosh_warm"},
+      {"t": 40.2, "sfx": "chime"},
+      {"t": 42.0, "sfx": "chime"},
+      {"t": 42.8, "sfx": "needle_drop"},
+      {"t": 43.6, "sfx": "chess_clack"},
+      {"t": 44.4, "sfx": "strum"},
+      {"t": 45.2, "sfx": "flop"},
+      {"t": 48.4, "sfx": "logo_boom"}
+    ]
+  }
+}
