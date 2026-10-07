@@ -125,7 +125,7 @@ def build_fur():
             continue
         if np.linalg.norm(p - NOSE) < 0.03 or p[2] < 0.012:
             continue
-        if abs(np.linalg.norm((p - COLLAR_C) @ COLLAR_R[:, :2]) - 0.083) < 0.03 and abs((p - COLLAR_C) @ COLLAR_R[:, 2]) < 0.03:
+        if abs(np.linalg.norm((p - COLLAR_C) @ COLLAR_R[:, :2]) - 0.083) < 0.03 and abs((p - COLLAR_C) @ COLLAR_R[:, 2]) < 0.03 and p[1] < -0.2:
             continue          # keep the shirt collar visible
         L *= rng.uniform(0.7, 1.1) * (0.85 if kind in ("back", "neck", "chest", "belly") else 1.0)
         w *= rng.uniform(0.8, 1.15)
@@ -215,8 +215,8 @@ def build_collar():
     g = Grid((-0.13, -0.31, 0.26), (0.13, -0.04, 0.47), 0.0014)
     c = COLLAR_C
     R = COLLAR_R
-    for dz, rr in ((-0.009, 0.0915), (0.0, 0.09), (0.009, 0.0885)):        # folded band, not a wire
-        g.add(torus(c + R @ V(0, 0, dz), rr, 0.0075, R @ np.diag([1.0, 1.1, 1.0])), k=0.008)
+    for dz, rr in ((-0.009, 0.0915), (0.0, 0.09), (0.009, 0.0885)):        # folded band across the throat only;
+        g.add(torus(c + R @ V(0, 0, dz), rr, 0.0075, R @ np.diag([1.0, 1.1, 1.0]), arc=(-150, -30)), k=0.008)   # the ruff hides the rest
     for s in (1, -1):
         p0 = c + R @ V(0.01 * s, -0.088, 0.0)
         pts = bezier(p0 + V(0.018 * s, 0, 0.004), p0 + V(0.034 * s, -0.012, -0.022), p0 + V(0.03 * s, -0.018, -0.05), n=6)
