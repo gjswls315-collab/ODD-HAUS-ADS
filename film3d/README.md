@@ -10,9 +10,9 @@ character design.
 
 | Deliverable | Where |
 |---|---|
-| A. Scale lineup inside the house | `index.html?mode=lineup` (default) · `renders/review1/lineup_*.jpg` |
+| A. Scale lineup inside the house | `index.html?mode=lineup` (default) · `renders/review1/lineup_c0…c3_t0.60.jpg` |
 | B. Free camera preview | `index.html?mode=free` (orbit, pan, zoom, WASD/QE fly) |
-| C. Test shots | `?mode=shot&shot=A` / `B` / `C`, `?mode=reel` for all three · `renders/review1/shot_*.mp4`, `test_shots_ABC.mp4` |
+| C. Test shots | `?mode=shot&shot=A` / `B` / `C`, `?mode=reel` for all three · `renders/review1/test_shots_ABC.mp4` (A → B → C, 23 s, 1280×720, 24 fps) |
 
 - **Shot A** — the tiny friends cross the house at night with Buddy (floor-level tracking, rug-fringe foreground, record-shelf bokeh).
 - **Shot B** — a fallen book blocks the gap between coffee table and sofa; Bully's hand comes down, lifts it (two-bone IK), tilt-up reveal of Bully (backward cap, guitar); he checks the hallway, then signals GO; everyone scurries past.

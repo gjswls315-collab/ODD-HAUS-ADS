@@ -239,6 +239,7 @@ export class DogController {
 
   apply(root, s, t) {
     const P = this.p, c = s.custom, m = root.meta;
+    if (!P.body || !P.neck || !P.head) return; // partial GLB rig: root motion only
     const trot = clamp(c.trot ?? 0);
     const stride = lerp(m.walkStride ?? 0.42, m.trotStride ?? 0.62, trot);
     const ph = (s.dist / stride) * TAU;
@@ -248,7 +249,7 @@ export class DogController {
     const offsTrot = { LegFL: 0, LegHR: 0, LegFR: 0.5, LegHL: 0.5 };
     const A = lerp(0.42, 0.55, trot) * mv;
     for (const L of P.legs) {
-      if (!L.hip) continue;
+      if (!L.hip || !L.up || !L.low || !L.paw) continue;
       const off = lerp(offsWalk[L.k], offsTrot[L.k], trot) * TAU;
       const a = ph + off;
       const sw = A * Math.sin(a);

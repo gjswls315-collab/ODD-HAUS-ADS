@@ -83,6 +83,7 @@ export class HumanController {
 
   apply(root, s, t) {
     const j = this.j, c = s.custom, m = root.meta;
+    if (!j.body || !j.spine || !j.chest || !j.neck || !j.head) return; // partial GLB rig: root motion only
     const heavy = m.heavy ?? 0;
     const mv = clamp(s.moving);
     const p = (s.dist / this.stride) * TAU;
@@ -98,7 +99,7 @@ export class HumanController {
     const knee = Math.PI - kneeC;
     const hipF = Math.acos(clamp((L * L + h * h - Sh * Sh) / (2 * L * h), -1, 1));
     for (const [leg, shin, foot, off, k] of [[j.legL, j.shinL, j.footL, 0, "legL"], [j.legR, j.shinR, j.footR, Math.PI, "legR"]]) {
-      if (!leg) continue;
+      if (!leg || !shin) continue;
       const a = p + off;
       const th = A * Math.sin(a);
       const lift = Math.max(0, Math.cos(a)) * mv;
@@ -122,7 +123,7 @@ export class HumanController {
     j.chest.scale.setScalar(1 + breathe * 0.006);
     // arms
     for (const [arm, fore, hand, sd, off, k] of [[j.armL, j.foreL, j.handL, 1, Math.PI, "armL"], [j.armR, j.foreR, j.handR, -1, 0, "armR"]]) {
-      if (!arm) continue;
+      if (!arm || !fore) continue;
       const sw = Math.sin(p + off) * (0.42 - heavy * 0.12) * mv;
       const e = c[k] || {};
       arm.rotation.x += -sw - (e.x ?? 0);
@@ -158,7 +159,7 @@ export class HumanController {
     // two-bone arm IK toward world targets (c.ikL / c.ikR = { target: Vector3, w, twist })
     for (const [arm, fore, side, k] of [[j.armL, j.foreL, 1, "ikL"], [j.armR, j.foreR, -1, "ikR"]]) {
       const ik = c[k];
-      if (!ik || !ik.target || !(ik.w > 0) || !arm) continue;
+      if (!ik || !ik.target || !(ik.w > 0) || !arm || !fore) continue;
       solveArmIK(root, arm, fore, ik.target, this.upper, this.lower, clamp(ik.w), side, ik.twist ?? 0);
     }
     root.extra?.(root.rig, s, t, { p, mv, breathe, crouch });
