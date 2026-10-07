@@ -119,17 +119,30 @@ const loader = new GLTFLoader();
  * GLB-first loader. If assets/chr_<id>.glb exists it is used (scaled to the
  * character's height, rig mapped by node name); otherwise the procedural model.
  */
+/**
+ * Fetch + parse `<name>.glb`, falling back to `<name>.gltf.json` (the same model as glTF JSON with
+ * embedded buffers, for hosts that only serve web types). Returns null if neither exists.
+ */
+export async function fetchModel(assetBase, name) {
+  for (const ext of [".glb", ".gltf.json"]) {
+    try {
+      const res = await fetch(`${assetBase}${name}${ext}`);
+      const type = res.headers.get("content-type") || "";
+      if (!res.ok || type.includes("text/html")) continue;
+      const data = ext === ".glb" ? await res.arrayBuffer() : await res.text();
+      return await loader.parseAsync(data, assetBase);
+    } catch (e) { /* try the next form */ }
+  }
+  return null;
+}
+
 export async function loadCharacter(def, buildProcedural, Controller, { assetBase = "./assets/", tryGLB = true, GLBController = null, glbExtra = null } = {}) {
   const root = new CharacterRoot(def);
   let Ctl = Controller;
   if (tryGLB) {
-    const url = `${assetBase}chr_${def.id}.glb`;
     try {
-      const res = await fetch(url, { method: "GET" });
-      const type = res.headers.get("content-type") || "";
-      if (res.ok && !type.includes("text/html")) {
-        const buf = await res.arrayBuffer();
-        const gltf = await loader.parseAsync(buf, assetBase);
+      const gltf = await fetchModel(assetBase, `chr_${def.id}`);
+      if (gltf) {
         const vis = gltf.scene;
         let modelledHeight = 0;
         vis.traverse((o) => { if (o.userData?.height) modelledHeight = o.userData.height; });

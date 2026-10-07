@@ -3,9 +3,9 @@
 //  - HoseLimb: one continuous, smoothly bending tube from hip to ankle / shoulder to wrist,
 //    rebuilt every frame from the joint positions (no segments, no ball joints).
 import * as THREE from "three";
-import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { M, mat } from "../core/mats.js";
 import { fabric } from "../core/textures.js";
+import { fetchModel } from "./base.js";
 
 let KIT = null;
 
@@ -13,10 +13,8 @@ export async function loadTinyKit(assetBase = "./assets/") {
   if (KIT !== null) return KIT;
   KIT = false;
   try {
-    const res = await fetch(`${assetBase}kit_tiny.glb`);
-    const type = res.headers.get("content-type") || "";
-    if (!res.ok || type.includes("text/html")) return KIT;
-    const gltf = await new GLTFLoader().parseAsync(await res.arrayBuffer(), assetBase);
+    const gltf = await fetchModel(assetBase, "kit_tiny");
+    if (!gltf) return KIT;
     const get = (n) => gltf.scene.getObjectByName(n);
     KIT = {
       palm: get("Glove_Palm"),
