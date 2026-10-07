@@ -268,7 +268,7 @@ export const SHOT_B = {
     C.aa.state.custom.ledOn = window01(t, 2.1, 5.8, 0.1) * (0.5 + 0.5 * Math.sin(t * 18));
     // Buddy waits behind, then trots past
     const bd = C.buddy.state;
-    const bpath = new Path([[-2.5, 0, 0.82], [-1.6, 0, 0.8], [-0.4, 0, 0.78], [0.6, 0, 0.78], [1.8, 0, 0.82]]);
+    const bpath = new Path([[-2.5, 0, 0.5], [-1.6, 0, 0.5], [-0.6, 0, 0.62], [0.1, 0, 0.86], [0.6, 0, 0.98], [1.8, 0, 1.0]]);   // clear of the lens, then through the gap
     const bs = travel(t, 0.2, 2.4, 1.15, 0.4) + travel(t, 6.2, 7.6, bpath.length - 1.15, 0.3);
     bpath.at(bs, bd.pos);
     bd.yaw = bpath.heading(Math.max(0.01, bs));

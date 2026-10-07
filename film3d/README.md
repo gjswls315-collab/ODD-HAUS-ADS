@@ -37,12 +37,12 @@ up-on-passing / down-on-contact rhythm, plus hip sway, hip yaw/roll, counter-swi
 and head stabilisation. Buddy uses the same idea on four paws (lateral-sequence walk, diagonal
 trot) with body height and pitch from the front/hind pairs (`src/characters/dogrig.js`).
 
-| Deliverable | Where |
-|---|---|
-| Scale lineup | `#lineup` (default) |
-| Walk tests (side-on tracking) | `#W` humans, `#V` small friends + Buddy |
-| Free camera | `#free` |
-| Test shots | `#A` `#B` `#C`, `#reel` |
+| Deliverable | Live | Rendered (`renders/review2/`) |
+|---|---|---|
+| Scale lineup | `#lineup` (default) | `lineup_c0…c3_t0.60.jpg`, `before_after_lineup.jpg` (build 1 vs 2) |
+| Walk tests (side-on tracking) | `#W` humans, `#V` small friends + Buddy | `walk_tests_WV.mp4` (15 s) |
+| Free camera | `#free` | — |
+| Test shots | `#A` `#B` `#C`, `#reel` | `test_shots_ABC.mp4` (23 s) |
 
 ## Review build 1
 
@@ -128,5 +128,5 @@ Missing nodes are simply skipped (root motion still works).
 
 ## Scale (metres)
 
-Picker 0.23 · Vin 0.25 · A.A. 0.28 · Locke 0.30 · Rex 0.35 · Buddy 0.52 (≈0.40 at the shoulder) ·
+Picker 0.23 · Vin 0.25 · A.A. 0.28 · Locke 0.30 · Rex 0.35 · Buddy 0.56 to the top of the head (≈0.40 at the shoulder) ·
 Bully 1.50 · Mr. ODD 1.80.
