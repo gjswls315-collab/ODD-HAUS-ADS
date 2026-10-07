@@ -4,6 +4,7 @@ import { group, mesh, ellipsoid, capsule, roundedBox, extrude, tube, makeEye, ma
 import { M, mat } from "../core/mats.js";
 import { skullTee, scrawl } from "../core/textures.js";
 import { humanSkeleton } from "./human.js";
+import { attachRest } from "./glb.js";
 import { TAU } from "../core/util.js";
 
 export const BULLY = { id: "bully", name: "Bully", height: 1.5, kind: "human", shadow: [0.32, 0.26, 0.55] };
@@ -320,4 +321,28 @@ export function buildBully() {
     browL.position.y = 0.171 + (s.custom.browUp ?? 0) * 0.008;
   };
   return { model: J.model, meta: { ...P, seed: 9, lid: 0.82, stepAngle: 0.4 }, extra };
+}
+
+/** Props + secondary motion for the sculpted GLB Bully (guitar on the back or played in front). */
+export function bullyGLBExtra(root) {
+  const chest = root.rig.all.get("chest");
+  if (!chest) return null;
+  const guitar = makeFlyingV();
+  guitar.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
+  const back = attachRest(root, chest, new THREE.Group(), [0.03, 1.0, -0.19], [0.1, Math.PI, 0.55]);
+  const front = attachRest(root, chest, new THREE.Group(), [-0.05, 0.86, 0.23], [-0.15, 0.18, 1.2]);
+  back.add(guitar);
+  const strapPts = [[0.15, 1.11, -0.03], [0.13, 1.08, 0.1], [0.02, 0.94, 0.162], [-0.12, 0.8, 0.175], [-0.188, 0.72, 0.0],
+    [-0.12, 0.8, -0.165], [0.06, 1.0, -0.16], [0.15, 1.11, -0.03]];
+  const strap = tube(strapPts, 0.011, M.cloth("#3a2a1f", 0.8), 64, 8, true);
+  strap.castShadow = true;
+  attachRest(root, chest, strap, [0, 0, 0]);
+  return (r, s, t, k) => {
+    const mode = s.custom.guitar ?? "back";
+    const want = mode === "front" ? front : back;
+    if (guitar.parent !== want) want.add(guitar);
+    guitar.visible = strap.visible = mode !== "none";
+    guitar.rotation.z = Math.sin(k.p * 2 - 1.2) * 0.04 * k.mv;
+    guitar.position.y = Math.sin(k.p * 2 - 0.9) * 0.008 * k.mv;
+  };
 }

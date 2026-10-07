@@ -218,3 +218,25 @@ export function buildMrOdd() {
   };
   return { model: J.model, meta: { ...P, seed: 13, lid: 0.35, heavy: 1, stepAngle: 0.34 }, extra };
 }
+
+/** Mug for the sculpted GLB Mr. ODD: held at the right grip and kept level (a careful man). */
+export function mroddGLBExtra(root) {
+  const grip = root.rig.all.get("rightgrip");
+  if (!grip) return null;
+  const level = new THREE.Group();
+  const mug = makeMug();
+  mug.position.set(0, -0.052, 0.012);
+  mug.rotation.y = -Math.PI / 2 - 0.3;
+  level.add(mug);
+  grip.add(level);
+  const qp = new THREE.Quaternion(), qr = new THREE.Quaternion(), qs = new THREE.Quaternion();
+  const ax = new THREE.Vector3(1, 0, 0);
+  return (r, s, t, k) => {
+    mug.visible = s.custom.mug !== false;
+    root.updateMatrixWorld(true);
+    root.getWorldQuaternion(qr);
+    qs.setFromAxisAngle(ax, (s.custom.sip ?? 0) * 0.9);
+    grip.getWorldQuaternion(qp);
+    level.quaternion.copy(qp.invert().multiply(qr).multiply(qs));
+  };
+}

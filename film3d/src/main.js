@@ -14,8 +14,8 @@ const capture = params.has("capture");
 // published pages only receive a bare #token: #free #A #B #C #reel #lineup #debug
 const hash = location.hash.slice(1);
 let debug = params.get("debug") === "1" || hash === "debug";
-let mode = params.get("mode") || ({ free: "free", reel: "reel", A: "shot", B: "shot", C: "shot", lineup: "lineup" }[hash]) || "lineup";
-if (["A", "B", "C"].includes(hash) && !params.get("shot")) params.set("shot", hash);
+let mode = params.get("mode") || ({ free: "free", reel: "reel", A: "shot", B: "shot", C: "shot", W: "shot", V: "shot", lineup: "lineup" }[hash]) || "lineup";
+if (["A", "B", "C", "W", "V"].includes(hash) && !params.get("shot")) params.set("shot", hash);
 const W = Number(params.get("w")) || innerWidth;
 const H = Number(params.get("h")) || innerHeight;
 
@@ -25,7 +25,7 @@ const { scene, camera } = stage;
 const house = buildHouse();
 scene.add(house);
 const lights = buildLighting(scene, house);
-const cast = await loadCast({ tryGLB: !capture });
+const cast = await loadCast({ tryGLB: true });
 for (const c of Object.values(cast)) scene.add(c);
 const world = { scene, camera, stage, house, lights, cast, three: THREE };
 
@@ -147,7 +147,7 @@ function render(t, dt = 1 / 24) {
 const bar = document.getElementById("bar");
 function buildBar() {
   if (capture) { bar.style.display = "none"; return; }
-  const items = [["lineup", "Lineup"], ["free", "Free camera"], ["A", "Shot A"], ["B", "Shot B"], ["C", "Shot C"], ["reel", "Play A · B · C"]];
+  const items = [["lineup", "Lineup"], ["free", "Free camera"], ["W", "Walk: humans"], ["V", "Walk: small + Buddy"], ["A", "Shot A"], ["B", "Shot B"], ["C", "Shot C"], ["reel", "Play A · B · C"]];
   bar.innerHTML = "";
   for (const [k, label] of items) {
     const b = document.createElement("button");
@@ -158,7 +158,7 @@ function buildBar() {
   }
 }
 function go(k) {
-  if (["A", "B", "C"].includes(k)) { activeShotKey = k; enterMode("shot", { shot: k }); }
+  if (["A", "B", "C", "W", "V"].includes(k)) { activeShotKey = k; enterMode("shot", { shot: k }); }
   else enterMode(k);
   playing = true;
 }

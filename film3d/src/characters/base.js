@@ -6,6 +6,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 import { contactShadow } from "../core/geo.js";
+import { prepareGLB } from "./glb.js";
 import { clamp, lerp, noise1, fbm1, TAU, remap } from "../core/util.js";
 
 /** Standard rig node names (procedural builders and GLB files both use these). */
@@ -118,8 +119,9 @@ const loader = new GLTFLoader();
  * GLB-first loader. If assets/chr_<id>.glb exists it is used (scaled to the
  * character's height, rig mapped by node name); otherwise the procedural model.
  */
-export async function loadCharacter(def, buildProcedural, Controller, { assetBase = "./assets/", tryGLB = true } = {}) {
+export async function loadCharacter(def, buildProcedural, Controller, { assetBase = "./assets/", tryGLB = true, GLBController = null, glbExtra = null } = {}) {
   const root = new CharacterRoot(def);
+  let Ctl = Controller;
   if (tryGLB) {
     const url = `${assetBase}chr_${def.id}.glb`;
     try {
@@ -129,20 +131,30 @@ export async function loadCharacter(def, buildProcedural, Controller, { assetBas
         const buf = await res.arrayBuffer();
         const gltf = await loader.parseAsync(buf, assetBase);
         const vis = gltf.scene;
-        vis.traverse((o) => { if (o.isMesh) { o.castShadow = true; o.receiveShadow = true; } });
-        const box = new THREE.Box3().setFromObject(vis);
-        const h = box.max.y - box.min.y;
-        if (h > 0) vis.scale.multiplyScalar(def.height / h);
-        root.setVisual(vis, mapRig(vis), { stride: def.height * 0.9 }, "glb");
+        let modelledHeight = 0;
+        vis.traverse((o) => { if (o.userData?.height) modelledHeight = o.userData.height; });
+        if (!modelledHeight) {
+          // foreign GLB: fit to the character's height
+          const box = new THREE.Box3().setFromObject(vis);
+          const h = box.max.y - box.min.y;
+          if (h > 0) vis.scale.multiplyScalar(def.height / h);
+        }
+        prepareGLB(vis, def);
+        root.setVisual(vis, mapRig(vis), { stride: def.height * 0.9, ...(def.glbMeta || {}) }, "glb");
+        if (GLBController) Ctl = GLBController;
+        root.extra = glbExtra ? glbExtra(root) : null;
       }
-    } catch (e) { /* fall through to procedural */ }
+    } catch (e) {
+      console.warn(`GLB ${def.id}:`, e);
+      if (root.visual) { root.remove(root.visual); root.visual = null; }
+    }
   }
   if (!root.visual) {
     const built = buildProcedural(def);
     root.setVisual(built.model, mapRig(built.model), built.meta, "procedural");
     root.extra = built.extra || null;
   }
-  root.controller = new Controller(root);
+  root.controller = new Ctl(root);
   root.apply(0);
   return root;
 }

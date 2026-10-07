@@ -289,7 +289,7 @@ export const SHOT_B = {
     const bookTop = V(0.5, 0.335, 0.95);
     const lift = smoother(remap(t, 2.75, 3.7));
     const handR = new THREE.Vector3().lerpVectors(V(0.6, 0.85, 0.85), bookTop, smooth(remap(t, 1.85, 2.55)));
-    handR.lerp(V(0.68, 0.72, 0.82), lift);
+    handR.lerp(V(0.6, 0.58, 0.4), lift);
     by.custom.ikR = { target: handR, w: smooth(remap(t, 1.7, 2.0)), twist: -0.3 };
     by.custom.armR = { curl: lerp(0.2, 0.75, smooth(remap(t, 2.45, 2.7))) };
     // GO gesture with the left hand (two flicks toward +x)
@@ -299,20 +299,20 @@ export const SHOT_B = {
     by.custom.ikL = { target: handL, w: go, twist: 0.4 };
     by.custom.armL = { curl: 0.1, spread: 0.6 };
     // head: book -> hallway (sound) -> friends
-    by.look = t < 3.9 ? bookTop.clone().lerp(V(0.68, 0.62, 0.82), lift) : t < 5.0 ? V(2.15, 1.3, 3.2) : V(0.35, 0.05, 0.95);
+    by.look = t < 3.9 ? bookTop.clone().lerp(V(0.6, 0.5, 0.4), lift * 0.5) : t < 5.0 ? V(2.15, 1.3, 3.2) : V(0.35, 0.05, 0.95);
     by.lookAmt = 1;
     by.custom.grin = t < 3.9 ? 0.25 : t < 5.0 ? 0.0 : smooth(remap(t, 5.2, 5.6)) * 0.9;
     by.custom.browUp = t > 3.9 && t < 5.0 ? 1 : 0;
     // camera: low behind the group -> tilt/crane up to reveal Bully -> settle as they pass
     const reveal = smoother(remap(t, 2.6, 4.3));
     const settle = smooth(remap(t, 5.9, 7.2));
-    const p0 = V(-0.72, 0.1, 0.95), p1 = V(-0.2, 0.44, 1.12), p2 = V(-0.05, 0.3, 1.18);
+    const p0 = V(-0.72, 0.1, 0.82), p1 = V(-0.45, 0.56, 1.08), p2 = V(-0.2, 0.34, 1.08);
     const camPos = p0.clone().lerp(p1, reveal).lerp(p2, settle);
     const trail = Math.min(...TINY.map((id) => C[id].state.pos.x)) - 0.55;
     camPos.x = lerp(Math.min(trail, camPos.x), camPos.x, smooth(remap(t, 1.6, 2.6)));
-    const tg0 = V(0.5, 0.16, 0.95), tg1 = V(0.86, 0.86, 0.72), tg2 = V(0.95, 0.45, 0.92);
+    const tg0 = V(0.5, 0.16, 0.92), tg1 = V(0.86, 0.84, 0.66), tg2 = V(0.95, 0.5, 0.88);
     const camTgt = tg0.clone().lerp(tg1, reveal).lerp(tg2, settle);
-    cam(world, camPos, camTgt, lerp(36, 40, reveal), t, 0.003);
+    cam(world, camPos, camTgt, lerp(36, 44, reveal), t, 0.003);
     const fpt = t < 2.6 ? V(0.5, 0.2, 0.95) : t < 6.0 ? V(0.86, 0.92, 0.68) : C.vin.state.pos.clone().add(V(0, 0.12, 0));
     focusOn(world, fpt, lerp(0.03, 0.016, reveal), 0.012);
     // lighting: warm practical spill from the floor lamp + cool rim
@@ -323,13 +323,15 @@ export const SHOT_B = {
   },
   post(t, world) {
     // the book rides in Bully's right hand once gripped
-    const hand = world.cast.bully.rig.all.get("righthand");
+    const all = world.cast.bully.rig.all;
+    const gripNode = all.get("rightgrip");
+    const hand = all.get("righthand");
     const book = this.book;
     const grip = smooth(remap(t, 2.5, 2.7));
     const rest = BOOK_AT.clone();
     if (grip <= 0 || !hand) { book.position.copy(rest); book.rotation.set(0, 0, 0); return; }
-    hand.updateWorldMatrix(true, false);
-    const hp = new THREE.Vector3(0, -0.06, 0).applyMatrix4(hand.matrixWorld);
+    hand.updateWorldMatrix(true, true);
+    const hp = gripNode ? gripNode.getWorldPosition(new THREE.Vector3()) : new THREE.Vector3(0, -0.06, 0).applyMatrix4(hand.matrixWorld);
     const target = hp.clone().add(V(0, -0.15, 0));
     book.position.lerpVectors(rest, target, grip);
     book.rotation.set(0, smooth(remap(t, 2.8, 3.8)) * -0.6, smooth(remap(t, 2.8, 3.8)) * 0.35);
@@ -408,17 +410,72 @@ export const SHOT_C = {
       r.fill.intensity = 0;
     } else {
       // reverse: from his eye-line, looking down at the frozen group
+      // his point of view: from just in front of the moustache, looking down at them
       const k = smooth(remap(t, cut, 8.4));
-      const camPos = V(2.78, 2.42, 3.12).lerp(V(2.72, 2.33, 3.02), k);
-      const camTgt = V(1.68, 0.15, 1.5);
-      cam(world, camPos, camTgt, lerp(42, 38, k), t, 0.0015);
+      const camPos = V(2.06, 1.6, 2.2).lerp(V(2.0, 1.52, 2.08), k);
+      const camTgt = V(1.72, 0.16, 1.45);
+      cam(world, camPos, camTgt, lerp(44, 39, k), t, 0.0015);
       focusOn(world, C.vin.state.pos.clone().add(V(0, 0.12, 0)), 0.02, 0.012);
-      setSpot(r.key, V(2.1, 2.3, 2.9), V(1.6, 0.1, 1.5), 11, 0.6);
+      setSpot(r.key, V(2.6, 2.7, 2.2), V(1.6, 0.1, 1.5), 9, 0.6);
       setSpot(r.rim, V(0.4, 1.0, 0.6), V(1.8, 0.2, 1.5), 4, 0.7);
       r.fill.intensity = 0;
     }
   },
 };
 
-export const SHOTS = { A: SHOT_A, B: SHOT_B, C: SHOT_C };
+// ------------------------------------------------------------------ WALK TESTS (review)
+// Side-on tracking cameras so foot planting can be judged against the floorboards.
+function walkTest(world, t, lanes, speed, camY, camZ, fov, lookY, follow) {
+  for (const [id, [x0, z, sp]] of Object.entries(lanes)) {
+    const ch = world.cast[id];
+    const v = sp ?? speed;
+    const path = new Path([V(x0, 0, z), V(x0 + v * 9, 0, z)]);
+    walk(ch, path, t, 0.4, 8.4, { accel: 0.12, nominal: v * 0.9 });
+    ch.state.lookAmt = 0;
+  }
+  const ids = Array.isArray(follow) ? follow : [follow];
+  const lead = centroid(world, ids);
+  const x = lead.x;
+  cam(world, V(x + 0.15, camY, camZ), V(x + 0.05, lookY, lead.z), fov, t, 0.002);
+  focusOn(world, lead.clone().add(V(0, lookY, 0)), 0.0);
+}
+export const SHOT_W = {
+  id: "W", name: "Walk test: humans", scene: "review", duration: 7.5,
+  setup(world) {
+    clearProps(world); resetStates(world); lightsOff(world);
+    show(world, ["bully", "mrodd"]);
+    world.stage.setLook({ letterbox: 0 });
+    world.cast.bully.state.custom.guitar = "back";
+  },
+  update(t, world) {
+    const r = rig(world);
+    const x = centroid(world, ["bully", "mrodd"]).x;
+    setSpot(r.key, V(x - 0.8, 2.6, 0.2), V(x, 0.6, -2.5), 30, 0.9);
+    setSpot(r.rim, V(x + 1.2, 2.0, -3.6), V(x, 0.8, -2.3), 12, 0.9);
+    r.fill.position.set(x, 0.8, -0.6); r.fill.intensity = 1.5;
+    world.cast.mrodd.state.custom.armR = { x: 0.12, z: -0.1, elbow: 1.45, curl: 0.75 };
+    walkTest(world, t, { bully: [-1.25, -2.45, 0.56], mrodd: [-2.35, -2.75, 0.56] }, 0.56, 0.95, 0.75, 38, 0.8, ["bully", "mrodd"]);
+  },
+};
+export const SHOT_V = {
+  id: "V", name: "Walk test: small friends + Buddy", scene: "review", duration: 7.5,
+  setup(world) {
+    clearProps(world); resetStates(world); lightsOff(world);
+    show(world, [...TINY, "buddy"]);
+    world.stage.setLook({ letterbox: 0 });
+  },
+  update(t, world) {
+    const r = rig(world);
+    const x = world.cast.aa.state.pos.x;
+    setSpot(r.key, V(x - 0.6, 1.8, -0.6), V(x, 0.1, -2.1), 26, 0.8);
+    setSpot(r.rim, V(x + 0.8, 1.4, -3.2), V(x, 0.2, -1.6), 10, 0.9);
+    r.fill.position.set(x, 0.4, -0.6); r.fill.intensity = 0.9;
+    walkTest(world, t, {
+      picker: [-1.0, -2.0, 0.24], vin: [-1.25, -2.1, 0.24], aa: [-1.5, -2.05, 0.24], locke: [-1.75, -2.15, 0.24], rex: [-2.0, -2.05, 0.24],
+      buddy: [-1.8, -2.6, 0.25],
+    }, 0.24, 0.22, -0.9, 34, 0.12, "aa");
+  },
+};
+
+export const SHOTS = { A: SHOT_A, B: SHOT_B, C: SHOT_C, W: SHOT_W, V: SHOT_V };
 export const REEL = ["A", "B", "C"];

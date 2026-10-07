@@ -582,3 +582,49 @@ export function scrawl(text, color = "#111111", w = 512, h = 192, seed = 3) {
     return tex(c, { wrap: false });
   });
 }
+
+/** Tee print decal (transparent): red lightning burst, skull, crossbones, cracked ink. */
+export function teePrint() {
+  return memo("teeprint", () => {
+    const W = 512, H = 512;
+    const [c, x] = canvas(W, H);
+    x.clearRect(0, 0, W, H);
+    const cx = W * 0.5, cy = H * 0.44;
+    x.fillStyle = "#c0262d";
+    x.beginPath();
+    const pts = [[-200, -30], [-80, -80], [-120, -170], [0, -95], [55, -190], [90, -80], [210, -70], [110, -10], [190, 70], [50, 30], [0, 120], [-50, 30], [-210, 60], [-110, -10]];
+    pts.forEach(([px, py], i) => (i ? x.lineTo(cx + px, cy + py) : x.moveTo(cx + px, cy + py)));
+    x.closePath(); x.fill();
+    x.strokeStyle = "#ece6d6"; x.lineWidth = 22; x.lineCap = "round";
+    x.beginPath(); x.moveTo(cx - 150, cy + 150); x.lineTo(cx + 150, cy + 225); x.stroke();
+    x.beginPath(); x.moveTo(cx + 150, cy + 150); x.lineTo(cx - 150, cy + 225); x.stroke();
+    for (const [bx, by] of [[-150, 150], [150, 225], [150, 150], [-150, 225]]) {
+      x.fillStyle = "#ece6d6";
+      x.beginPath(); x.arc(cx + bx, cy + by - 9, 15, 0, 7); x.arc(cx + bx, cy + by + 9, 15, 0, 7); x.fill();
+    }
+    x.fillStyle = "#ece6d6";
+    x.beginPath(); x.ellipse(cx, cy - 8, 96, 88, 0, 0, Math.PI * 2); x.fill();
+    x.beginPath(); x.roundRect(cx - 58, cy + 40, 116, 66, 14); x.fill();
+    x.fillStyle = "#18181b";
+    x.beginPath(); x.ellipse(cx - 38, cy - 4, 27, 31, 0.25, 0, 7); x.fill();
+    x.beginPath(); x.ellipse(cx + 38, cy - 4, 27, 31, -0.25, 0, 7); x.fill();
+    x.beginPath(); x.moveTo(cx, cy + 26); x.lineTo(cx - 13, cy + 50); x.lineTo(cx + 13, cy + 50); x.closePath(); x.fill();
+    for (let i = -4; i <= 4; i++) x.fillRect(cx + i * 13 - 2, cy + 70, 4, 34);
+    x.fillStyle = "#c0262d";
+    x.beginPath(); x.arc(cx - 36, cy - 2, 8, 0, 7); x.fill();
+    x.beginPath(); x.arc(cx + 36, cy - 2, 8, 0, 7); x.fill();
+    // cracked, washed-out ink
+    x.globalCompositeOperation = "destination-out";
+    const r = rng(77);
+    for (let i = 0; i < 2600; i++) { const s = 1 + r() * 3; x.fillStyle = `rgba(0,0,0,${0.4 + r() * 0.6})`; x.fillRect(r() * W, r() * H, s, s); }
+    x.lineWidth = 1.2;
+    for (let i = 0; i < 70; i++) {
+      let px = r() * W, py = r() * H;
+      x.strokeStyle = "rgba(0,0,0,0.8)"; x.beginPath(); x.moveTo(px, py);
+      for (let k = 0; k < 5; k++) { px += (r() - 0.5) * 30; py += (r() - 0.5) * 30; x.lineTo(px, py); }
+      x.stroke();
+    }
+    x.globalCompositeOperation = "source-over";
+    return tex(c, { wrap: false });
+  });
+}
