@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:" />
+    <title>ODD HAUS desk</title>
+    <link rel="stylesheet" href="desk.css" />
+  </head>
+  <body>
+    <div id="desk">
+      <canvas id="c"></canvas>
+      <div id="bubble" class="hit" hidden>
+        <p id="bubble-text"></p>
+        <button id="bubble-action" class="mini" hidden>오늘 요약 보기</button>
+      </div>
+      <div id="meter" class="pill hit">분당 <b id="kpm">0</b>타 <span class="gap"></span> 오늘 <b id="today">0</b>타</div>
+      <button id="focus" class="pill btn hit" type="button">🍅 집중 시작</button>
+      <div class="credit">© ODD HAUS</div>
+    </div>
+    <script type="module" src="desk.js"></script>
+  </body>
+</html>

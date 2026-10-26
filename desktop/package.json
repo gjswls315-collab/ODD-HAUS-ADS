@@ -1,0 +1,82 @@
+{
+  "name": "odd-haus-desktop",
+  "productName": "ODD HAUS Desktop",
+  "version": "1.0.0",
+  "description": "ODD HAUS 작은 친구들이 바탕화면에 놀러 와요. 타자 콤보, 에피소드, 집중 기록, 밥·기지개 알림.",
+  "author": "ODD HAUS",
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "src/main/main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test \"test/*.test.*\"",
+    "preview": "node tools/preview.mjs",
+    "icons": "node tools/make-icons.mjs",
+    "dist:win": "electron-builder --win zip --x64 --publish never",
+    "dist:mac": "electron-builder --mac zip --x64 --arm64 --publish never"
+  },
+  "oddhaus": {
+    "releasesApi": "https://api.github.com/repos/gjswls315-collab/odd-haus-ads/releases?per_page=20",
+    "releasesPage": "https://github.com/gjswls315-collab/odd-haus-ads/releases"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "1.3.0",
+    "uiohook-napi": "1.5.5"
+  },
+  "devDependencies": {
+    "electron": "45.0.0",
+    "electron-builder": "26.18.0"
+  },
+  "build": {
+    "appId": "com.oddhaus.desktop",
+    "productName": "ODD HAUS Desktop",
+    "executableName": "OddHausDesktop",
+    "artifactName": "OddHausDesktop-${version}-${os}-${arch}.${ext}",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "src/**/*",
+      "assets/**/*",
+      "package.json",
+      "!**/*.{d.ts,d.mts,d.cts,map,md,ts}",
+      "!node_modules/@anthropic-ai/sdk/src/**",
+      "!node_modules/uiohook-napi/{libuiohook,src}/**"
+    ],
+    "asarUnpack": [
+      "node_modules/uiohook-napi/**"
+    ],
+    "npmRebuild": false,
+    "win": {
+      "icon": "assets/icon.png",
+      "files": [
+        "!node_modules/uiohook-napi/prebuilds/{darwin,linux}-*/**",
+        "!node_modules/uiohook-napi/prebuilds/win32-arm64/**"
+      ]
+    },
+    "mac": {
+      "icon": "assets/icon.png",
+      "category": "public.app-category.entertainment",
+      "identity": "-",
+      "extendInfo": {
+        "LSUIElement": true
+      },
+      "files": [
+        "!node_modules/uiohook-napi/prebuilds/{win32,linux}-*/**"
+      ]
+    },
+    "linux": {
+      "icon": "assets/icon.png"
+    },
+    "electronLanguages": [
+      "ko",
+      "en-US"
+    ],
+    "compression": "maximum"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gjswls315-collab/odd-haus-ads.git"
+  }
+}

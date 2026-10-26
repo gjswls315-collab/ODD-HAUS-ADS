@@ -1,0 +1,31 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>props sheet</title>
+<style>
+  @font-face { font-family: Jua; src: url(../../src/renderer/fonts/Jua.woff2); }
+  body { margin: 0; background: #cfe6ff; }
+</style>
+<canvas id="c"></canvas>
+<script type="module">
+  import { drawProp, drawGuest, PROPS } from '../../src/renderer/shared/props.js';
+  const c = document.getElementById('c');
+  c.width = 1600; c.height = 1300;
+  const ctx = c.getContext('2d');
+  await document.fonts.load('14px Jua');
+  const view = { x: 0, y: 0, scale: 1, dpr: 1, w: 1600, h: 1300 };
+  const names = Object.keys(PROPS).filter((n) => n !== 'waves');
+  const t = 1.2;
+  names.forEach((type, i) => {
+    const x = 90 + (i % 9) * 170, y = 170 + Math.floor(i / 9) * 190;
+    const p = { type, x, y, s: 1, spinning: true, needleDown: true, lit: true, open: 1, filled: true, highlight: true, on: true, text: '오늘의 간식', bulbs: 3, span: 90, count: 4, w: 140 };
+    if (type === 'moon' || type === 'sun') p.y -= 60;
+    drawProp(ctx, p, t, view);
+    ctx.fillStyle = '#333'; ctx.font = '12px sans-serif'; ctx.fillText(type, x - 30, y + 20);
+  });
+  drawGuest(ctx, { type: 'buddy', x: 160, y: 1250, walking: true, happy: true }, t, view);
+  drawGuest(ctx, { type: 'bully', x: 600, y: 1300, s: 0.8 }, t, view);
+  drawGuest(ctx, { type: 'hand', x: 900, y: 1050, wrist: true, item: 'mug', s: 0.8 }, t, view);
+  drawGuest(ctx, { type: 'odd', x: 1300, y: 1100, s: 0.8, smile: 0.2 }, t, view);
+  drawProp(ctx, { type: 'waves', x: 0, y: 0, h: 60 }, t, { ...view });
+  document.title = 'ready';
+</script>

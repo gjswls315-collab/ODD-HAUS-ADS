@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:" />
+    <title>ODD HAUS Desktop 설정</title>
+    <link rel="stylesheet" href="settings.css" />
+  </head>
+  <body>
+    <!-- the day summary card, shared by the 오늘 tab and the end-of-day popup -->
+    <template id="today-card">
+      <section class="card today">
+        <div class="today-top">
+          <div>
+            <div class="eyebrow">오늘</div>
+            <div class="big" data-t="focus">0분</div>
+            <div class="sub" data-t="sub"></div>
+            <div class="streak" data-t="streak"></div>
+          </div>
+          <div class="praise">
+            <canvas class="portrait" width="96" height="96"></canvas>
+            <p data-t="praise"></p>
+          </div>
+        </div>
+        <div class="goal">
+          <div class="bar"><i data-t="goalbar"></i></div>
+          <div class="goal-text" data-t="goal"></div>
+        </div>
+        <div class="sub" data-t="times"></div>
+        <div class="chart" data-t="chart"></div>
+        <div class="legend"><span class="sw meal"></span>식사 시간 <span class="sw now"></span>지금</div>
+      </section>
+    </template>
+
+    <div id="summary-view" hidden>
+      <button class="close" id="close" type="button" aria-label="닫기">✕</button>
+      <h1 class="hello">오늘도 수고했어~ 🌙</h1>
+      <div id="summary-slot"></div>
+    </div>
+
+    <div id="settings-view" hidden>
+      <header>
+        <canvas id="logo" width="72" height="72"></canvas>
+        <div>
+          <h1>ODD HAUS Desktop</h1>
+          <p class="tagline">쓸모없는 것은 없다. 모두에게는 집이 필요하다. — 바탕화면도요.</p>
+        </div>
+        <span class="version" id="version"></span>
+      </header>
+      <nav id="tabs">
+        <button data-tab="today">오늘</button>
+        <button data-tab="friends">친구들</button>
+        <button data-tab="episodes">에피소드</button>
+        <button data-tab="alerts">알림</button>
+        <button data-tab="etc">기타</button>
+      </nav>
+
+      <main>
+        <section data-panel="today">
+          <div id="today-slot"></div>
+          <section class="card">
+            <h2>최근 7일</h2>
+            <div class="week" id="week"></div>
+          </section>
+        </section>
+
+        <section data-panel="friends" hidden>
+          <section class="card">
+            <h2>책상 친구</h2>
+            <p class="hint">키보드 앞에 앉아서 같이 두드려 주는 친구예요.</p>
+            <div class="friend-grid" id="desk-friend"></div>
+          </section>
+          <section class="card">
+            <h2>돌아다니는 친구</h2>
+            <p class="hint">바탕화면 아래쪽을 걸어 다니고, 모니터가 여러 개면 넘나들어요. 클릭하면 반응하고, 끌어서 옮길 수도 있어요.</p>
+            <div class="friend-grid" id="wanderers"></div>
+          </section>
+          <section class="card">
+            <h2>보기</h2>
+            <label class="row"><input type="checkbox" data-key="showFriends" /> 친구들 보이기</label>
+            <label class="row"><input type="checkbox" data-key="showDesk" /> 책상 보이기 <span class="hint">(책상은 끌어서 옮길 수 있어요)</span></label>
+            <label class="row">
+              크기
+              <input type="range" min="0.6" max="1.8" step="0.05" data-key="scale" />
+              <output id="scale-out"></output>
+            </label>
+            <label class="row"><input type="checkbox" data-key="smooth" /> 더 부드럽게 움직이기 (60fps, CPU를 조금 더 써요)</label>
+          </section>
+          <section class="card">
+            <h2>타자 치면 반응하기</h2>
+            <label class="row"><input type="checkbox" data-key="typingReact" /> 키보드 입력에 반응하기</label>
+            <p class="status" id="kb-status"></p>
+            <div class="note">
+              🔒 타자 반응 때문에 키보드 입력을 감지하긴 하지만, <b>'키를 눌렀다'는 사실과 엔터·스페이스·지우기 구분만</b> 써요.
+              무슨 키를 눌렀는지는 저장하지도 않고 어디로 보내지도 않아요. 끄면 키보드 감지 자체를 안 해요.
+            </div>
+          </section>
+        </section>
+
+        <section data-panel="episodes" hidden>
+          <section class="card">
+            <h2>에피소드</h2>
+            <label class="row"><input type="checkbox" data-key="autoEpisodes" /> 가끔 저절로 이야기 펼치기 <span class="hint">(타자를 쉬고 있을 때만)</span></label>
+            <label class="row">
+              얼마나 자주
+              <select data-key="episodeFreq">
+                <option value="rare">가끔 (25~40분)</option>
+                <option value="normal">보통 (12~22분)</option>
+                <option value="often">자주 (5~10분)</option>
+              </select>
+            </label>
+            <p class="hint">
+              레코드 Vin, 기타 피크 Picker, 건전지 A.A., 열쇠 Locke, 체스 킹 Rex가 모여 놀고, 강아지 Buddy와 기타 소년 Bully,
+              집주인 Mr. ODD가 놀러 와요. 칩을 누르면 바로 보여 주고, 동그라미를 끄면 저절로는 안 나와요. 계절 이야기는 그 시기에만 저절로 나와요.
+            </p>
+            <p class="status" id="ep-status"></p>
+            <div id="episode-list"></div>
+          </section>
+        </section>
+
+        <section data-panel="alerts" hidden>
+          <section class="card">
+            <h2>밥 챙기기</h2>
+            <label class="row"><input type="checkbox" data-key="mealReminders" /> 점심·저녁 알림</label>
+            <p class="hint">점심은 11:50~14:00, 저녁은 18:00~20:00 사이에 아직 타자를 치고 있으면 한 번 챙겨 줘요.</p>
+          </section>
+          <section class="card">
+            <h2>몸 챙기기</h2>
+            <label class="row"><input type="checkbox" data-key="stretchReminder" /> 기지개 알림 — 쉬지 않고 <input type="number" min="15" max="180" step="5" data-key="stretchMinutes" />분 일하면</label>
+            <label class="row"><input type="checkbox" data-key="waterReminder" /> 물 마시기 알림 — 집중 <input type="number" min="15" max="240" step="5" data-key="waterMinutes" />분마다</label>
+          </section>
+          <section class="card">
+            <h2>오늘의 목표와 퇴근</h2>
+            <label class="row">오늘의 목표 집중 <input type="number" min="0.5" max="12" step="0.5" data-key="goalHours" />시간</label>
+            <label class="row"><input type="checkbox" data-key="endOfDay" /> 퇴근 인사 — 오늘 처음 타자 친 시각 + <input type="number" min="1" max="14" step="0.5" data-key="workHours" />시간에 "오늘도 수고했어~"와 하루 요약</label>
+          </section>
+          <section class="card">
+            <h2>🍅 집중 타이머</h2>
+            <label class="row">집중 <input type="number" min="5" max="90" step="5" data-key="pomodoroMinutes" />분 · 쉬기 <input type="number" min="1" max="30" step="1" data-key="breakMinutes" />분</label>
+            <p class="hint">책상 아래 '🍅 집중 시작' 버튼으로 시작해요. 집중하는 동안 책상 친구가 안경을 써요.</p>
+          </section>
+        </section>
+
+        <section data-panel="etc" hidden>
+          <section class="card">
+            <h2>AI 말투 변환</h2>
+            <label class="row"><input type="checkbox" data-key="aiEnabled" /> 알림 문장을 책상 친구 말투로 바꾸기</label>
+            <div class="row">
+              <input type="password" id="ai-key" placeholder="Anthropic API 키 (sk-ant-…)" autocomplete="off" spellcheck="false" />
+              <button type="button" id="ai-save" class="chip small">저장</button>
+              <button type="button" id="ai-clear" class="chip small">지우기</button>
+            </div>
+            <label class="row">
+              모델
+              <select data-key="aiModel">
+                <option value="claude-opus-5-5">Claude Opus 5.5 (기본)</option>
+                <option value="claude-sonnet-5-5">Claude Sonnet 5.5</option>
+                <option value="claude-haiku-5-5">Claude Haiku 5.5 (가장 저렴)</option>
+              </select>
+            </label>
+            <div class="row"><button type="button" id="ai-test" class="chip small">말투 미리 듣기</button> <span class="status" id="ai-status"></span></div>
+            <p class="hint">
+              직접 API 키를 넣고 켰을 때만 인터넷을 써요. 보내는 건 앱이 정한 알림 문장과 캐릭터 설명뿐이고, 타자 친 내용은 절대 보내지 않아요.
+              키는 이 PC의 OS 보안 저장소로 암호화해서 보관해요. <a href="#" data-link="https://console.anthropic.com/">API 키 받기</a>
+            </p>
+          </section>
+          <section class="card">
+            <h2>시작과 업데이트</h2>
+            <label class="row"><input type="checkbox" data-key="launchAtLogin" /> 컴퓨터를 켜면 같이 시작하기</label>
+            <div class="row"><button type="button" id="update-check" class="chip small">업데이트 확인</button> <span class="status" id="update-status"></span></div>
+          </section>
+          <section class="card">
+            <h2>기록</h2>
+            <p class="hint">집중 기록은 시간대별 숫자만 이 PC에 저장되고 밖으로 나가지 않아요.</p>
+            <div class="row">
+              <button type="button" id="open-data" class="chip small">기록 폴더 열기</button>
+              <button type="button" id="reset" class="chip small danger">기록 모두 지우기</button>
+            </div>
+          </section>
+          <section class="card">
+            <h2>만든 사람들</h2>
+            <p class="hint">
+              ODD HAUS의 작은 친구들 — 바늘이 튀는 레코드, 짝 잃은 기타 피크, 반쯤 닳은 건전지, 맞는 문이 없는 열쇠, 체스판을 잃은 킹.
+              폰트: Jua (SIL Open Font License).
+            </p>
+            <div class="row"><button type="button" id="quit" class="chip small">ODD HAUS Desktop 종료</button></div>
+          </section>
+        </section>
+      </main>
+    </div>
+    <script type="module" src="settings.js"></script>
+  </body>
+</html>

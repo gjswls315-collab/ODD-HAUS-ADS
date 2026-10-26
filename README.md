@@ -8,6 +8,7 @@ procedurally modelled, rigged characters inside a modelled house, filmed with mo
 | Folder | What |
 |---|---|
 | [`film3d/`](film3d/) | The 3D production: characters, house, lighting, cameras, shots, headless renderer. Start with [`film3d/README.md`](film3d/README.md). |
+| [`desktop/`](desktop/) | **ODD HAUS Desktop**: the small friends live on your desktop (typing-combo desk, 36 episodes, focus log, meal and stretch reminders). Windows/macOS app; start with [`desktop/README.md`](desktop/README.md). |
 | `film3d/renders/review2/` | Review build 2: lineup stills, before/after, walk tests, test shots A, B, C (MP4). |
 | `film3d/renders/review1/` | Review build 1 (superseded characters). |
 | `reference/` | Key visual and storyboard board — **reference only** (mood, scale, character design). Never used as footage. |

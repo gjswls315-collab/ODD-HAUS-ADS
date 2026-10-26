@@ -1,0 +1,560 @@
+@font-face {
+  font-family: Jua;
+  src: url(../fonts/Jua.woff2) format('woff2');
+}
+
+:root {
+  --ink: #3d2c2e;
+  --soft: #7a6566;
+  --bg: #fffaf3;
+  --card: #ffffff;
+  --pink: #e2697f;
+  --pink-soft: #f3a5b4;
+  --blue: #6f95cf;
+  --meal: #f0c46b;
+  --line: #eadfd2;
+  --body: 'Pretendard', 'Malgun Gothic', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 14px;
+}
+
+h1,
+h2,
+.big,
+.eyebrow,
+nav button,
+.chip,
+.legend,
+.goal-text,
+.hello {
+  font-family: Jua, var(--body);
+  font-weight: normal;
+}
+
+header {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 24px 8px;
+}
+
+header h1 {
+  margin: 0;
+  font-size: 24px;
+}
+
+.tagline {
+  margin: 2px 0 0;
+  color: var(--soft);
+  font-size: 13px;
+}
+
+.version {
+  margin-left: auto;
+  color: var(--soft);
+  font-size: 12px;
+}
+
+nav {
+  display: flex;
+  gap: 8px;
+  padding: 8px 24px 0;
+  border-bottom: 2px solid var(--line);
+}
+
+nav button {
+  font-size: 16px;
+  color: var(--soft);
+  background: none;
+  border: none;
+  padding: 10px 14px 12px;
+  cursor: pointer;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+}
+
+nav button.on {
+  color: var(--ink);
+  border-bottom-color: var(--pink);
+}
+
+main {
+  padding: 16px 24px 32px;
+}
+
+.card {
+  background: var(--card);
+  border: 2.5px solid var(--ink);
+  border-radius: 18px;
+  box-shadow: 0 4px 0 var(--ink);
+  padding: 18px 22px;
+  margin-bottom: 18px;
+}
+
+.card h2 {
+  margin: 0 0 10px;
+  font-size: 19px;
+}
+
+.hint {
+  color: var(--soft);
+  font-size: 13px;
+  line-height: 1.55;
+  margin: 6px 0;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 10px 0;
+  line-height: 1.5;
+}
+
+.row .hint {
+  margin: 0;
+}
+
+input[type='checkbox'] {
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border: 2.5px solid var(--ink);
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  display: grid;
+  place-content: center;
+  flex: none;
+}
+
+input[type='checkbox']:checked {
+  background: var(--pink);
+}
+
+input[type='checkbox']:checked::after {
+  content: '';
+  width: 9px;
+  height: 5px;
+  border-left: 2.5px solid #fff;
+  border-bottom: 2.5px solid #fff;
+  transform: rotate(-45deg) translate(1px, -1px);
+}
+
+input[type='number'],
+input[type='password'],
+select {
+  font: inherit;
+  border: 2px solid var(--ink);
+  border-radius: 10px;
+  padding: 5px 8px;
+  background: #fff;
+  color: var(--ink);
+}
+
+input[type='number'] {
+  width: 70px;
+}
+
+input[type='password'] {
+  flex: 1;
+  min-width: 220px;
+}
+
+input[type='range'] {
+  flex: 1;
+  max-width: 260px;
+  accent-color: var(--pink);
+}
+
+.status {
+  color: var(--blue);
+  font-size: 13px;
+  margin: 4px 0;
+}
+
+.status.bad {
+  color: #d0455c;
+}
+
+.note {
+  margin-top: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff4e8;
+  line-height: 1.6;
+  font-size: 13px;
+}
+
+a {
+  color: var(--pink);
+}
+
+/* chips (episodes, buttons) */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 15px;
+  color: var(--ink);
+  background: #fff;
+  border: 2.5px solid var(--ink);
+  border-radius: 14px;
+  box-shadow: 0 3px 0 var(--ink);
+  padding: 7px 14px 6px;
+  cursor: pointer;
+  transition: transform 0.08s;
+}
+
+.chip:hover {
+  background: #fff6ef;
+}
+
+.chip:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 var(--ink);
+}
+
+.chip.small {
+  font-size: 13px;
+  padding: 5px 12px 4px;
+}
+
+.chip.danger {
+  color: #c2364e;
+}
+
+.chip.playing {
+  background: #ffe1e6;
+}
+
+.chip.unavailable {
+  opacity: 0.45;
+}
+
+.chip .dot {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--pink);
+  flex: none;
+}
+
+.chip .dot.off {
+  background: #fff;
+}
+
+.chip .need {
+  font-size: 11px;
+  color: var(--soft);
+}
+
+.cat {
+  margin: 18px 0 8px;
+  color: var(--pink);
+  font-family: Jua, var(--body);
+  font-size: 16px;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 10px;
+}
+
+/* friend pickers */
+.friend-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.friend {
+  position: relative;
+  border: 2.5px solid var(--ink);
+  border-radius: 16px;
+  box-shadow: 0 3px 0 var(--ink);
+  background: #fff;
+  padding: 8px 6px 10px;
+  text-align: center;
+  cursor: pointer;
+  font: inherit;
+  color: var(--ink);
+}
+
+.friend canvas {
+  width: 96px;
+  height: 96px;
+}
+
+.friend b {
+  display: block;
+  font-family: Jua, var(--body);
+  font-weight: normal;
+  font-size: 16px;
+}
+
+.friend small {
+  display: block;
+  color: var(--soft);
+  font-size: 11px;
+  line-height: 1.35;
+  margin-top: 2px;
+}
+
+.friend.on {
+  background: #ffe9ed;
+}
+
+.friend.on::after {
+  content: '✓';
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--pink);
+  color: #fff;
+  font-size: 13px;
+  line-height: 22px;
+}
+
+.friend[disabled] {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* today card */
+.today .today-top {
+  display: flex;
+  gap: 16px;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.eyebrow {
+  font-size: 16px;
+}
+
+.big {
+  font-size: 38px;
+  color: var(--pink);
+  line-height: 1.15;
+  margin: 2px 0 4px;
+}
+
+.sub {
+  color: var(--soft);
+  font-size: 14px;
+  margin: 4px 0;
+}
+
+.streak {
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 600;
+  margin: 6px 0 8px;
+}
+
+.praise {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: 300px;
+  border: 2px solid #ead9c5;
+  background: #fff9f0;
+  border-radius: 16px;
+  padding: 6px 14px 6px 6px;
+}
+
+.praise canvas {
+  width: 64px;
+  height: 64px;
+  flex: none;
+}
+
+.praise p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.45;
+}
+
+.goal .bar {
+  height: 12px;
+  border-radius: 999px;
+  background: #f2e6da;
+  border: 2px solid #e5d6c6;
+  overflow: hidden;
+  max-width: 320px;
+}
+
+.goal .bar i {
+  display: block;
+  height: 100%;
+  width: 0;
+  background: var(--pink-soft);
+  border-radius: 999px;
+}
+
+.goal-text {
+  font-size: 14px;
+  margin: 6px 0 2px;
+}
+
+.chart {
+  display: grid;
+  grid-template-columns: repeat(24, 1fr);
+  align-items: end;
+  gap: 4px;
+  height: 130px;
+  margin-top: 14px;
+  position: relative;
+}
+
+.chart .col {
+  position: relative;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+}
+
+.chart .col i {
+  display: block;
+  width: 100%;
+  min-height: 3px;
+  border-radius: 5px 5px 2px 2px;
+  background: var(--blue);
+}
+
+.chart .col.meal i {
+  background: var(--meal);
+}
+
+.chart .col.now i {
+  background: var(--pink);
+}
+
+.chart .col span {
+  position: absolute;
+  bottom: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  color: var(--soft);
+}
+
+.legend {
+  margin-top: 26px;
+  font-size: 13px;
+  color: var(--soft);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.legend .sw {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  display: inline-block;
+  margin-left: 8px;
+}
+
+.legend .sw.meal {
+  background: var(--meal);
+  margin-left: 0;
+}
+
+.legend .sw.now {
+  background: var(--pink);
+}
+
+.week {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  align-items: end;
+  height: 120px;
+}
+
+.week .day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  font-size: 12px;
+  color: var(--soft);
+  gap: 4px;
+}
+
+.week .day i {
+  display: block;
+  width: 60%;
+  min-height: 3px;
+  border-radius: 6px 6px 2px 2px;
+  background: var(--blue);
+}
+
+.week .day.today i {
+  background: var(--pink);
+}
+
+/* end-of-day popup */
+body.summary {
+  background: transparent;
+}
+
+#summary-view {
+  position: relative;
+  margin: 10px;
+  padding: 16px 18px 6px;
+  background: var(--bg);
+  border: 3px solid var(--ink);
+  border-radius: 22px;
+  box-shadow: 0 5px 0 var(--ink);
+}
+
+#summary-view .card {
+  box-shadow: none;
+  border-width: 2px;
+}
+
+.hello {
+  margin: 0 0 12px;
+  font-size: 22px;
+}
+
+.close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2.5px solid var(--ink);
+  background: #fff;
+  font-size: 15px;
+  cursor: pointer;
+  color: var(--ink);
+}
+
+@media (max-width: 720px) {
+  .friend-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
