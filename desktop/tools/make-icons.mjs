@@ -17,6 +17,7 @@ await page.goto(`http://127.0.0.1:${server.address().port}/tools/preview/blank.h
 
 const icons = await page.evaluate(async () => {
   const { drawFriend, ellipse, fillStroke, INK } = await import('/src/renderer/shared/draw.js');
+  await import('/src/renderer/shared/chiikawa.js');
   const make = (size, paint) => {
     const c = document.createElement('canvas');
     c.width = size;
@@ -24,12 +25,12 @@ const icons = await page.evaluate(async () => {
     paint(c.getContext('2d'), size);
     return c.toDataURL('image/png');
   };
-  // Vin's face filling a circle: used for the colour tray icon
-  const vinHead = (ctx, size) => {
-    const s = size / 50;
-    ctx.translate(size / 2, size / 2 + 38 * s);
+  // Chiikawa's face filling the square: the colour tray icon
+  const faceIcon = (ctx, size) => {
+    const s = size / 52;
+    ctx.translate(size / 2, size / 2 + 26 * s);
     ctx.scale(s, s);
-    drawFriend(ctx, 'vin', { pose: 'stand', seed: 9, look: [0, 0] }, 0.5);
+    drawFriend(ctx, 'chiikawa', { pose: 'stand', seed: 9, look: [0, 0] }, 0.5);
   };
   return {
     'icon.png': make(512, (ctx, size) => {
@@ -47,39 +48,51 @@ const icons = await page.evaluate(async () => {
       ellipse(ctx, size / 2, size - 40, 190, 50);
       ctx.fillStyle = '#ffd3dc';
       ctx.fill();
-      ctx.translate(size / 2, size - 52);
-      ctx.scale(5.3, 5.3);
-      drawFriend(ctx, 'vin', { pose: 'wave', seed: 9, look: [0.2, 0] }, 0.35);
+      ctx.translate(size / 2 - 70, size - 60);
+      ctx.scale(5.2, 5.2);
+      drawFriend(ctx, 'hachiware', { pose: 'stand', seed: 4, look: [0.3, 0] }, 0.35);
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.translate(size / 2 + 60, size - 50);
+      ctx.scale(5.6, 5.6);
+      drawFriend(ctx, 'chiikawa', { pose: 'wave', seed: 9, look: [-0.2, 0] }, 0.35);
       ctx.restore();
       void fillStroke;
     }),
-    'tray.png': make(32, vinHead),
-    'tray@2x.png': make(64, vinHead),
-    // macOS menu bar: a black template image (the record with two eye holes)
+    'tray.png': make(32, faceIcon),
+    'tray@2x.png': make(64, faceIcon),
+    // macOS menu bar: a black template image (a round head with ears, eyes cut out)
     'trayTemplate.png': make(18, (ctx, size) => {
-      const r = size * 0.44;
-      ellipse(ctx, size / 2, size / 2, r, r);
+      const r = size * 0.4;
       ctx.fillStyle = '#000';
+      for (const dx of [-0.27, 0.27]) {
+        ellipse(ctx, size / 2 + dx * size, size * 0.22, size * 0.14, size * 0.14);
+        ctx.fill();
+      }
+      ellipse(ctx, size / 2, size * 0.56, r, r * 0.92);
       ctx.fill();
       ctx.globalCompositeOperation = 'destination-out';
       for (const dx of [-0.17, 0.17]) {
-        ellipse(ctx, size / 2 + dx * size, size * 0.42, size * 0.09, size * 0.12);
+        ellipse(ctx, size / 2 + dx * size * 0.8, size * 0.55, size * 0.07, size * 0.09);
         ctx.fill();
       }
-      ellipse(ctx, size / 2, size * 0.66, size * 0.12, size * 0.09);
+      ellipse(ctx, size / 2, size * 0.7, size * 0.07, size * 0.05);
       ctx.fill();
     }),
     'trayTemplate@2x.png': make(36, (ctx, size) => {
-      const r = size * 0.44;
-      ellipse(ctx, size / 2, size / 2, r, r);
+      const r = size * 0.4;
       ctx.fillStyle = '#000';
+      for (const dx of [-0.27, 0.27]) {
+        ellipse(ctx, size / 2 + dx * size, size * 0.22, size * 0.14, size * 0.14);
+        ctx.fill();
+      }
+      ellipse(ctx, size / 2, size * 0.56, r, r * 0.92);
       ctx.fill();
       ctx.globalCompositeOperation = 'destination-out';
       for (const dx of [-0.17, 0.17]) {
-        ellipse(ctx, size / 2 + dx * size, size * 0.42, size * 0.09, size * 0.12);
+        ellipse(ctx, size / 2 + dx * size * 0.8, size * 0.55, size * 0.07, size * 0.09);
         ctx.fill();
       }
-      ellipse(ctx, size / 2, size * 0.66, size * 0.12, size * 0.09);
+      ellipse(ctx, size / 2, size * 0.7, size * 0.07, size * 0.05);
       ctx.fill();
     }),
   };

@@ -1,16 +1,20 @@
 // A fake main process for previewing the windows in a normal browser. Never used in the app.
-// URL options: ?ep=<episode id>  ?typing=1  ?remind=<type>  ?desk=x,y,w,h  ?friend=<id>  ?tab=<tab>
+// URL options: ?pack=chiikawa|oddhaus ?ep=<episode id> ?typing=1 ?remind=<type> ?desk=x,y,w,h ?friend=<id> ?tab=<tab>
+
+import cast from '../../shared/cast.json' with { type: 'json' };
 
 const q = new URLSearchParams(location.search);
+const PACK = cast.packs[q.get('pack')] ? q.get('pack') : 'chiikawa';
 
 const SETTINGS = {
   typingReact: true,
   showFriends: true,
   showDesk: true,
-  deskFriend: q.get('friend') || 'picker',
+  pack: PACK,
+  deskFriend: q.get('friend') || cast.packs[PACK].desk,
   deskPos: null,
-  wanderers: (q.get('wanderers') || 'vin,aa,locke,rex').split(',').filter(Boolean),
-  scale: Number(q.get('scale') || 1.25),
+  wanderers: (q.get('wanderers') || cast.packs[PACK].wanderers.join(',')).split(',').filter(Boolean),
+  scale: Number(q.get('scale') || 1.5),
   smooth: true,
   autoEpisodes: true,
   episodeFreq: 'normal',
@@ -121,6 +125,7 @@ export function createMock(role) {
     episodeState: (s) => {
       window.__episode = s;
       emit('episode', s);
+      if (window.parent !== window) window.parent.postMessage({ oddEpisode: s }, '*'); // tools/preview/scene.html passes it to the desk
     },
     playEpisode: (id) => emit('episode', { action: 'play', id }),
     deskDrag: () => {},
@@ -133,6 +138,9 @@ export function createMock(role) {
       emit('pomodoro', pomodoro);
     },
     setSettings: async (patch) => {
+      if (patch.pack && patch.pack !== settings.pack) {
+        Object.assign(settings, { deskFriend: cast.packs[patch.pack].desk, wanderers: cast.packs[patch.pack].wanderers.slice() });
+      }
       Object.assign(settings, patch);
       emit('settings', settings);
       return settings;

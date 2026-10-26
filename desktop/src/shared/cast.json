@@ -34,11 +34,110 @@
       "what": "체스판을 잃어버린 킹",
       "role": "위엄을 지키려 애쓰는 허당 왕",
       "persona": "위엄을 지키려 애쓰는 허당 왕. '짐이', '~하노라', '~하거라' 같은 옛날 왕 말투를 쓰지만 어딘가 귀엽게 허술하다."
+    },
+    "chiikawa": {
+      "name": "치이카와",
+      "ko": "치이카와",
+      "what": "작고 귀여운 녀석",
+      "role": "겁은 많지만 열심히 하는 아이",
+      "persona": "작고 겁 많지만 열심히 하는 아이. 말수가 아주 적고 \"…!\", \"흐엣\", \"와아…\", \"웅…\" 같은 짧은 감탄사를 주로 쓴다. 문장은 아주 짧게."
+    },
+    "hachiware": {
+      "name": "하치와레",
+      "ko": "하치와레",
+      "what": "밝고 긍정적인 고양이",
+      "role": "노래를 좋아하는 낙천가",
+      "persona": "밝고 긍정적인 하치와레. \"괜찮아~!\", \"좋은 생각이야!\", \"~지 뭐!\" 같은 다정하고 씩씩한 반말을 쓴다."
+    },
+    "usagi": {
+      "name": "우사기",
+      "ko": "우사기",
+      "what": "엉뚱하고 힘이 넘치는 토끼",
+      "role": "예측 불가 에너지",
+      "persona": "엉뚱하고 에너지 넘치는 우사기. 거의 \"우라!\", \"야하!\", \"후울~\", \"하아?!\" 같은 외침으로만 말한다. 아주 짧게."
     }
   },
   "guests": {
-    "buddy": { "name": "Buddy", "ko": "버디", "what": "주인 없던 떠돌이 개, 지금은 길잡이" },
-    "bully": { "name": "Bully", "ko": "불리", "what": "어딜 가나 시끄럽다며 쫓겨나던 기타 소년" },
-    "mrodd": { "name": "Mr. ODD", "ko": "미스터 오드", "what": "무뚝뚝한 집주인, 말없이 모두의 자리를 만들어 둔 사람" }
+    "buddy": {
+      "name": "Buddy",
+      "ko": "버디",
+      "what": "주인 없던 떠돌이 개, 지금은 길잡이"
+    },
+    "bully": {
+      "name": "Bully",
+      "ko": "불리",
+      "what": "어딜 가나 시끄럽다며 쫓겨나던 기타 소년"
+    },
+    "mrodd": {
+      "name": "Mr. ODD",
+      "ko": "미스터 오드",
+      "what": "무뚝뚝한 집주인, 말없이 모두의 자리를 만들어 둔 사람"
+    },
+    "momonga": {
+      "name": "모몽가",
+      "ko": "모몽가",
+      "what": "귀엽다는 말을 듣고 싶은 하늘다람쥐"
+    },
+    "kurimanju": {
+      "name": "쿠리만쥬",
+      "ko": "쿠리만쥬",
+      "what": "한 잔을 좋아하는 밤만쥬"
+    },
+    "rakko": {
+      "name": "랏코",
+      "ko": "랏코",
+      "what": "모두가 동경하는 최강 토벌가"
+    },
+    "shisa": {
+      "name": "시사",
+      "ko": "시사",
+      "what": "라멘 가게에서 수행 중인 시사"
+    },
+    "yoroi": {
+      "name": "갑옷씨",
+      "ko": "갑옷씨",
+      "what": "일을 맡겨 주는 갑옷 입은 분"
+    },
+    "chimera": {
+      "name": "키메라",
+      "ko": "키메라",
+      "what": "들판에 나타나는 수상한 녀석"
+    }
+  },
+  "packs": {
+    "chiikawa": {
+      "name": "치이카와",
+      "title": "놀러와요 치이카와",
+      "credit": "© nagano / chiikawa committee",
+      "friends": [
+        "chiikawa",
+        "hachiware",
+        "usagi"
+      ],
+      "desk": "chiikawa",
+      "wanderers": [
+        "hachiware",
+        "usagi"
+      ]
+    },
+    "oddhaus": {
+      "name": "ODD HAUS",
+      "title": "ODD HAUS Desktop",
+      "credit": "© ODD HAUS",
+      "friends": [
+        "vin",
+        "picker",
+        "aa",
+        "locke",
+        "rex"
+      ],
+      "desk": "picker",
+      "wanderers": [
+        "vin",
+        "aa",
+        "locke",
+        "rex"
+      ]
+    }
   }
 }

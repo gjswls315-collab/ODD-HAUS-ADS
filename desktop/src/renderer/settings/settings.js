@@ -1,8 +1,9 @@
 // Settings window (tabs) and the end-of-day summary popup (?view=summary).
 
-import { drawFriend, FRIEND_IDS } from '../shared/draw.js';
+import { drawFriend } from '../shared/draw.js';
+import '../shared/chiikawa.js';
 import { connect, loadFonts } from '../shared/bridge.js';
-import { EPISODES, CATEGORIES } from '../overlay/episodes.js';
+import { episodesFor, categoriesFor } from '../overlay/episodes.js';
 import cast from '../../shared/cast.json' with { type: 'json' };
 
 const odd = await connect('settings');
@@ -10,6 +11,8 @@ await loadFonts();
 const boot = await odd.bootstrap();
 const params = new URLSearchParams(location.search);
 let settings = boot.settings;
+const pack = () => cast.packs[settings.pack] || cast.packs.chiikawa;
+const nameOf = (id) => (cast.friends[id] || cast.guests[id] || { name: id }).name;
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -106,15 +109,16 @@ function mountToday(slot) {
 
 if (params.get('view') === 'summary') {
   document.body.classList.add('summary');
+  document.title = `${pack().title} 오늘 요약`;
   $('#summary-view').hidden = false;
   const slot = mountToday($('#summary-slot'));
   renderToday(slot, await odd.today());
   odd.onToday((d) => renderToday(slot, d));
   $('#close').addEventListener('click', () => odd.closeWindow());
-  document.title = 'ready';
+  document.documentElement.dataset.ready = '1'; // previews wait for this
 } else {
   await setupSettings();
-  document.title = 'ready';
+  document.documentElement.dataset.ready = '1'; // previews wait for this
 }
 
 // ------------------------------------------------------------------ settings window
@@ -122,7 +126,6 @@ if (params.get('view') === 'summary') {
 async function setupSettings() {
   $('#settings-view').hidden = false;
   $('#version').textContent = `v${boot.version}`;
-  portrait($('#logo'), 'vin', { pose: 'wave', scale: 0.72 });
 
   // tabs
   const show = (tab) => {
@@ -150,11 +153,17 @@ async function setupSettings() {
     if (el.type === 'range') el.addEventListener('input', () => ($('#scale-out').textContent = `${Math.round(el.value * 100)}%`));
   }
 
+  buildPackPicker();
   buildFriendPickers();
   buildEpisodes();
   applySettings();
   odd.onSettings((s) => {
+    const packChanged = s.pack !== settings.pack;
     settings = s;
+    if (packChanged) {
+      buildFriendPickers();
+      buildEpisodes();
+    }
     applySettings();
   });
 
@@ -165,7 +174,7 @@ async function setupSettings() {
       const e = s.error;
       status.textContent =
         e.reason === 'needs'
-          ? `이 이야기는 ${e.missing.map((m) => cast.friends[m].name).join(', ')}이(가) 돌아다니고 있어야 볼 수 있어요. 친구들 탭에서 켜 주세요.`
+          ? `이 이야기는 ${e.missing.map(nameOf).join(', ')}이(가) 나와 있어야 볼 수 있어요. 친구들 탭에서 켜 주세요.`
           : e.reason === 'few'
             ? '돌아다니는 친구가 더 있어야 볼 수 있어요.'
             : e.reason || '지금은 볼 수 없어요.';
@@ -267,7 +276,7 @@ function friendCard(id, onClick) {
   c.height = 96;
   portrait(c, id);
   const name = document.createElement('b');
-  name.textContent = `${cast.friends[id].name}`;
+  name.textContent = nameOf(id);
   const what = document.createElement('small');
   what.textContent = cast.friends[id].what;
   b.append(c, name, what);
@@ -275,7 +284,41 @@ function friendCard(id, onClick) {
   return b;
 }
 
+function buildPackPicker() {
+  $('#pack').replaceChildren(
+    ...Object.entries(cast.packs).map(([key, p]) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'friend pack';
+      b.dataset.id = key;
+      const row = document.createElement('div');
+      row.className = 'pack-row';
+      for (const id of p.friends.slice(0, 3)) {
+        const c = document.createElement('canvas');
+        c.width = 72;
+        c.height = 80;
+        portrait(c, id, { scale: 0.8 });
+        row.append(c);
+      }
+      const name = document.createElement('b');
+      name.textContent = p.name;
+      const what = document.createElement('small');
+      what.textContent = p.friends.map(nameOf).join(' · ');
+      b.append(row, name, what);
+      b.addEventListener('click', async () => {
+        if (settings.pack === key) return;
+        settings = await odd.setSettings({ pack: key });
+        buildFriendPickers();
+        buildEpisodes();
+        applySettings();
+      });
+      return b;
+    }),
+  );
+}
+
 function buildFriendPickers() {
+  const FRIEND_IDS = pack().friends;
   $('#desk-friend').replaceChildren(
     ...FRIEND_IDS.map((id) =>
       friendCard(id, async () => {
@@ -300,7 +343,9 @@ function buildFriendPickers() {
 
 function buildEpisodes() {
   const list = $('#episode-list');
-  for (const [cat, label] of CATEGORIES) {
+  list.replaceChildren();
+  const EPISODES = episodesFor(settings.pack);
+  for (const [cat, label] of categoriesFor(settings.pack)) {
     const eps = EPISODES.filter((e) => e.cat === cat);
     if (!eps.length) continue;
     const h = document.createElement('div');
@@ -351,12 +396,13 @@ function applySettings() {
     b.title = desk ? '책상에 앉아 있어요' : '';
   }
   for (const chip of $$('#episode-list .chip')) {
-    const ep = EPISODES.find((e) => e.id === chip.dataset.id);
+    const ep = episodesFor(settings.pack).find((e) => e.id === chip.dataset.id);
     const dot = $('.dot', chip);
     if (dot) dot.classList.toggle('off', settings.disabledEpisodes.includes(ep.id));
-    const missing = (ep.requires || []).filter((x) => !settings.wanderers.includes(x));
+    const around = [...settings.wanderers, ...(settings.showDesk ? [settings.deskFriend] : [])];
+    const missing = (ep.requires || []).filter((x) => !around.includes(x));
     chip.classList.toggle('unavailable', missing.length > 0);
-    $('.need', chip).textContent = missing.length ? `(${missing.map((m) => cast.friends[m].name).join(', ')} 필요)` : '';
+    $('.need', chip).textContent = missing.length ? `(${missing.map(nameOf).join(', ')} 필요)` : '';
   }
   const kb = settings.keyboard || {};
   const status = $('#kb-status');
@@ -370,5 +416,16 @@ function applySettings() {
         : kb.running
           ? '타자에 반응하는 중이에요 ✓'
           : '';
+  for (const b of $$('#pack .friend')) b.classList.toggle('on', b.dataset.id === settings.pack);
+  $('#app-title').textContent = pack().title;
+  document.title = `${pack().title} 설정`;
+  const logo = $('#logo');
+  if (logo.dataset.id !== settings.deskFriend) {
+    logo.dataset.id = settings.deskFriend;
+    logo.width = 72;
+    logo.height = 72;
+    portrait(logo, settings.deskFriend, { pose: 'wave', scale: 0.72 });
+  }
+  $('#credit').textContent = pack().credit;
   $('#ai-key').placeholder = settings.aiHasKey ? '저장된 키가 있어요 (바꾸려면 새 키 입력)' : 'Anthropic API 키 (sk-ant-…)';
 }

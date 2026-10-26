@@ -2,7 +2,7 @@
 // walk friends around, say lines, place props, bring guests in, start effects.
 
 import { clock } from './world.js';
-import { EPISODES, isInSeason } from './episodes.js';
+import { episodesFor, isInSeason } from './episodes.js';
 
 export const CANCEL = Symbol('episode cancelled');
 const rand = (a, b) => a + Math.random() * (b - a);
@@ -24,6 +24,7 @@ export class Stage {
     this.waits = [];
     this.tweens = [];
     this.owned = [];
+    this.visitors = [];
     const d = world.main;
     this.unit = world.unit;
     this.floor = d.y + d.h;
@@ -114,7 +115,7 @@ export class Stage {
     for (const x of [...this.waits, ...this.tweens]) x.reject(CANCEL);
     this.waits = [];
     this.tweens = [];
-    for (const id of this.cast) {
+    for (const id of this.everyone) {
       const f = this.f(id);
       if (f && f.task && f.task.resolve) f.task.resolve(false); // unblocks walk/jump/land awaits
       if (f) f.task = null;
@@ -240,6 +241,29 @@ export class Stage {
     this.check();
   }
 
+  /** A guest walks in from a screen edge (and is sent home when the episode ends). */
+  async visit(id, { side = 'right', x, run = false, speed = 1 } = {}) {
+    this.check();
+    const start = side === 'left' ? this.left - 50 * this.unit : this.right + 50 * this.unit;
+    const f = this.w.addVisitor(id, start);
+    f.facing = side === 'left' ? 1 : -1;
+    if (!this.visitors.includes(id)) this.visitors.push(id);
+    if (x !== undefined) await this.walk(id, x, { run, speed });
+    return f;
+  }
+
+  async leave(id, side = 'right', opts = {}) {
+    const x = side === 'left' ? this.left - 70 * this.unit : this.right + 70 * this.unit;
+    await this.walk(id, x, opts);
+    this.w.removeVisitor(id, { puff: false });
+    this.visitors = this.visitors.filter((v) => v !== id);
+  }
+
+  /** Everyone in the scene: the cast plus guests who are still here. */
+  get everyone() {
+    return [...this.cast, ...this.visitors.filter((v) => !this.cast.includes(v))];
+  }
+
   // ---------------------------------------------------------- scenery
 
   own(list, obj) {
@@ -319,8 +343,20 @@ export class Director {
     return this.stage ? this.stage.ep.id : null;
   }
 
+  get episodes() {
+    return episodesFor(this.world.settings.pack);
+  }
+
+  /** The desk friend can step away from the keyboard to join in. */
+  deskFriend() {
+    const id = this.world.settings.deskFriend;
+    return this.world.settings.showDesk && this.world.desk && id && !this.world.friends.has(id) ? id : null;
+  }
+
   available() {
-    return [...this.world.friends.values()].filter((f) => f.mode !== 'held').map((f) => f.id);
+    const ids = [...this.world.friends.values()].filter((f) => f.mode !== 'held' && !f.visitor).map((f) => f.id);
+    const desk = this.deskFriend();
+    return desk ? [...ids, desk] : ids;
   }
 
   /** Which episodes can play right now with the friends on screen. */
@@ -340,9 +376,10 @@ export class Director {
       await this.running;
     }
     const ids = this.available();
-    let ep = EPISODES.find((e) => e.id === id);
+    const episodes = this.episodes;
+    let ep = episodes.find((e) => e.id === id);
     if (!ep || id === 'random') {
-      const pool = EPISODES.filter((e) => this.playable(e, ids, { auto: true }));
+      const pool = episodes.filter((e) => this.playable(e, ids, { auto: true }));
       ep = pool[Math.floor(Math.random() * pool.length)];
     }
     if (!ep) return { ok: false, reason: '지금은 볼 수 있는 이야기가 없어요.' };
@@ -350,16 +387,26 @@ export class Director {
       const missing = (ep.requires || []).filter((x) => !ids.includes(x));
       return { ok: false, reason: missing.length ? 'needs' : 'few', missing, id: ep.id };
     }
+    const desk = this.deskFriend();
     const req = ep.requires || [];
     const pref = (ep.prefer || []).filter((x) => ids.includes(x) && !req.includes(x));
-    const rest = shuffle(ids.filter((x) => !req.includes(x) && !pref.includes(x)));
-    const cast = [...req, ...pref, ...rest].slice(0, ep.max || 5);
+    const rest = shuffle(ids.filter((x) => !req.includes(x) && !pref.includes(x) && x !== desk));
+    const tail = desk && !req.includes(desk) && !pref.includes(desk) ? [desk] : [];
+    const cast = [...req, ...pref, ...rest, ...tail].slice(0, ep.max || 5);
 
     const world = this.world;
     const stage = new Stage(world, ep, cast);
     this.stage = stage;
     world.director = this;
+    let borrowed = null;
     for (const fid of cast) {
+      if (fid === desk) {
+        // hops out of the desk and walks over
+        borrowed = fid;
+        world.addVisitor(fid, world.desk.x + world.desk.w / 2, { borrowed: true });
+        world.puff(world.desk.x + world.desk.w / 2, stage.floor - 30 * world.unit);
+        continue;
+      }
       const f = world.friends.get(fid);
       world.stop(f);
       f.mode = 'script';
@@ -373,7 +420,7 @@ export class Director {
         world.puff(f.x, f.y - 30 * world.unit);
       }
     }
-    this.onState({ playing: ep.id, title: ep.title });
+    this.onState({ playing: ep.id, title: ep.title, borrowed });
     this.running = (async () => {
       try {
         await ep.play(stage);
@@ -382,9 +429,11 @@ export class Director {
       } finally {
         stage.cancel();
         stage.cleanup();
+        for (const vid of stage.visitors) world.removeVisitor(vid);
+        if (borrowed) world.removeVisitor(borrowed); // back to the desk
         for (const fid of cast) {
           const f = world.friends.get(fid);
-          if (!f) continue;
+          if (!f || f.visitor) continue;
           Object.assign(f, { mode: 'auto', expr: null, look: null, item: null, acc: [], scared: false, z: 0, spin: 0, alpha: 1, task: null });
           if (f.y < stage.floor - 2) {
             f.onGround = false;
@@ -400,7 +449,7 @@ export class Director {
           this.stage = null;
           world.director = null;
           world.scheduleNextEpisode();
-          this.onState({ playing: null });
+          this.onState({ playing: null, borrowed: null });
         }
       }
     })();

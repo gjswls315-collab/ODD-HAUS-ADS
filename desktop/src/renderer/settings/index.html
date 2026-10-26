@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:" />
-    <title>ODD HAUS Desktop 설정</title>
+    <title>놀러와요 치이카와 설정</title>
     <link rel="stylesheet" href="settings.css" />
   </head>
   <body>
@@ -42,8 +42,8 @@
       <header>
         <canvas id="logo" width="72" height="72"></canvas>
         <div>
-          <h1>ODD HAUS Desktop</h1>
-          <p class="tagline">쓸모없는 것은 없다. 모두에게는 집이 필요하다. — 바탕화면도요.</p>
+          <h1 id="app-title">놀러와요 치이카와</h1>
+          <p class="tagline">바탕화면에서 친구들이 꼼지락거려요. 일하는 동안 옆에서 같이 놀아 줘요.</p>
         </div>
         <span class="version" id="version"></span>
       </header>
@@ -66,8 +66,13 @@
 
         <section data-panel="friends" hidden>
           <section class="card">
+            <h2>캐릭터</h2>
+            <p class="hint">바꾸면 책상 친구, 돌아다니는 친구, 에피소드가 모두 그 캐릭터들로 바뀌어요.</p>
+            <div class="friend-grid packs" id="pack"></div>
+          </section>
+          <section class="card">
             <h2>책상 친구</h2>
-            <p class="hint">키보드 앞에 앉아서 같이 두드려 주는 친구예요.</p>
+            <p class="hint">키보드 앞에 앉아서 같이 두드려 주는 친구예요. 에피소드가 열리면 잠깐 책상을 비우고 놀러 가요.</p>
             <div class="friend-grid" id="desk-friend"></div>
           </section>
           <section class="card">
@@ -110,8 +115,8 @@
               </select>
             </label>
             <p class="hint">
-              레코드 Vin, 기타 피크 Picker, 건전지 A.A., 열쇠 Locke, 체스 킹 Rex가 모여 놀고, 강아지 Buddy와 기타 소년 Bully,
-              집주인 Mr. ODD가 놀러 와요. 칩을 누르면 바로 보여 주고, 동그라미를 끄면 저절로는 안 나와요. 계절 이야기는 그 시기에만 저절로 나와요.
+              라멘 가게, 소풍, 숨바꼭질, 키메라 토벌… 친구들이 모여 놀고 손님들도 놀러 와요. 칩을 누르면 바로 보여 주고,
+              동그라미를 끄면 저절로는 안 나와요. 계절 이야기는 그 시기에만 저절로 나와요.
             </p>
             <p class="status" id="ep-status"></p>
             <div id="episode-list"></div>
@@ -180,8 +185,8 @@
           <section class="card">
             <h2>만든 사람들</h2>
             <p class="hint">
-              ODD HAUS의 작은 친구들 — 바늘이 튀는 레코드, 짝 잃은 기타 피크, 반쯤 닳은 건전지, 맞는 문이 없는 열쇠, 체스판을 잃은 킹.
-              폰트: Jua (SIL Open Font License).
+              <span id="credit"></span> · 개인이 재미로 쓰려고 만든 비상업 팬 메이드 앱이에요.
+              ODD HAUS의 작은 친구들(레코드, 기타 피크, 건전지, 열쇠, 체스 킹)도 캐릭터 탭에서 고를 수 있어요. 폰트: Jua (SIL Open Font License).
             </p>
             <div class="row"><button type="button" id="quit" class="chip small">ODD HAUS Desktop 종료</button></div>
           </section>

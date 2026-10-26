@@ -1,9 +1,11 @@
 // The desk: a friend behind a keyboard who types along with you (bongo style), combos,
 // keys per minute, today's count, the pomodoro button and reminder bubbles.
 
-import { drawFriend, friendTop, glove, drawEmote, INK, rrect, fillStroke } from '../shared/draw.js';
+import { drawFriend, friendTop, paw, drawEmote, INK, RIG, rrect, fillStroke } from '../shared/draw.js';
+import '../shared/chiikawa.js';
 import { connect, loadFonts } from '../shared/bridge.js';
 import { POKE, pick } from '../shared/lines.js';
+import cast from '../../shared/cast.json' with { type: 'json' };
 
 const odd = await connect('desk');
 await loadFonts();
@@ -25,9 +27,9 @@ const $ = (id) => document.getElementById(id);
 const now = () => performance.now() / 1000;
 const fmt = (n) => Number(n || 0).toLocaleString('ko-KR');
 
-// friend & keyboard geometry
-const S = 1.85; // friend size at the desk
-const FEET = 282;
+// friend & keyboard geometry: size and where the feet are (hidden behind the keyboard)
+const DESK_DEFAULT = { s: 1.85, feet: 282 };
+const deskFit = (id) => (RIG[id] && RIG[id].desk) || DESK_DEFAULT;
 const KB = { x: 34, y: 236, w: 232, h: 62 };
 const COMBO_GAP = 1.5;
 
@@ -186,8 +188,19 @@ $('focus').addEventListener('click', () => odd.pomodoro('toggle'));
 setInterval(renderPomodoro, 1000);
 renderPomodoro();
 
+let away = null; // the desk friend stepped out to join an episode
+odd.onEpisode((e) => {
+  if (e && 'borrowed' in e) away = e.borrowed || null;
+});
+
+function applyCredit() {
+  document.querySelector('.credit').textContent = (cast.packs[settings.pack] || cast.packs.chiikawa).credit;
+}
+applyCredit();
+
 odd.onSettings((s) => {
   settings = s;
+  applyCredit();
 });
 
 // ------------------------------------------------------------------ pointer: click-through, drag, poke
@@ -287,7 +300,9 @@ function render() {
   const comboAlive = t - st.lastPress < COMBO_GAP && st.combo >= 5;
 
   // the friend
-  const id = settings.deskFriend || 'picker';
+  const id = settings.deskFriend || 'chiikawa';
+  const { s: S, feet: FEET } = deskFit(id);
+  const here = away !== id;
   const dozing = t - st.lastPress > 300 && !typing;
   const jump = Math.max(0, Math.sin(Math.min(1, (t - st.jumpAt) / 0.45) * Math.PI)) * 10;
   const squash = Math.max(0, 1 - (t - st.squashAt) / 0.15);
@@ -304,11 +319,14 @@ function render() {
     acc: pomo.mode === 'focus' ? ['glasses'] : [],
     expr: exprOn ? st.expr : dozing ? { eyes: 'closed', mouth: 'o' } : null,
   };
-  ctx.save();
-  ctx.translate(150, FEET - jump);
-  ctx.scale(S, S);
-  const P = drawFriend(ctx, id, friendState, t);
-  ctx.restore();
+  let P = null;
+  if (here) {
+    ctx.save();
+    ctx.translate(150, FEET - jump);
+    ctx.scale(S, S);
+    P = drawFriend(ctx, id, friendState, t);
+    ctx.restore();
+  }
 
   drawKeyboard(t);
 
@@ -317,8 +335,18 @@ function render() {
     ctx.save();
     ctx.translate(150, FEET - jump);
     ctx.scale(S, S);
-    glove(ctx, P.aL[0], P.aL[1] + P.by, 4.4, -1);
-    glove(ctx, P.aR[0], P.aR[1] + P.by, 4.4, 1);
+    paw(ctx, id, P.aL[0], P.aL[1] + P.by, -1);
+    paw(ctx, id, P.aR[0], P.aR[1] + P.by, 1);
+    ctx.restore();
+  } else {
+    ctx.save();
+    ctx.font = '14px Jua, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = '#fff';
+    ctx.strokeText('잠깐 놀러 갔어요~', 150, 222);
+    ctx.fillStyle = '#7a6566';
+    ctx.fillText('잠깐 놀러 갔어요~', 150, 222);
     ctx.restore();
   }
 
@@ -363,7 +391,7 @@ function render() {
 
   // emote above the head
   const emote = dozing ? { kind: 'zzz', start: 0 } : st.emote && st.emote.until > t ? st.emote : null;
-  if (emote) {
+  if (emote && here) {
     ctx.save();
     ctx.translate(150 + 28 * S, FEET - jump + (friendTop(id, friendState) + 4) * S);
     ctx.scale(1.4, 1.4);
@@ -371,8 +399,8 @@ function render() {
     ctx.restore();
   }
 
-  // typing sounds floating up
-  st.pops = st.pops.filter((p) => t - p.start < 0.7);
+  // typing sounds floating up (only when someone is there to make them)
+  st.pops = st.pops.filter((p) => t - p.start < 0.7 && here);
   for (const p of st.pops) {
     const k = (t - p.start) / 0.7;
     ctx.save();
@@ -412,4 +440,4 @@ function loop() {
   requestAnimationFrame(loop);
 }
 requestAnimationFrame(loop);
-document.title = 'ready';
+document.documentElement.dataset.ready = '1'; // previews wait for this

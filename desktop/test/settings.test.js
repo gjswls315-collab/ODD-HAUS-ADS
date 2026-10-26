@@ -8,18 +8,29 @@ const path = require('path');
 const { Settings, sanitize, DEFAULTS } = require('../src/main/settings');
 
 test('bad values fall back to safe ones', () => {
-  const s = sanitize({ scale: 99, deskFriend: 'nobody', wanderers: ['vin', 'vin', 'ghost'], episodeFreq: 'always', aiModel: 'gpt', extra: 1 });
+  const s = sanitize({ pack: 'oddhaus', scale: 99, deskFriend: 'nobody', wanderers: ['vin', 'vin', 'ghost'], episodeFreq: 'always', aiModel: 'gpt', extra: 1 });
   assert.equal(s.scale, 1.8);
-  assert.equal(s.deskFriend, DEFAULTS.deskFriend);
+  assert.equal(s.deskFriend, 'picker');
   assert.deepEqual(s.wanderers, ['vin']);
+  assert.equal(sanitize({ pack: 'nope' }).pack, DEFAULTS.pack);
   assert.equal(s.episodeFreq, 'normal');
   assert.equal(s.aiModel, 'claude-opus-5-5');
   assert.equal('extra' in s, false);
 });
 
 test('the desk friend never also wanders', () => {
-  const s = sanitize({ deskFriend: 'vin', wanderers: ['vin', 'aa'] });
+  const s = sanitize({ pack: 'oddhaus', deskFriend: 'vin', wanderers: ['vin', 'aa'] });
   assert.deepEqual(s.wanderers, ['aa']);
+});
+
+test('the Chiikawa trio is the default, and switching packs brings in that pack', () => {
+  assert.deepEqual([DEFAULTS.pack, DEFAULTS.deskFriend, DEFAULTS.wanderers], ['chiikawa', 'chiikawa', ['hachiware', 'usagi']]);
+  const odd = sanitize({ ...DEFAULTS, pack: 'oddhaus' });
+  assert.equal(odd.deskFriend, 'picker');
+  assert.deepEqual(odd.wanderers, ['vin', 'aa', 'locke', 'rex']);
+  const back = sanitize({ ...odd, pack: 'chiikawa' });
+  assert.deepEqual([back.deskFriend, back.wanderers], ['chiikawa', ['hachiware', 'usagi']]);
+  assert.deepEqual(sanitize({ ...DEFAULTS, wanderers: [] }).wanderers, []); // nobody wandering is allowed
 });
 
 test('windows never see the API key, and it is stored encrypted', () => {

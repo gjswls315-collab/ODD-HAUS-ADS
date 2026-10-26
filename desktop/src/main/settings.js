@@ -3,17 +3,21 @@
 const { EventEmitter } = require('events');
 const { readJson, writeJson } = require('./jsonstore');
 
-const FRIENDS = ['vin', 'picker', 'aa', 'locke', 'rex'];
+const cast = require('../shared/cast.json');
+
+const PACKS = cast.packs; // chiikawa | oddhaus: who sits at the desk and who wanders by default
+const FRIENDS = Object.values(PACKS).flatMap((p) => p.friends);
 const AI_MODELS = ['claude-opus-5-5', 'claude-sonnet-5-5', 'claude-haiku-5-5'];
 
 const DEFAULTS = Object.freeze({
   typingReact: true, // 타자 치면 반응하기: off means the keyboard hook is never started
   showFriends: true,
   showDesk: true,
-  deskFriend: 'picker',
+  pack: 'chiikawa',
+  deskFriend: 'chiikawa',
   deskPos: null, // {x, y} in screen coordinates, null = bottom-right of the main screen
-  wanderers: ['vin', 'aa', 'locke', 'rex'],
-  scale: 1.25,
+  wanderers: ['hachiware', 'usagi'],
+  scale: 1.5,
   smooth: false, // 60fps instead of 30fps
 
   autoEpisodes: true,
@@ -49,10 +53,14 @@ function sanitize(raw) {
   for (const key of Object.keys(DEFAULTS)) {
     if (typeof DEFAULTS[key] === 'boolean') s[key] = Boolean(s[key]);
   }
-  if (!FRIENDS.includes(s.deskFriend)) s.deskFriend = DEFAULTS.deskFriend;
-  s.wanderers = Array.isArray(s.wanderers)
-    ? [...new Set(s.wanderers.filter((id) => FRIENDS.includes(id) && id !== s.deskFriend))]
-    : FRIENDS.filter((id) => id !== s.deskFriend);
+  if (!PACKS[s.pack]) s.pack = DEFAULTS.pack;
+  const pack = PACKS[s.pack];
+  if (!pack.friends.includes(s.deskFriend)) s.deskFriend = pack.desk;
+  const asked = Array.isArray(s.wanderers) ? s.wanderers : null;
+  const fromPack = asked ? asked.filter((id) => pack.friends.includes(id)) : [];
+  // switching packs (nothing asked for belongs to this pack) brings in the pack's own wanderers
+  const wanted = asked && (fromPack.length || !asked.length) ? fromPack : pack.wanderers;
+  s.wanderers = [...new Set(wanted.filter((id) => id !== s.deskFriend))];
   s.disabledEpisodes = Array.isArray(s.disabledEpisodes) ? s.disabledEpisodes.filter((x) => typeof x === 'string') : [];
   if (!['rare', 'normal', 'often'].includes(s.episodeFreq)) s.episodeFreq = DEFAULTS.episodeFreq;
   if (!AI_MODELS.includes(s.aiModel)) s.aiModel = DEFAULTS.aiModel;
@@ -121,4 +129,4 @@ class Settings extends EventEmitter {
   }
 }
 
-module.exports = { Settings, DEFAULTS, FRIENDS, AI_MODELS, sanitize };
+module.exports = { Settings, DEFAULTS, FRIENDS, PACKS, AI_MODELS, sanitize };

@@ -1,7 +1,7 @@
 // Episode props, guests and sky objects, drawn in the same flat outlined style as the friends.
 // Each draw function gets a context already translated to the prop's ground point.
 
-import { INK, ellipse, rrect, fillStroke, stroke, star, heart, note, drawItem } from './draw.js';
+import { INK, ellipse, rrect, fillStroke, stroke, star, heart, note, drawItem, drawFriend } from './draw.js';
 
 const TAU = Math.PI * 2;
 
@@ -612,6 +612,129 @@ const PROPS = {
       fillStroke(ctx, '#8a5a35', 1.4);
     }
   },
+  stall(ctx, p, t) {
+    // a little ramen shop: counter, roof and a noren curtain
+    const w = 170;
+    rrect(ctx, -w / 2, -46, w, 46, 4);
+    fillStroke(ctx, '#c98f5a', 2.4);
+    rrect(ctx, -w / 2 - 6, -52, w + 12, 8, 3);
+    fillStroke(ctx, '#e3b07c', 2);
+    for (const x of [-w / 2 + 6, w / 2 - 10]) {
+      rrect(ctx, x, -150, 4, 100, 1);
+      fillStroke(ctx, '#8a5a35', 1.6);
+    }
+    ctx.beginPath(); // roof
+    ctx.moveTo(-w / 2 - 18, -146);
+    ctx.lineTo(w / 2 + 18, -146);
+    ctx.lineTo(w / 2 + 4, -168);
+    ctx.lineTo(-w / 2 - 4, -168);
+    ctx.closePath();
+    fillStroke(ctx, '#d6453f', 2.4);
+    const sway = Math.sin(t * 2) * 1.5;
+    for (let i = 0; i < 4; i++) {
+      const x = -60 + i * 30;
+      ctx.beginPath();
+      ctx.moveTo(x, -146);
+      ctx.lineTo(x + 28, -146);
+      ctx.lineTo(x + 28 + sway, -112);
+      ctx.lineTo(x + sway, -112);
+      ctx.closePath();
+      fillStroke(ctx, '#2f3b5c', 1.8);
+    }
+    ctx.font = '15px Jua, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#fff';
+    ctx.fillText('라', -46 + sway, -124);
+    ctx.fillText('멘', -16 + sway, -124);
+    ctx.fillText('가', 14 + sway, -124);
+    ctx.fillText('게', 44 + sway, -124);
+  },
+  weeds(ctx, p, t) {
+    const n = p.count ?? 6;
+    for (let i = 0; i < n; i++) {
+      ctx.save();
+      ctx.translate(-((p.span || 160) / 2) + (i + 0.5) * ((p.span || 160) / Math.max(n, 1)), 0);
+      ctx.rotate(Math.sin(t * 2 + i) * 0.06);
+      drawItem(ctx, 'weed', 0, -1, t);
+      ctx.restore();
+    }
+  },
+  board(ctx, p) {
+    for (const x of [-38, 34]) {
+      rrect(ctx, x, -70, 4, 70, 1);
+      fillStroke(ctx, '#8a5a35', 1.6);
+    }
+    rrect(ctx, -48, -96, 96, 56, 4);
+    fillStroke(ctx, '#c98f5a', 2.4);
+    const papers = p.papers || ['풀 뽑기', '토벌', '배달'];
+    ctx.font = '10px Jua, sans-serif';
+    ctx.textAlign = 'center';
+    papers.forEach((text, i) => {
+      const x = -30 + i * 30;
+      rrect(ctx, x - 13, -90, 26, 32, 2);
+      fillStroke(ctx, i === p.pick ? '#fff3a6' : '#fffaf0', 1.4);
+      ctx.fillStyle = INK;
+      ctx.fillText(text, x, -72);
+      ellipse(ctx, x, -88, 1.6, 1.6);
+      ctx.fillStyle = '#e0483f';
+      ctx.fill();
+    });
+  },
+  stage(ctx, p, t) {
+    const w = p.w || 150;
+    rrect(ctx, -w / 2, -18, w, 18, 3);
+    fillStroke(ctx, '#c98f5a', 2.2);
+    for (let i = 0; i < 5; i++) {
+      const x = -w / 2 + 14 + i * ((w - 28) / 4);
+      ellipse(ctx, x, -9, 3.2, 3.2);
+      ctx.fillStyle = p.lit && (Math.floor(t * 4) + i) % 2 ? '#ffe066' : '#f3e2c0';
+      ctx.fill();
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = INK;
+      ctx.stroke();
+    }
+    if (p.lit) {
+      const g = ctx.createRadialGradient(0, -70, 10, 0, -70, 110);
+      g.addColorStop(0, 'rgba(255,240,170,0.45)');
+      g.addColorStop(1, 'rgba(255,240,170,0)');
+      ctx.fillStyle = g;
+      ctx.fillRect(-120, -180, 240, 162);
+    }
+  },
+  boat(ctx, p, t) {
+    ctx.save();
+    ctx.rotate(Math.sin(t * 2) * 0.05);
+    ctx.beginPath();
+    ctx.moveTo(-62, -26);
+    ctx.lineTo(62, -26);
+    ctx.quadraticCurveTo(52, 4, 0, 4);
+    ctx.quadraticCurveTo(-52, 4, -62, -26);
+    ctx.closePath();
+    fillStroke(ctx, '#f2f2f2', 2.6);
+    ctx.beginPath();
+    ctx.moveTo(-58, -17);
+    ctx.quadraticCurveTo(0, -11, 58, -17);
+    stroke(ctx, 4, '#e0483f');
+    rrect(ctx, -2, -96, 4, 72, 1);
+    fillStroke(ctx, '#8a5a35', 1.6);
+    ctx.beginPath();
+    ctx.moveTo(2, -94);
+    ctx.quadraticCurveTo(40 + Math.sin(t * 3) * 3, -70, 4, -34);
+    ctx.closePath();
+    fillStroke(ctx, '#fffaf0', 2);
+    ctx.restore();
+  },
+  table(ctx) {
+    rrect(ctx, -44, -30, 88, 8, 2);
+    fillStroke(ctx, '#f6f1e6', 2);
+    ctx.beginPath();
+    ctx.moveTo(-44, -22);
+    ctx.lineTo(-40, 0);
+    ctx.lineTo(40, 0);
+    ctx.lineTo(44, -22);
+    ctx.closePath();
+    fillStroke(ctx, '#e06a6a', 2);
+  },
   cord(ctx, p, t) {
     // a string of fairy lights hanging from the top of the screen down to y = 0
     const len = p.len || 400;
@@ -694,6 +817,10 @@ function skinHand(ctx, color = '#f5c9a5', reach = 1600) {
 }
 
 const GUESTS = {
+  /** Any friend drawn huge, peeking in from an edge (the parallel-world visitor). */
+  giant(ctx, g, t) {
+    drawFriend(ctx, g.id, { pose: g.pose || 'stand', expr: g.expr || null, look: g.look || [0, 0], seed: 3, t0: 0, acc: g.acc || [] }, t);
+  },
   buddy(ctx, g, t) {
     // side view, facing +x; feet at y = 0
     const walk = g.walking ? g.phase || t * 6 : 0;

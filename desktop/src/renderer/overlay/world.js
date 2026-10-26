@@ -3,8 +3,9 @@
 // overlay window; other screens only draw snapshots of it.
 
 import { RIG, friendTop } from '../shared/draw.js';
+import '../shared/chiikawa.js';
 import { Fx } from '../shared/fx.js';
-import { POKE, DROPPED, GREET, CHEER, pick } from '../shared/lines.js';
+import { POKE, DROPPED, GREET, GREET_CHIIKAWA, CHEER, pick } from '../shared/lines.js';
 
 const GRAVITY = 1500;
 const WALK = 46; // px/s at size 1
@@ -60,8 +61,8 @@ export class World {
   }
 
   syncFriends(ids, initial) {
-    for (const id of [...this.friends.keys()]) {
-      if (!ids.includes(id)) this.removeFriend(id);
+    for (const [id, f] of [...this.friends]) {
+      if (!f.visitor && !ids.includes(id)) this.removeFriend(id);
     }
     ids.forEach((id, i) => {
       if (!this.friends.has(id)) this.addFriend(id, initial ? i : -1);
@@ -102,6 +103,23 @@ export class World {
     this.friends.set(id, f);
     this.puff(f.x, f.y - 30 * this.unit);
     return f;
+  }
+
+  /** A friend who only drops by for an episode: a guest, or the desk friend stepping away. */
+  addVisitor(id, x, extra = {}) {
+    const old = this.friends.get(id);
+    if (old) return old;
+    const f = this.addFriend(id, -1);
+    Object.assign(f, { x, y: this.floor(this.main), disp: this.main, mode: 'script', visitor: true, until: Infinity }, extra);
+    this.puffs.pop(); // they walk in, no puff
+    return f;
+  }
+
+  removeVisitor(id, { puff = true } = {}) {
+    const f = this.friends.get(id);
+    if (!f || !f.visitor) return;
+    if (puff) this.puff(f.x, f.y - 30 * this.unit);
+    this.friends.delete(id);
   }
 
   removeFriend(id) {
@@ -161,9 +179,11 @@ export class World {
   }
 
   walkTo(f, x, { speed = 1, run = false, roll = false } = {}) {
-    const d = this.displayAt(x, f.y) || f.disp;
-    const m = this.half(f);
-    x = Math.min(Math.max(x, d.x + m), d.x + d.w - m); // always somewhere it can actually reach
+    if (!f.visitor) {
+      const d = this.displayAt(x, f.y) || f.disp;
+      const m = this.half(f);
+      x = Math.min(Math.max(x, d.x + m), d.x + d.w - m); // always somewhere it can actually reach
+    }
     return new Promise((resolve) => {
       if (f.task && f.task.resolve) f.task.resolve(false);
       f.task = { type: 'walk', x, speed, run, roll, resolve };
@@ -356,7 +376,7 @@ export class World {
         const a = free[i];
         const b = free[j];
         if (a.disp !== b.disp || Math.abs(a.x - b.x) > 64 * this.unit || Math.random() > dt * 0.4) continue;
-        const [la, lb] = pick(GREET);
+        const [la, lb] = pick(this.settings.pack === 'chiikawa' ? GREET_CHIIKAWA : GREET);
         for (const f of [a, b]) {
           this.stop(f);
           f.chatAfter = t + rand(60, 120);
@@ -412,7 +432,7 @@ export class World {
       const d = this.displayAt(f.x, f.y) || f.disp;
       f.disp = d;
       const m = this.half(f);
-      f.x = Math.min(Math.max(f.x, d.x + m), d.x + d.w - m);
+      if (!f.visitor) f.x = Math.min(Math.max(f.x, d.x + m), d.x + d.w - m);
       if (f.vy > 0 && f.y >= this.floor(d)) {
         f.y = this.floor(d);
         f.vy = 0;
@@ -456,7 +476,7 @@ export class World {
         f.phase += (stepLen / (20 * u)) * Math.PI;
         if (task.roll) f.spin += (dir * stepLen) / (24 * u);
         this.setPose(f, task.run ? 'run' : 'walk', t);
-        this.crossEdges(f);
+        if (!f.visitor) this.crossEdges(f); // visitors may walk in from off-screen
       }
     } else if (f.mode === 'auto' && t >= f.until) {
       this.think(f, t);

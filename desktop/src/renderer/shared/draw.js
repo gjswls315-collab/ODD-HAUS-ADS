@@ -896,6 +896,129 @@ export function drawItem(ctx, kind, x, y, t, side = 1) {
         stroke(ctx, 1, '#ffd34d');
       }
       break;
+    case 'ramen':
+      ellipse(ctx, 0, -6, 9, 3);
+      fillStroke(ctx, '#f6e7c8', 1.3);
+      ctx.beginPath();
+      ctx.moveTo(-9, -6);
+      ctx.quadraticCurveTo(-8, 3, 0, 3);
+      ctx.quadraticCurveTo(8, 3, 9, -6);
+      fillStroke(ctx, '#e0483f', 1.4);
+      ctx.beginPath();
+      ctx.moveTo(-6, -4);
+      ctx.lineTo(6, -4);
+      stroke(ctx, 1, '#fff');
+      for (let i = 0; i < 3; i++) {
+        const k = (t * 0.6 + i / 3) % 1;
+        ctx.globalAlpha = (1 - k) * 0.6;
+        ctx.beginPath();
+        ctx.moveTo(-4 + i * 4, -9 - k * 12);
+        ctx.quadraticCurveTo(-6 + i * 4, -13 - k * 12, -4 + i * 4, -17 - k * 12);
+        stroke(ctx, 1.1, '#9aa');
+        ctx.globalAlpha = 1;
+      }
+      ctx.beginPath(); // chopsticks
+      ctx.moveTo(4, -7);
+      ctx.lineTo(13, -18);
+      ctx.moveTo(6, -6);
+      ctx.lineTo(15, -16);
+      stroke(ctx, 1.2, '#b8864f');
+      break;
+    case 'weed':
+      for (const [a, l] of [[-0.4, 9], [0, 12], [0.4, 9]]) {
+        ctx.save();
+        ctx.rotate(a);
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.quadraticCurveTo(3, -l / 2, 0, -l);
+        ctx.quadraticCurveTo(-3, -l / 2, 0, 0);
+        fillStroke(ctx, '#7cc46a', 1);
+        ctx.restore();
+      }
+      ctx.beginPath();
+      ctx.moveTo(0, 0);
+      ctx.lineTo(-1, 4);
+      ctx.moveTo(0, 0);
+      ctx.lineTo(1.5, 4.5);
+      stroke(ctx, 0.9, '#9b7650');
+      break;
+    case 'stick':
+      ctx.rotate(-0.5);
+      rrect(ctx, -1.6, -24, 3.2, 30, 1.5);
+      fillStroke(ctx, '#c9925a', 1.3);
+      ctx.beginPath();
+      ctx.moveTo(-5, -24);
+      ctx.quadraticCurveTo(0, -29, 5, -24);
+      stroke(ctx, 1.6, '#8a8f99');
+      break;
+    case 'mic':
+      rrect(ctx, -1.6, -4, 3.2, 10, 1.4);
+      fillStroke(ctx, '#3a3a40', 1.1);
+      ellipse(ctx, 0, -7, 3.6, 3.6);
+      fillStroke(ctx, '#c9c9d0', 1.2);
+      break;
+    case 'beer':
+      rrect(ctx, -3.6, -10, 7.2, 11, 1.5);
+      fillStroke(ctx, '#e8b93a', 1.2);
+      rrect(ctx, -3.6, -10, 7.2, 2.4, 1);
+      fillStroke(ctx, '#d8dce3', 1);
+      break;
+    case 'sake':
+      ctx.beginPath();
+      ctx.moveTo(-4, -6);
+      ctx.lineTo(4, -6);
+      ctx.lineTo(2.6, 0);
+      ctx.lineTo(-2.6, 0);
+      ctx.closePath();
+      fillStroke(ctx, '#fff', 1.2);
+      break;
+    case 'shikishi':
+      rrect(ctx, -8, -20, 16, 20, 1.5);
+      fillStroke(ctx, '#fffaf0', 1.3);
+      rrect(ctx, -8, -20, 16, 20, 1.5);
+      ctx.strokeStyle = '#d6b45a';
+      ctx.lineWidth = 1;
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(-4, -14);
+      ctx.bezierCurveTo(4, -18, -6, -8, 4, -6);
+      stroke(ctx, 1, INK);
+      break;
+    case 'lightstick':
+      rrect(ctx, -1.6, -2, 3.2, 7, 1);
+      fillStroke(ctx, '#ececf2', 1);
+      rrect(ctx, -1.8, -14, 3.6, 12, 1.8);
+      ctx.fillStyle = `hsl(${(t * 80) % 360}, 90%, 70%)`;
+      ctx.fill();
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = INK;
+      ctx.stroke();
+      break;
+    case 'shell':
+      ctx.beginPath();
+      ctx.moveTo(-6, -2);
+      ctx.quadraticCurveTo(0, -12, 6, -2);
+      ctx.quadraticCurveTo(0, 1, -6, -2);
+      fillStroke(ctx, '#ffd6c9', 1.2);
+      for (const x of [-2.5, 0, 2.5]) {
+        ctx.beginPath();
+        ctx.moveTo(0, -1);
+        ctx.lineTo(x * 1.6, -7);
+        stroke(ctx, 0.7, '#e6a090');
+      }
+      break;
+    case 'paper':
+      rrect(ctx, -7, -14, 14, 16, 1);
+      fillStroke(ctx, '#fff', 1.2);
+      for (const y of [-10, -7, -4]) {
+        ctx.beginPath();
+        ctx.moveTo(-4, y);
+        ctx.lineTo(4, y);
+        stroke(ctx, 0.7, '#999');
+      }
+      ellipse(ctx, 3, -1.5, 2.4, 2.4);
+      fillStroke(ctx, '#ff6b6b', 0.8);
+      break;
     case 'kite':
       ctx.beginPath();
       ctx.moveTo(0, 0);
@@ -1058,6 +1181,7 @@ export function drawFriend(ctx, id, st, t) {
   const look = st.look || P.look || [0.5, 0];
   const acc = st.acc || [];
   const ghost = acc.includes('ghost');
+  if (rig.style === 'blob') return drawBlob(ctx, id, st, t, P, { eyes, mouthKind, look, acc, ghost });
 
   ctx.save();
   if (P.lie) {
@@ -1117,6 +1241,122 @@ export function drawFriend(ctx, id, st, t) {
     sneaker(ctx, P.fL[0] - 2, P.fL[1] - P.by, rig.shoe);
     sneaker(ctx, P.fR[0] - 2, P.fR[1] - P.by, rig.shoe);
   }
+  ctx.restore();
+  return P;
+}
+
+// ------------------------------------------------------------------ round, stubby friends (character packs)
+
+/** Per-character drawing parts for 'blob' friends: shape(), back(), front(), face(), colors. */
+export const BLOBS = {};
+
+export function registerBlob(id, rig, parts) {
+  RIG[id] = { style: 'blob', eye: 'bead', brows: null, mouth: 'w', ...rig };
+  BLOBS[id] = parts;
+}
+
+/** A hand: a white glove for the rubber-hose cast, a little round paw for the blob cast. */
+export function paw(ctx, id, x, y, side = 1) {
+  const rig = RIG[id];
+  if (rig && rig.style === 'blob') {
+    ellipse(ctx, x, y, rig.pawR || 4.2, (rig.pawR || 4.2) * 0.9);
+    fillStroke(ctx, BLOBS[id].color, 2);
+  } else glove(ctx, x, y, 4.4, side);
+}
+
+function stub(ctx, x1, y1, x2, y2, w, fill) {
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.lineCap = 'round';
+  ctx.lineWidth = w + LINE * 2;
+  ctx.strokeStyle = INK;
+  ctx.stroke();
+  ctx.lineWidth = w;
+  ctx.strokeStyle = fill;
+  ctx.stroke();
+}
+
+function drawBlob(ctx, id, st, t, P, { eyes, mouthKind, look, acc, ghost }) {
+  const rig = RIG[id];
+  const B = BLOBS[id];
+  const reach = (S, G) => {
+    const dx = G[0] - S[0];
+    const dy = G[1] - S[1];
+    const len = Math.hypot(dx, dy) || 1;
+    const k = Math.min(len, rig.arm) / len;
+    return [S[0] + dx * k, S[1] + dy * k];
+  };
+  P.aL = reach(rig.sh[0], P.aL);
+  P.aR = reach(rig.sh[1], P.aR);
+  if (st.pose === 'sit' || st.pose === 'doze') P.by = Math.min(P.by, 1.5); // round friends just plop down
+
+  ctx.save();
+  if (P.lie) {
+    ctx.translate(rig.top * -0.45, -rig.hw);
+    ctx.rotate(-Math.PI / 2);
+  }
+  ctx.translate(0, P.by);
+
+  // feet peek out under the body
+  if (!ghost) {
+    for (const f of [P.fL, P.fR]) {
+      const fx = f[0] * 0.75;
+      ellipse(ctx, fx, f[1] - P.by - 2.6, rig.footR || 4.6, (rig.footR || 4.6) * 0.62);
+      fillStroke(ctx, B.color, 2);
+    }
+  }
+
+  ctx.save();
+  const pivot = -rig.h * 0.35;
+  ctx.translate(0, pivot);
+  ctx.rotate(P.rot);
+  ctx.scale(1, P.sq || 1);
+  ctx.translate(0, -pivot);
+
+  if (ghost) {
+    drawGhostSheet(ctx, id, t);
+  } else {
+    if (B.back) B.back(ctx, st, t);
+    B.shape(ctx);
+    fillStroke(ctx, B.color, 2.5);
+    if (B.front) {
+      ctx.save();
+      B.shape(ctx);
+      ctx.clip();
+      B.front(ctx, st, t);
+      ctx.restore();
+      B.shape(ctx);
+      stroke(ctx, 2.5);
+    }
+    if (B.face) B.face(ctx, { eyes, mouthKind, look, t, st });
+    else {
+      ctx.save();
+      ctx.translate(rig.face[0], rig.face[1]);
+      ctx.scale(rig.faceScale || 1, rig.faceScale || 1);
+      drawFace(ctx, {
+        x: 0,
+        y: 0,
+        eyes,
+        mouthKind,
+        look,
+        browKind: (st.expr && st.expr.brows !== undefined ? st.expr.brows : rig.brows) || null,
+        style: rig.eye,
+        t,
+        sp: rig.sp || 8,
+      });
+      ctx.restore();
+    }
+    if (B.over) B.over(ctx, st, t);
+    for (const a of acc) drawAccessory(ctx, id, a, t);
+  }
+
+  const [sl, sr] = rig.sh;
+  const armColor = B.armColor || B.color;
+  stub(ctx, sl[0], sl[1], P.aL[0], P.aL[1], rig.armW || 7, armColor);
+  stub(ctx, sr[0], sr[1], P.aR[0], P.aR[1], rig.armW || 7, armColor);
+  if (st.item) drawItem(ctx, st.item, P.aR[0], P.aR[1], t);
+  ctx.restore();
   ctx.restore();
   return P;
 }

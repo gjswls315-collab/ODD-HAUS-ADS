@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { World, clock } from '../src/renderer/overlay/world.js';
 import { Director } from '../src/renderer/overlay/director.js';
-import { EPISODES } from '../src/renderer/overlay/episodes.js';
+import { episodesFor } from '../src/renderer/overlay/episodes.js';
 
 const SETTINGS = { scale: 1, wanderers: ['vin', 'aa', 'locke', 'rex'], autoEpisodes: false, showFriends: true, episodeFreq: 'normal', disabledEpisodes: [] };
 const TWO = [
@@ -59,26 +59,50 @@ test('snapshots carry what other screens need to draw', () => {
   for (const key of ['id', 'x', 'y', 'pose', 'facing', 'bubble', 'emote']) assert.ok(key in snap.friends[0], key);
 });
 
-test('every episode plays to the end and gives the friends back', async () => {
-  const all = { ...SETTINGS, wanderers: ['vin', 'picker', 'aa', 'locke', 'rex'] };
-  for (const ep of EPISODES.filter((e) => e.id !== 'random')) {
-    const w = new World({ displays: [{ ...TWO[0], w: 1920, h: 1040 }], worldDisplayId: 1, settings: all, desk: { x: 1600, y: 640, w: 300, h: 400 } });
-    const d = new Director(w);
-    const res = await d.play(ep.id);
-    assert.ok(res.ok, `${ep.id}: ${JSON.stringify(res)}`);
-    let t = clock();
-    let done = false;
-    for (let i = 0; i < 30 * 120 && !done; i++) {
-      t += 1 / 30;
-      w.update(1 / 30, t);
-      if (i % 30 === 0) await new Promise((r) => setImmediate(r));
-      done = d.playing === null;
+const PACKS = {
+  oddhaus: { pack: 'oddhaus', deskFriend: 'picker', wanderers: ['vin', 'aa', 'locke', 'rex'] },
+  chiikawa: { pack: 'chiikawa', deskFriend: 'chiikawa', wanderers: ['hachiware', 'usagi'] },
+};
+
+for (const [name, conf] of Object.entries(PACKS)) {
+  test(`${name}: every episode plays to the end and gives the friends back`, async () => {
+    const all = { ...SETTINGS, ...conf, showDesk: true };
+    for (const ep of episodesFor(name).filter((e) => e.id !== 'random')) {
+      const w = new World({ displays: [{ ...TWO[0], w: 1920, h: 1040 }], worldDisplayId: 1, settings: all, desk: { x: 1600, y: 640, w: 300, h: 400 } });
+      const states = [];
+      const d = new Director(w, { onState: (st) => states.push(st) });
+      const res = await d.play(ep.id);
+      assert.ok(res.ok, `${ep.id}: ${JSON.stringify(res)}`);
+      let t = clock();
+      let done = false;
+      for (let i = 0; i < 30 * 150 && !done; i++) {
+        t += 1 / 30;
+        w.update(1 / 30, t);
+        if (i % 30 === 0) await new Promise((r) => setImmediate(r));
+        done = d.playing === null;
+      }
+      assert.ok(done, `${ep.id} did not finish`);
+      sim(w, 2);
+      assert.deepEqual([...w.friends.keys()].sort(), [...conf.wanderers].sort(), `${ep.id}: guests or the desk friend stayed behind`);
+      for (const f of w.friends.values()) assert.equal(f.mode, 'auto', `${ep.id}: ${f.id} still scripted`);
+      assert.equal(w.props.length + w.guests.length + w.tints.length, 0, `${ep.id} left scenery behind`);
+      assert.equal(states.at(-1).playing, null);
     }
-    assert.ok(done, `${ep.id} did not finish`);
-    sim(w, 2);
-    for (const f of w.friends.values()) assert.equal(f.mode, 'auto', `${ep.id}: ${f.id} still scripted`);
-    assert.equal(w.props.length + w.guests.length + w.tints.length, 0, `${ep.id} left scenery behind`);
-  }
+  });
+}
+
+test('the desk friend steps out to join an episode and comes back', async () => {
+  const conf = { ...SETTINGS, ...PACKS.chiikawa, showDesk: true };
+  const w = new World({ displays: [TWO[0]], worldDisplayId: 1, settings: conf, desk: { x: 700, y: 400, w: 300, h: 400 } });
+  const states = [];
+  const d = new Director(w, { onState: (st) => states.push(st) });
+  await d.play('hideseek'); // needs 3: two wanderers + the desk friend
+  assert.equal(states[0].borrowed, 'chiikawa');
+  assert.ok(w.friends.has('chiikawa'));
+  d.cancel();
+  await d.running;
+  assert.equal(w.friends.has('chiikawa'), false);
+  assert.equal(states.at(-1).borrowed, null);
 });
 
 test('cancelling an episode midway cleans up', async () => {

@@ -558,3 +558,18 @@ body.summary {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+.friend-grid.packs {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.pack-row {
+  display: flex;
+  justify-content: center;
+  gap: 2px;
+}
+
+.pack-row canvas {
+  width: 72px;
+  height: 80px;
+}

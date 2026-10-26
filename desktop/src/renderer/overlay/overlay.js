@@ -327,4 +327,4 @@ function frame() {
   requestAnimationFrame(frame);
 }
 requestAnimationFrame(frame);
-document.title = 'ready';
+document.documentElement.dataset.ready = '1'; // previews wait for this

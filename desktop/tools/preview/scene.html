@@ -2,7 +2,7 @@
 <meta charset="utf-8" />
 <title>desktop scene</title>
 <!-- A pretend desktop: the overlay and the desk side by side, each with its own mock bridge.
-     Query parameters are passed on to both (ep=, typing=, remind=, friend=, scale=). -->
+     Query parameters are passed on to both (pack=, ep=, typing=, remind=, friend=, scale=). -->
 <style>
   html,
   body {
@@ -36,8 +36,14 @@
 <script>
   const q = new URLSearchParams(location.search);
   q.set('transparent', '1');
-  const desk = `${innerWidth - 316},${innerHeight - 400},300,400`;
-  document.getElementById('overlay').src = `../../src/renderer/overlay/index.html?${q}&desk=${desk}`;
+  // borrow=0 keeps the desk friend at the keyboard during episodes
+  const desk = q.get('borrow') === '0' ? '' : `&desk=${innerWidth - 316},${innerHeight - 400},300,400`;
+  document.getElementById('overlay').src = `../../src/renderer/overlay/index.html?${q}${desk}`;
   document.getElementById('desk').src = `../../src/renderer/desk/index.html?${q}`;
+  // like the main process: tell the desk when its friend steps out for an episode
+  addEventListener('message', (e) => {
+    const desk = document.getElementById('desk').contentWindow;
+    if (e.data && e.data.oddEpisode && desk.__mock) desk.__mock.emit('episode', e.data.oddEpisode);
+  });
   setTimeout(() => (document.title = 'ready'), 1500);
 </script>

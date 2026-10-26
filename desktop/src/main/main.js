@@ -24,6 +24,7 @@ const { pickLine } = require('./lines');
 const ai = require('./ai');
 const { checkForUpdate } = require('./updater');
 const pkg = require('../../package.json');
+const cast = require('../shared/cast.json');
 
 const RENDERER = path.join(__dirname, '..', 'renderer');
 const ASSETS = path.join(__dirname, '..', '..', 'assets');
@@ -215,7 +216,7 @@ function openSettings(tab = 'today') {
     height: 720,
     minWidth: 640,
     minHeight: 520,
-    title: 'ODD HAUS Desktop 설정',
+    title: `${appTitle()} 설정`,
     backgroundColor: '#fffaf3',
     autoHideMenuBar: true,
     show: false,
@@ -245,7 +246,7 @@ function openSummary() {
     width: w,
     height: h,
     focusable: true,
-    title: 'ODD HAUS 오늘 요약',
+    title: `${appTitle()} 오늘 요약`,
   });
   summaryWin.setAlwaysOnTop(true, 'pop-up-menu');
   roles.set(summaryWin.webContents.id, { role: 'summary' });
@@ -330,10 +331,12 @@ function trayIcon() {
   return nativeImage.createFromPath(path.join(ASSETS, 'tray.png'));
 }
 
+const appTitle = () => (cast.packs[settings.get('pack')] || cast.packs.chiikawa).title;
+
 function menuTemplate() {
   const pomo = pomodoro.state();
   const items = [
-    { label: `ODD HAUS Desktop ${pkg.version}`, enabled: false },
+    { label: `${appTitle()} ${pkg.version}`, enabled: false },
     { type: 'separator' },
     { label: '오늘 요약', click: () => openSummary() },
     { label: pomo.mode === 'idle' ? '🍅 집중 시작' : '🍅 집중 그만하기', click: () => pomodoro.toggle(Date.now()) },
@@ -351,12 +354,14 @@ function menuTemplate() {
 }
 
 function refreshTray() {
-  if (tray) tray.setContextMenu(Menu.buildFromTemplate(menuTemplate()));
+  if (!tray) return;
+  tray.setToolTip(appTitle());
+  tray.setContextMenu(Menu.buildFromTemplate(menuTemplate()));
 }
 
 function createTray() {
   tray = new Tray(trayIcon());
-  tray.setToolTip('ODD HAUS Desktop');
+  tray.setToolTip(appTitle());
   tray.on('click', () => (IS_MAC ? tray.popUpContextMenu() : openSettings('today')));
   refreshTray();
 }
