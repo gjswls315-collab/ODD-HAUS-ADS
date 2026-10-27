@@ -237,22 +237,27 @@ export class Hud {
     ctx.save();
     ctx.globalAlpha = alpha;
     panel(r, x, y, 300, 96, { alpha: 0.78 });
-    pixelText(r, 'SCORE', x + 12, y + 9, 3, { color: C.sub });
-    const big = w.score - this.shownScore > 0 && w.pings.score !== undefined;
-    pixelText(r, String(Math.min(999999999, Math.round(this.shownScore))).padStart(9, '0'), x + 288, y + 30, 4, { align: 'right', color: big ? C.gold : C.ivory });
-    pixelText(r, 'POWER LV.' + p.level, x + 12, y + 62, 3, { color: C.ivory });
+    // row 1: score (label left, 9 fixed-width digits right)
+    pixelText(r, 'SCORE', x + 12, y + 12, 3, { color: C.sub });
+    const rolling = this.shownScore < w.score;
+    pixelText(r, String(Math.min(999999999, Math.round(this.shownScore))).padStart(9, '0'), x + 288, y + 12, 3, { align: 'right', color: rolling ? C.goldLight : C.ivory });
+    // row 2: power level + P progress pips
+    pixelText(r, 'POWER LV.' + (p.level >= 3 ? 'MAX' : p.level), x + 12, y + 42, 3, { color: C.ivory });
     for (let i = 0; i < 4; i++) {
       const lit = p.level >= 3 ? true : i < p.pp % 4;
       ctx.fillStyle = lit ? C.gold : C.empty;
-      ctx.fillRect(x + 216 + i * 18, y + 65, 12, 12);
+      ctx.fillRect(x + 216 + i * 18, y + 46, 12, 12);
     }
+    // row 3: chain + chain timer line (multiplier replaces the line from Chain 10)
     const chainCol = w.chain >= 10 ? C.gold : C.ivory;
-    pixelText(r, 'CHAIN x' + w.chain, x + 12, y + 80, 2.4, { color: w.chain ? chainCol : C.sub });
-    if (w.chain >= 10) pixelText(r, 'x' + w.chainMul.toFixed(1), x + 288, y + 80, 2.4, { align: 'right', color: C.gold });
-    ctx.fillStyle = C.empty;
-    ctx.fillRect(x + 140, y + 85, 90, 3);
-    ctx.fillStyle = C.cyan;
-    ctx.fillRect(x + 140, y + 85, 90 * clamp(w.chainT / 2, 0, 1), 3);
+    pixelText(r, 'CHAIN x' + w.chain, x + 12, y + 70, 3, { color: w.chain ? chainCol : C.sub });
+    if (w.chain >= 10) pixelText(r, 'x' + w.chainMul.toFixed(1), x + 288, y + 70, 3, { align: 'right', color: C.gold });
+    else {
+      ctx.fillStyle = C.empty;
+      ctx.fillRect(x + 198, y + 78, 90, 3);
+      ctx.fillStyle = C.cyan;
+      ctx.fillRect(x + 198, y + 78, 90 * clamp(w.chainT / 2, 0, 1), 3);
+    }
     ctx.restore();
   }
 

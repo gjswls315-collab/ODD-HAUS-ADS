@@ -28,11 +28,15 @@ export class Renderer {
     [this.world, this.wctx] = makeCanvas(W, H);
     this.resize();
     window.addEventListener('resize', () => this.resize());
+    if (typeof ResizeObserver !== 'undefined' && canvas.parentElement) new ResizeObserver(() => this.resize()).observe(canvas.parentElement);
   }
 
   resize() {
     const dpr = Math.min(window.devicePixelRatio || 1, 3);
-    const cw = window.innerWidth, ch = window.innerHeight;
+    // size to the canvas's container (the whole window in the standalone build)
+    const host = this.canvas.parentElement;
+    const cw = Math.max(1, host && host !== document.body ? host.clientWidth : window.innerWidth);
+    const ch = Math.max(1, host && host !== document.body ? host.clientHeight : window.innerHeight);
     this.bw = Math.max(320, Math.floor(cw * dpr));
     this.bh = Math.max(180, Math.floor(ch * dpr));
     this.canvas.width = this.bw;

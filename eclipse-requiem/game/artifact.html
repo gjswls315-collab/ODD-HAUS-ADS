@@ -1,0 +1,48 @@
+<title>Eclipse Requiem</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* Single dark arcade look by design: letterboxed 16:9 game canvas, gothic gold accents. */
+  :root {
+    --bg: #0B0B0F;
+    --fg: #E9E1D3;
+    --muted: #B9B3AA;
+    --gold: #D8B35E;
+    --panel: rgba(17, 18, 23, 0.92);
+    --font-display: "Cinzel", "Times New Roman", serif;
+    --font-body: "Noto Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif;
+    color-scheme: dark;
+  }
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    padding-block: 0;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  #stage { position: relative; width: 100%; height: 100%; }
+  #stage canvas { position: absolute; inset: 0; display: block; outline: none; touch-action: none; }
+  #boot {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    font: 600 16px var(--font-display); letter-spacing: 0.3em; color: var(--muted);
+  }
+  #nokbd {
+    display: none; position: fixed; left: max(16px, env(safe-area-inset-left, 0px)); right: max(16px, env(safe-area-inset-right, 0px));
+    bottom: calc(16px + env(safe-area-inset-bottom, 0px)); padding: 12px 16px; border: 1px solid var(--gold);
+    background: var(--panel); color: var(--fg); font-size: 14px; line-height: 1.5; text-align: center;
+  }
+  @media (hover: none) and (pointer: coarse) { #nokbd { display: block; } }
+</style>
+<div id="stage">
+  <div id="boot">ECLIPSE REQUIEM</div>
+  <canvas id="game" tabindex="0" aria-label="ECLIPSE REQUIEM 게임 화면. 화면을 클릭한 뒤 키보드로 플레이합니다."></canvas>
+</div>
+<div id="nokbd">이 게임은 PC 키보드(또는 게임패드)로 플레이합니다. Play with a keyboard or gamepad.</div>
+<!--APP-->

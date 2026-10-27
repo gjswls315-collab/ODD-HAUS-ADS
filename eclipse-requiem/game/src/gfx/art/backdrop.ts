@@ -204,9 +204,8 @@ export function makeMid(seed = 31) {
           const cw = aw / n;
           gothicWindow(g, ax + i * cw + 6, h - ah + 16, cw - 12, ah, hole);
         }
-        // broken top
-        g.fillStyle = hole;
-        g.fillRect(ax + aw * 0.6, h - ah - 1, aw * 0.25, 9);
+        // broken top: a gap bitten out of the parapet
+        g.clearRect(ax + aw * 0.6, h - ah, aw * 0.25, 7);
         g.fillStyle = rim;
         g.fillRect(ax, h - ah, aw * 0.6, 1);
         // chains

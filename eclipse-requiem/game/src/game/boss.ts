@@ -17,10 +17,10 @@ const PHASE_NAME = [
   { en: 'LAMENT BELL', kr: '비탄의 종' },
   { en: 'FUNERAL COLLAPSE', kr: '장송의 붕괴' },
 ];
-const ANCHOR = [{ x: 500, y: 190 }, { x: 470, y: 185 }, { x: 510, y: 170 }];
+const ANCHOR = [{ x: 500, y: 196 }, { x: 470, y: 192 }, { x: 510, y: 186 }];
 const CYCLE = [8.0, 9.0, 9.0];
 // core = (x,y); body sprite core pixel (97,119). The bell rotates around its crown (pivot); at angle 0 its mouth sits above-left of the head.
-const PIVOT = { x: 79, y: -135 };
+const PIVOT = { x: 100, y: -142 };
 const MOUTH_FROM_PIVOT = { x: -117, y: 39 };
 const BELL_CROWN_PX = { x: 169, y: 51 };
 
@@ -41,6 +41,7 @@ export class Abaddon implements Target {
   combatT = 0;
   invuln = true;
   flash = 0;
+  private flashCd = 0;
   wrath = false;
   lastToll = false;
   phaseByDamage = [false, false, false];
@@ -89,19 +90,20 @@ export class Abaddon implements Target {
     if (this.state !== 'fight' && this.state !== 'transition') return [];
     return [
       { x: this.x - 1, y: this.y, r: 24, mul: 1 },
-      { x: this.x + 20, y: this.y - 115, r: 44, mul: 0.5 },
+      { x: this.x + 41, y: this.y - 122, r: 44, mul: 0.5 },
       { x: this.x - 34, y: this.y - 58, r: 24, mul: 0.2 },
       { x: this.x + 30, y: this.y + 40, r: 58, mul: 0.2 },
     ];
   }
 
-  takeDamage(d: number) {
-    if (!this.vulnerable) {
-      if (this.state === 'fight' || this.state === 'transition') this.flash = 0;
-      return;
-    }
+  takeDamage(d: number, _charge?: boolean, part = 1) {
+    if (!this.vulnerable) return;
     this.hp -= d;
-    this.flash = 0.034; // 2 frames white flash
+    // docs/03 §6-3: the 2-frame white flash only covers the core; the bell (armour) throws metal sparks
+    if (part >= 1 && this.flashCd <= 0) {
+      this.flash = 0.034;
+      this.flashCd = 0.1;
+    } else if (part === 0.5 && R.next() < 0.3) this.w.fx.spark(this.x + 10, this.y - 110, 2, ['#F3E6C4', '#D8B35E'], 80, { life: 0.2 });
     G.audio.sfx('hit');
     const th = THRESH[this.phase];
     if (this.hp <= th) {
@@ -173,6 +175,7 @@ export class Abaddon implements Target {
   update(dt: number) {
     this.t += dt;
     this.flash = Math.max(0, this.flash - dt);
+    this.flashCd = Math.max(0, this.flashCd - dt);
     this.teleBell = Math.max(0, this.teleBell - dt);
     this.scream = Math.max(0, this.scream - dt);
     this.pathLine = Math.max(0, this.pathLine - dt);
@@ -537,7 +540,7 @@ export class Abaddon implements Target {
       w.bg?.setTint('#000000', 0);
       if (w.bg) w.bg.lightningRate = 0;
     }
-    if (t >= 3) {
+    if (t >= 3 && t - 1 / 60 < 3) {
       G.audio.music('victory');
       w.player.autoPilot = { x: 220, y: 190 };
       w.ui.push({ type: 'bossHud', on: false });
@@ -576,7 +579,13 @@ export class Abaddon implements Target {
     g.rotate(1.25);
     g.drawImage(B.faces[this.scream > 0 ? 1 : 0], -28, -16);
     g.restore();
-    g.drawImage(this.flash > 0 ? B.bodyFlash : B.body, x - 97, y - 119);
+    g.drawImage(B.body, x - 97, y - 119);
+    if (this.flash > 0) {
+      // white flash on the soul-lantern core only
+      g.fillStyle = '#FFFFFF';
+      g.fillRect(x - 10, y - 14, 18, 26);
+      g.fillRect(x - 6, y - 18, 10, 34);
+    }
     g.drawImage(B.arm[this.armPose], x - 22 - 111, y - 39 - 31);
     g.globalAlpha = 1;
   }

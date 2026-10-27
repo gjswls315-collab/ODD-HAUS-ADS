@@ -112,8 +112,10 @@ export class StageBg {
         x += R.int(-4, 4);
       }
     }
-    g.drawImage(a.moon, 520 - a.moon.width / 2, 58 - a.moon.height / 2);
+    g.globalAlpha = 0.5;
     this.loop(g, a.clouds, this.dist * 0.15 + this.time * 3, 34);
+    g.globalAlpha = 1;
+    g.drawImage(a.moon, 520 - a.moon.width / 2, 58 - a.moon.height / 2);
     this.loop(g, a.far, this.dist * 0.4, 112);
     if (this.belfryX !== null) {
       const sx = this.belfryShake > 0 ? R.int(-1, 1) : 0;

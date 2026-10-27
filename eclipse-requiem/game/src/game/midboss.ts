@@ -13,8 +13,8 @@ export class Graven implements Target {
   isBoss = false;
   x = 720;
   y = 180;
-  hp = 2400;
-  maxHp = 2400;
+  hp = 2000;
+  maxHp = 2000;
   t = 0;
   state: 'enter' | 'fight' | 'sink' | 'dead' = 'enter';
   private lashN = 0;

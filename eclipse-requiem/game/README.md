@@ -3,7 +3,8 @@
 `../docs/`의 시각 기획서·UI 설계서·Stage 1 구성서를 그대로 구현한 **HTML5 수직 슬라이스**입니다.
 타이틀 → 프롤로그 → 캐릭터 선택 → 스테이지 브리핑 → Stage 1 전 구간(미니보스 · 보스 3페이즈) → 클리어/랭크까지 한 판을 끝까지 플레이할 수 있습니다.
 
-- **바로 플레이**: `release/eclipse-requiem.html` 파일 하나를 브라우저(Chrome/Edge 권장)로 열면 됩니다. 외부 에셋 없이 실행됩니다(폰트만 Google Fonts에서 불러오며, 오프라인이면 시스템 글꼴로 대체).
+- **바로 플레이 (웹)**: https://claude.ai/artifact/5kNsLn6RdwzFtRWrCHqNEH — 비공개 링크라 다른 사람은 페이지의 Share 메뉴로 공유받아야 열 수 있습니다.
+- **바로 플레이 (로컬)**: `release/eclipse-requiem.html` 파일 하나를 브라우저(Chrome/Edge 권장)로 열면 됩니다. 외부 에셋 없이 실행됩니다(폰트만 Google Fonts에서 불러오며, 오프라인이면 시스템 글꼴로 대체).
 - 그래픽과 사운드는 모두 **코드로 생성**합니다(절차적 픽셀아트 + WebAudio 합성). 정식 아트·사운드로 교체하기 전의 임시 에셋입니다.
 
 ## 조작
@@ -47,7 +48,13 @@
 ```bash
 npm install
 npm run dev        # http://localhost:5173  (?debug 를 붙이면 F2: 구간 점프, F3: 보스 페이즈 넘기기, F4: 무적)
-npm run build      # 타입 검사 → dist/ → release/eclipse-requiem.html (단일 파일)
+npm run build      # 타입 검사 → dist/ → release/eclipse-requiem.html (단일 파일) + release/artifact.html (웹 게시용)
+
+# 자동 점검 (Playwright)
+node scripts/simulate.mjs <URL> <출력폴더> [seraphine|noctis|morgana] [mortal] [idle]
+#   봇이 Stage 1을 빨리 감기로 끝까지 플레이하며 구간·미니보스·보스 상태 변화와 스크린샷을 기록
+#   idle: 보스가 피해를 받지 않음 → 페이즈 타이머(40/40/50초)와 시간 초과(Silent Collapse) 경로 점검
+node scripts/screens.mjs <URL> <출력폴더>   # 키보드로 전체 화면(타이틀~클리어) 순회
 ```
 
 URL 파라미터: `?play=seraphine|noctis|morgana` 바로 Stage 1 시작, `&tl=165` 타임라인 위치(초)부터 시작(165 = 보스), `?artsheet` 생성된 스프라이트 시트 보기.

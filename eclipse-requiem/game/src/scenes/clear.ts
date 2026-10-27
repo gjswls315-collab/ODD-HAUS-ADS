@@ -179,7 +179,7 @@ export class ClearScene implements Scene {
       const at = 0.6 + i * 0.25;
       const a = clamp((this.t - at) / 0.2, 0, 1);
       if (a <= 0) return;
-      const y = 290 + i * 70;
+      const y = 286 + i * 62;
       ctx.globalAlpha = a;
       ctx.fillStyle = rgba(C.charcoal, 0.6);
       ctx.fillRect(960, y - 6, 840, 52);
@@ -187,15 +187,16 @@ export class ClearScene implements Scene {
       text(r, val, 1770, y + 20, { size: 30, font: 'display', weight: 700, baseline: 'middle', align: 'right', color: hi ? C.gold : C.ivory });
       ctx.globalAlpha = 1;
     });
-    if (this.res.continues > 0) text(r, `CONTINUE x${this.res.continues} — 최고 점수 미등록`, 990, 712, { size: 18, color: C.warn });
-    if (this.newHi && this.t > 2) text(r, 'NEW HI-SCORE', 990, 712, { size: 21, font: 'display', weight: 700, color: C.gold });
+    if (this.res.continues > 0) text(r, `CONTINUE x${this.res.continues} — 최고 점수 미등록`, 990, 676, { size: 18, color: C.warn });
+    if (this.newHi && this.t > 2) text(r, 'NEW HI-SCORE', 990, 676, { size: 21, font: 'display', weight: 700, color: C.gold });
     // rank stamp
     if (this.stampT >= 0 && !this.failed) {
       const k = clamp(this.stampT / 0.18, 0, 1);
       const sc = 1.6 - 0.6 * ease.outBack(k);
       const rank = this.res.rank;
       ctx.save();
-      ctx.translate(1660, 760);
+      ctx.translate(1660, 790);
+      ctx.scale(0.85, 0.85);
       ctx.scale(sc, sc);
       if (rank === 'S' || rank === 'EX') {
         ctx.save();

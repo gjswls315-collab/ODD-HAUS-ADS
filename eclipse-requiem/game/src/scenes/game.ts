@@ -238,13 +238,13 @@ export class GameScene implements Scene {
     // blood moon swaying
     const sway = Math.sin(t * (TAU / 6)) * 1.5 * (Math.PI / 180);
     ctx.save();
-    ctx.translate(960, 230);
+    ctx.translate(960, 170);
     ctx.rotate(sway);
-    ctx.globalAlpha = clamp((t - 1.7) / 0.6, 0, 1);
+    ctx.globalAlpha = clamp((t - 1.7) / 0.6, 0, 1) * 0.85;
     const moon = this.w.bg ? this.w.bg.a.moon : null;
     if (moon) {
       ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(moon, -moon.width * 3, -moon.width * 3, moon.width * 6, moon.width * 6);
+      ctx.drawImage(moon, -moon.width * 2, -moon.width * 2, moon.width * 4, moon.width * 4);
     }
     ctx.restore();
     ctx.globalAlpha = 1;
@@ -254,9 +254,9 @@ export class GameScene implements Scene {
     ctx.globalAlpha = clamp((t - 1.8) / 0.6, 0, 1) * 0.8;
     ctx.filter = 'grayscale(0.6) brightness(0.7)';
     ctx.imageSmoothingEnabled = false;
-    ctx.translate(960, 860);
+    ctx.translate(960, 900);
     ctx.rotate(0.12);
-    ctx.drawImage(big, -big.width * 1.5, -big.height * 1.5, big.width * 3, big.height * 3);
+    ctx.drawImage(big, -big.width * 1.1, -big.height * 0.9, big.width * 2.2, big.height * 2.2);
     ctx.restore();
     ctx.filter = 'none';
     // ash rising

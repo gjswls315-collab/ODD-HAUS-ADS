@@ -24,7 +24,7 @@ export interface Target {
   alive: boolean;
   isBoss: boolean;
   hitCircles(): HitCircle[];
-  takeDamage(d: number, charge?: boolean): void;
+  takeDamage(d: number, charge?: boolean, part?: number): void;
   damageMod?(charge: boolean): number;
 }
 
@@ -196,7 +196,7 @@ export class World {
         const hit = s.len > 0 ? this.segCircle(s.x - s.len, s.y, s.x + 4, s.y, c.x, c.y, c.r + s.r) : (s.x - c.x) ** 2 + (s.y - c.y) ** 2 < (c.r + s.r) ** 2;
         if (!hit) continue;
         const mod = t.damageMod ? t.damageMod(s.charge) : 1;
-        t.takeDamage(s.dmg * c.mul * mod, s.charge);
+        t.takeDamage(s.dmg * c.mul * mod, s.charge, c.mul);
         s.hit.add(t);
         const sx = s.len > 0 ? Math.min(s.x, c.x - c.r * 0.5) : s.x;
         if (s.kind === 'basic') {

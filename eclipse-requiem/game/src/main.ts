@@ -28,6 +28,7 @@ async function boot() {
   const unlock = () => G.audio.unlock();
   window.addEventListener('keydown', unlock);
   window.addEventListener('pointerdown', unlock);
+  canvas.addEventListener('pointerdown', () => canvas.focus());
 
   const params = new URLSearchParams(location.search);
   if (params.has('artsheet')) G.scenes.go(new ArtSheetScene(), undefined, 'none');

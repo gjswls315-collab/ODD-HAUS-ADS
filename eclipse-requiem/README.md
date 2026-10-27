@@ -6,6 +6,11 @@
 GDD v1.0(PDF, 2026-10-26)과 화면별 시각 기획서 v1.0, 콘셉트 보드(7화면)를 하나로 합친 실행용 문서 세트다.
 프로그래머 · 픽셀 아티스트 · UI 디자이너가 같은 수치를 기준으로 수직 슬라이스(Stage 1 한 판)를 만들 수 있게 정리했다.
 
+## 플레이 가능한 빌드
+
+이 문서대로 구현한 Stage 1 수직 슬라이스가 [`game/`](game/README.md)에 있다.
+[웹에서 플레이](https://claude.ai/artifact/5kNsLn6RdwzFtRWrCHqNEH) 하거나 `game/release/eclipse-requiem.html`을 브라우저로 연다.
+
 ## 문서 지도
 
 | # | 문서 | 내용 | 주 독자 |

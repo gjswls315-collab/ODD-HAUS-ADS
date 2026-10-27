@@ -106,7 +106,7 @@ export class IntroScene implements Scene {
     if (t > 4.5) {
       const a = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin((t - 4.5) * (Math.PI * 2 / 1.2)));
       text(r, 'PRESS ANY KEY', 960, 940, { size: 24, font: 'display', weight: 600, align: 'center', spacing: 8, color: C.ivory, alpha: a });
-      text(r, '키보드 · 게임패드로 플레이합니다 (사운드 ON 권장)', 960, 990, { size: 18, align: 'center', color: C.sub, alpha: 0.7 });
+      text(r, '화면을 한 번 클릭한 뒤 키보드 · 게임패드로 플레이합니다 (사운드 ON 권장)', 960, 990, { size: 18, align: 'center', color: C.sub, alpha: 0.7 });
     }
   }
 }
