@@ -139,6 +139,14 @@ export class Graven implements Target {
     sh.draw(g, tag, sh.index(tag, this.t), this.x, this.y + this.sinkY, { flash: this.flash > 0, dither: Math.round(this.alpha * 16) });
   }
 
+  /** Faint re-draw above the black fog so the midboss silhouette stays readable (same rule as regular enemies). */
+  drawLights(g: Ctx) {
+    if (this.state === 'dead') return;
+    const sh = sheet(SHEET.enemies);
+    const tag = this.pose === 'lash' ? 'graven_lash' : this.pose === 'open' ? 'graven_open' : 'graven';
+    sh.draw(g, tag, sh.index(tag, this.t), this.x, this.y + this.sinkY, { alpha: 0.45 * this.alpha });
+  }
+
   /** Chain Lash telegraph: three dotted aim lines of crimson marker dots. */
   drawTele(g: Ctx) {
     if (this.state !== 'fight') return;

@@ -5,7 +5,7 @@ import { image, sheet } from '../gfx/assets';
 import { PAL } from '../gfx/palette';
 import { ptext } from '../gfx/pixeltext';
 import { HeroId, SHEET } from '../gfx/sprites';
-import { button, fade, keyHints, panel, text } from '../gfx/ui';
+import { button, fade, panel, text } from '../gfx/ui';
 import { Director } from '../game/director';
 import { StageBg } from '../game/stagebg';
 import { World } from '../game/world';
@@ -220,9 +220,9 @@ export class GameScene implements Scene {
   private renderControls() {
     const r = G.r;
     fade(r, 0.7);
-    panel(r, 560, 220, 800, 640, { style: 'tome', alpha: 0.97 });
+    panel(r, 500, 220, 920, 640, { style: 'tome', alpha: 0.97 });
     text(r, 'CONTROLS', 960, 250, { size: 36, font: 'display', weight: 700, align: 'center', spacing: 8, color: C.gold });
-    controlsTable(r, 640, 330);
+    controlsTable(r, 560, 330);
     text(r, 'ENTER / ESC 로 돌아가기', 960, 810, { size: 18, align: 'center', color: C.sub });
   }
 
@@ -238,21 +238,22 @@ export class GameScene implements Scene {
     // the red eclipse at 2x, swaying by whole pixels
     const moon = image('stage1/moon');
     g.globalAlpha = ka;
-    g.drawImage(moon, Math.round(W / 2 - moon.width + Math.sin(t * 1.05) * 2), 14, moon.width * 2, moon.height * 2);
-    // the fallen heroine (portrait, darkened by dither)
+    g.drawImage(moon, Math.round(W / 2 - moon.width / 2 + Math.sin(t * 1.05) * 1), 12);
+    // the fallen heroine (portrait, half-lit), left of the prompt
     const port = sheet(SHEET.portraits);
-    port.draw(g, this.hero, 0, W / 2, 352, { dither: Math.round(ka * 9) });
+    port.draw(g, this.hero, 0, 96, 350, { dither: Math.round(ka * 12) });
+    port.draw(g, this.hero, 0, 96, 350, { shadow: true, alpha: 0.5 * ka });
     // ash rising
     const fx = sheet(SHEET.fx);
     for (let i = 0; i < 30; i++) fx.draw(g, 'ash', i % 3, (i * 71) % W, 360 - ((t * 14 + i * 33) % 370));
     g.globalAlpha = clamp((t - 2.0) / 0.8, 0, 1);
-    ptext(g, 'REQUIEM INTERRUPTED', W / 2, 108, { font: 'S', scale: 3, color: PAL.R3, align: 'center', outline: PAL.N0 });
+    ptext(g, 'REQUIEM INTERRUPTED', W / 2, 106, { font: 'S', scale: 3, color: PAL.R3, align: 'center', outline: PAL.N0 });
     g.globalAlpha = 1;
     if (t >= 2.5) {
-      ptext(g, 'CONTINUE?', W / 2 - 24, 168, { font: 'S', scale: 2, color: PAL.B4, align: 'right', outline: PAL.N0 });
+      ptext(g, 'CONTINUE?', W / 2 - 12, 150, { font: 'S', scale: 2, color: PAL.B4, align: 'right', outline: PAL.N0 });
       const n = String(Math.max(0, this.count)).padStart(2, '0');
-      ptext(g, n, W / 2 + 6, 160, { font: 'S', scale: this.countT < 0.12 ? 5 : 4, color: this.count <= 3 ? PAL.R4 : PAL.B5, outline: PAL.N0 });
-      ptext(g, '컨티뉴하면 점수가 0으로 초기화됩니다', W / 2, 228, { font: 'G9', color: PAL.N8, align: 'center', outline: PAL.N0 });
+      ptext(g, n, W / 2 + 6, 142, { font: 'S', scale: this.countT < 0.12 ? 5 : 4, color: this.count <= 3 ? PAL.R4 : PAL.B5, outline: PAL.N0 });
+      ptext(g, '컨티뉴하면 점수가 0으로 초기화됩니다', W / 2, 238, { font: 'G9', color: PAL.N8, align: 'center', outline: PAL.N0 });
       const sc = String(this.w.score).padStart(9, '0');
       ptext(g, 'SCORE ' + sc + '   STAGE 1   ' + this.w.ch.name, W / 2, 336, { font: 'S', color: PAL.N8, align: 'center', outline: PAL.N0 });
     }
@@ -280,8 +281,7 @@ export function controlsTable(r = G.r, x = 640, y = 330) {
     const yy = y + i * 72;
     panel(r, x, yy, 220, 52, { alpha: 0.9 });
     text(r, k, x + 110, yy + 27, { size: 21, weight: 700, align: 'center', baseline: 'middle', color: C.ivory });
-    text(r, en, x + 250, yy + 6, { size: 18, font: 'display', weight: 700, spacing: 3, color: C.gold });
-    text(r, d, x + 250, yy + 28, { size: 21, color: C.ivory });
+    text(r, en, x + 250, yy - 3, { size: 18, font: 'display', weight: 700, spacing: 3, color: C.gold });
+    text(r, d, x + 250, yy + 24, { size: 21, color: C.ivory });
   });
-  keyHints(r, x, y + rows.length * 72 + 4, []);
 }

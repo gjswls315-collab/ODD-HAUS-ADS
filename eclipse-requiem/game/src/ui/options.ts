@@ -211,7 +211,6 @@ export class OptionsPanel {
     const row = this.rows[this.idx];
     if (row.kind !== 'head') text(r, row.desc, 960, 930, { size: 21, align: 'center', color: C.sub });
     keyHints(r, 470, 972, [['↑↓', 'SELECT'], ['←→', 'CHANGE'], ['ENTER', 'APPLY'], ['ESC', 'BACK']]);
-    text(r, '이동: 방향키 / WASD  ·  일시정지: ESC / P', 1450, 978, { size: 18, align: 'right', color: C.sub });
     ctx.restore();
   }
 }

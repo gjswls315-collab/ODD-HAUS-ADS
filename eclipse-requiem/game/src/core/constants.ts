@@ -7,27 +7,28 @@ export const STEP = 1 / 60;
 
 // Design tokens (docs/00_overview.md §4)
 export const C = {
-  charcoal: '#111217',
-  blueblack: '#171C26',
-  violetdark: '#241B31',
-  blood: '#B3263B',
-  gold: '#D8B35E',
-  violet: '#7B5CC7',
-  cyan: '#59B7C9',
-  ivory: '#E9E1D3',
-  sub: '#B9B3AA',
-  warn: '#D94C3A',
-  frame: '#5A4A2E',
-  empty: '#2A2733',
-  outline: '#0B0B0F',
-  hpOk: '#59B7C9',
-  hpCaution: '#E0913A',
-  hpDanger: '#D94C3A',
-  itemP: '#D8B35E',
-  itemH: '#5FD1A8',
-  itemB: '#B3263B',
-  itemS: '#9D86E0',
-  goldLight: '#F3E6C4',
+  // UI colour tokens, mapped onto the v2 palette (assets/palette.json)
+  charcoal: '#0E1015', // N1
+  blueblack: '#101A27', // S1
+  violetdark: '#20242C', // N3 (focus row)
+  blood: '#8C1223', // R2
+  gold: '#D9AD52', // G2
+  violet: '#7F93A8', // M0
+  cyan: '#3698D6', // A2
+  ivory: '#D9CDB6', // B4
+  sub: '#838B97', // N8
+  warn: '#FF4152', // R4
+  frame: '#2B3039', // N4
+  empty: '#161920', // N2
+  outline: '#07080B', // N0
+  hpOk: '#3698D6', // A2
+  hpCaution: '#D9AD52', // G2
+  hpDanger: '#FF4152', // R4
+  itemP: '#D9AD52',
+  itemH: '#349E6E',
+  itemB: '#C91C30',
+  itemS: '#B7C6D5',
+  goldLight: '#F2D58C', // G3
   letterbox: '#07080B',
 } as const;
 

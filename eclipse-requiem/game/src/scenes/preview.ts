@@ -1,7 +1,7 @@
 import { G, Scene } from '../core/app';
 import { C, W } from '../core/constants';
 import { clamp } from '../core/math';
-import { image, sheet } from '../gfx/assets';
+import { sheet } from '../gfx/assets';
 import { Ctx } from '../gfx/canvas';
 import { shade } from '../gfx/dither';
 import { PAL } from '../gfx/palette';
@@ -116,7 +116,7 @@ export class PreviewScene implements Scene {
     (['bat', 'candle', 'skeleton', 'cleric', 'sentinel'] as const).forEach((k, i) => {
       if (this.t < 0.5 + i * 0.08) return;
       const x = 18 + i * 59, y = 94;
-      g.fillStyle = PAL.N0;
+      g.fillStyle = PAL.N3;
       g.fillRect(x, y, 56, 70);
       const seen = G.save.flags.seen[k];
       g.save();
@@ -141,7 +141,12 @@ export class PreviewScene implements Scene {
       g.beginPath();
       g.rect(x, y, 94, 40);
       g.clip();
-      if (i === 0) g.drawImage(image('stage1/fog_a'), x - 40, y - 50);
+      if (i === 0) {
+        // the black-fog vision edge closing in on a lit patch
+        g.fillStyle = PAL.S3;
+        g.fillRect(x, y, 94, 40);
+        fx.draw(g, 'vision', 1, x + 20 + 116 - ((this.t * 8) % 24), y + 20);
+      }
       else if (i === 1) {
         const f = Math.floor(this.t * 6) % 2;
         fx.draw(g, 'gravecross', 1 + f, x + 30, y + 46);
@@ -155,7 +160,7 @@ export class PreviewScene implements Scene {
     // boss: the real sprite parts as a silhouette, soul lantern lit
     const sa = clamp((this.t - 0.8) / 0.6, 0, 1);
     if (sa > 0) {
-      const bs = sheet(SHEET.boss), bx = 470, by = 196;
+      const bs = sheet(SHEET.boss), bx = 478, by = 166;
       const pt = (n: string) => bs.point('body', 0, n);
       const o = { shadow: true, dither: Math.round(sa * 16) };
       bs.draw(g, 'armB', 0, bx + pt('armB')[0], by + pt('armB')[1], o);
@@ -166,14 +171,14 @@ export class PreviewScene implements Scene {
       bs.draw(g, 'core', bs.index('core', this.t), bx, by, { dither: Math.round(sa * 16) });
       g.save();
       g.globalAlpha = sa;
-      this.t2(g, 'BOSS', 470, 290, PAL.R4, 'S', { align: 'center' });
-      this.t2(g, 'BELLKEEPER ABADDON', 470, 300, PAL.B5, 'S', { align: 'center', scale: 2 });
-      this.t2(g, '침묵의 종지기', 470, 318, PAL.N8, 'G11', { align: 'center' });
+      this.t2(g, 'BOSS', 478, 256, PAL.R4, 'S', { align: 'center' });
+      this.t2(g, 'BELLKEEPER ABADDON', 478, 266, PAL.B5, 'S', { align: 'center', scale: 2 });
+      this.t2(g, '침묵의 종지기', 478, 284, PAL.N8, 'G11', { align: 'center' });
       g.restore();
     }
     // loading pips above the button
     const hud = sheet(SHEET.hud);
-    for (let i = 0; i < 12; i++) hud.draw(g, 'pip', i / 12 < this.loaded ? 1 : 0, 486 + i * 11, 314);
+    for (let i = 0; i < 12; i++) hud.draw(g, 'pip', i / 12 < this.loaded ? 1 : 0, 486 + i * 11, 310);
     r.presentWorld();
     r.uiTransform();
     const ready = this.loaded >= 1 && this.t >= 2.0;
@@ -185,12 +190,12 @@ export class PreviewScene implements Scene {
 
   private renderHowTo() {
     const r = G.r;
-    panel(r, 560, 120, 800, 840, { style: 'tome', alpha: 0.96 });
+    panel(r, 500, 120, 920, 840, { style: 'tome', alpha: 0.96 });
     text(r, 'HOW TO PLAY', 960, 150, { size: 48, font: 'display', weight: 700, align: 'center', color: C.gold });
     text(r, '처음 한 번만 표시됩니다', 960, 200, { size: 18, align: 'center', color: C.sub });
-    controlsTable(r, 640, 250);
+    controlsTable(r, 560, 260);
     const tips = ['적탄은 불투명한 구슬 · 내 탄은 반투명 빛줄기', '히트박스는 몸 중앙의 작은 점 하나', '탄을 스치면(GRAZE) 점수 +10'];
-    tips.forEach((t, i) => text(r, '·  ' + t, 660, 720 + i * 34, { size: 21, color: C.ivory }));
+    tips.forEach((t, i) => text(r, '·  ' + t, 600, 714 + i * 40, { size: 21, color: C.ivory }));
     if (Math.floor(this.t * 2) % 2 === 0) text(r, 'ENTER — 계속', 960, 900, { size: 30, weight: 700, align: 'center', color: C.ivory });
   }
 }

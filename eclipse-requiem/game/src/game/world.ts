@@ -438,6 +438,7 @@ export class World {
     if (this.fog.on) {
       this.drawFogMask(g);
       for (const e of this.enemies) e.drawLights(g);
+      this.midboss?.drawLights(g);
       this.items.draw(g);
     }
     for (const h of this.hazards) h.drawTele?.(g);

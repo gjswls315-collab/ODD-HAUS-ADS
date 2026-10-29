@@ -4,8 +4,10 @@
 타이틀 → 프롤로그 → 캐릭터 선택 → 스테이지 브리핑 → Stage 1 전 구간(미니보스 · 보스 3페이즈) → 클리어/랭크까지 한 판을 끝까지 플레이할 수 있습니다.
 
 - **바로 플레이 (웹)**: https://claude.ai/artifact/5kNsLn6RdwzFtRWrCHqNEH — 비공개 링크라 다른 사람은 페이지의 Share 메뉴로 공유받아야 열 수 있습니다.
-- **바로 플레이 (로컬)**: `release/eclipse-requiem.html` 파일 하나를 브라우저(Chrome/Edge 권장)로 열면 됩니다. 외부 에셋 없이 실행됩니다(폰트만 Google Fonts에서 불러오며, 오프라인이면 시스템 글꼴로 대체).
-- 그래픽과 사운드는 모두 **코드로 생성**합니다(절차적 픽셀아트 + WebAudio 합성). 정식 아트·사운드로 교체하기 전의 임시 에셋입니다.
+- **바로 플레이 (로컬)**: `release/eclipse-requiem.html` 파일 하나를 브라우저(Chrome/Edge 권장)로 열면 됩니다. 이미지·폰트가 모두 들어 있어 오프라인에서도 실행됩니다.
+- 그래픽은 **`assets/` 의 이미지 파일**(PNG + Aseprite JSON)이고 코드는 불러와 그리기만 합니다. 현재 PNG는 `tools/art/` 스크립트로 만든 **임시 아트**이며, 같은 이름으로 덮어쓰면 교체됩니다 → `assets/README.md`.
+- 사운드는 WebAudio 실시간 합성입니다.
+- 그래픽 리팩터링 기록: `docs/refactor/01_analysis.md`(분석) · `02_art_system.md`(구조) · `03_report.md`(결과·테스트·남은 작업).
 
 ## 조작
 
@@ -57,17 +59,23 @@ node scripts/simulate.mjs <URL> <출력폴더> [seraphine|noctis|morgana] [morta
 node scripts/screens.mjs <URL> <출력폴더>   # 키보드로 전체 화면(타이틀~클리어) 순회
 ```
 
-URL 파라미터: `?play=seraphine|noctis|morgana` 바로 Stage 1 시작, `&tl=165` 타임라인 위치(초)부터 시작(165 = 보스), `?artsheet` 생성된 스프라이트 시트 보기.
+URL 파라미터: `?play=seraphine|noctis|morgana` 바로 Stage 1 시작, `&tl=165` 타임라인 위치(초)부터 시작(165 = 보스), `?artsheet` 불러온 스프라이트 시트·태그 재생(교체한 아트 확인용).
+
+```bash
+node scripts/capture.mjs <URL> <출력폴더>   # 1280x720 고정 장면 캡처 (전/후 비교용)
+node tools/art/build.mjs [stage1|combat|heroes|enemies|boss|ui]   # 임시 아트 재생성 (아티스트 파일을 덮어쓰므로 주의)
+```
 
 ## 코드 구조
 
 ```text
 src/
   core/      app(씬 매니저) · input(키 상태 폴링, 게임패드, 마우스) · save(localStorage) · math(RNG, 이징)
-  gfx/       renderer(640x360 월드 + 고해상 UI 2레이어) · pixelfont(5x7 비트맵) · ui(패널·버튼·키캡)
-  gfx/art/   heroines · enemies · bosses · items · backdrop — 절차적 픽셀아트 생성기
+  gfx/       renderer(640x360 월드, 정수 배율 확대) · assets(시트 로더) · palette · pixeltext(5x7 + Galmuri) · dither · ui(픽셀 UI)
   audio/     audio.ts — 효과음 합성 + 시퀀서 BGM + 생성형 성당 리버브
   game/      world · player · bullets · enemies · items · hazards · boss · midboss · director(Stage 1 타임라인) · stagebg · fx
   ui/        hud · menu · options · logo
-  scenes/    intro · title · prologue · select · preview · game · clear
+  scenes/    intro · title · prologue · select · preview · game · clear · artsheet
+assets/      그래픽 에셋 (stage1/ sprites/ ui/ fonts/) + palette — 사양은 assets/README.md
+tools/art/   임시 아트 생성 스크립트 (node, 의존성 없음)
 ```
