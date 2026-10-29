@@ -1,0 +1,930 @@
+<title>Eclipse Requiem Visual Bible</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
+<style>
+/*@FONTFACE@*/
+/* Layout: one reading column (~72ch) on a dark art-review surround; blockout figures and wide tables break out to 1280px.
+   Deliberately single-theme (dark): pixel art and swatches are judged on a fixed neutral surround. */
+:root {
+  --bg: #0E1015; --panel: #161920; --sunk: #0A0B0F; --line: #2B3039; --line-2: #3A404B;
+  --fg: #E4DFD5; --fg-2: #A6ACB5; --fg-3: #838B97;
+  --gilt: #C2A464; --crimson: #FF4152; --pearl: #B7C6D5; --azure: #82CEFA;
+  --font-body: "IBM Plex Sans KR", "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --font-pixel: "Galmuri11", "IBM Plex Mono", ui-monospace, monospace;
+  --read: 46rem; --wide: 84rem;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: calc(env(safe-area-inset-top, 0px) + 64px); }
+body { background: var(--bg); color: var(--fg); font: 400 15px/1.72 var(--font-body); margin: 0; -webkit-font-smoothing: antialiased; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--sunk); }
+a { color: var(--pearl); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 2px solid var(--gilt); outline-offset: 2px; }
+code { font: 500 0.86em var(--font-mono); color: var(--pearl); background: var(--panel); padding: 0.05em 0.35em; border-radius: 3px; }
+b, strong { font-weight: 600; color: #F2EBDD; }
+
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.read { max-width: var(--read); margin-inline: auto; }
+.wide { max-width: var(--wide); margin-inline: auto; }
+
+/* chapter bar */
+.chapters { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 9; background: color-mix(in srgb, var(--sunk) 92%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--line); }
+.chapters nav { display: flex; gap: 2px; overflow-x: auto; scrollbar-width: none; padding-block: 8px; }
+.chapters nav::-webkit-scrollbar { display: none; }
+.chapters a { flex: none; display: flex; gap: 8px; align-items: baseline; padding: 6px 10px; border-radius: 4px; color: var(--fg-2); text-decoration: none; font-size: 13px; white-space: nowrap; }
+.chapters a span { font: 12px var(--font-pixel); color: var(--fg-3); }
+.chapters a:hover { color: var(--fg); background: var(--panel); }
+.chapters a.on { color: var(--fg); box-shadow: inset 0 -2px 0 var(--gilt); }
+.chapters a.on span { color: var(--gilt); }
+
+/* masthead */
+header.mast { padding-block: 56px 24px; }
+.eyebrow { font: 12px var(--font-pixel); letter-spacing: 0.08em; color: var(--fg-3); text-transform: uppercase; margin: 0 0 14px; }
+h1 { font: 700 clamp(30px, 5vw, 44px)/1.15 var(--font-body); letter-spacing: -0.01em; margin: 0 0 10px; text-wrap: balance; }
+.sub { font-size: 17px; color: var(--fg-2); margin: 0 0 28px; }
+.thesis { font: 600 clamp(19px, 2.6vw, 24px)/1.45 var(--font-body); margin: 28px 0; padding-left: 18px; border-left: 2px solid var(--line-2); text-wrap: balance; }
+.thesis em { font-style: normal; color: var(--crimson); }
+dl.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 14px 28px; margin: 0; padding: 18px 0; border-block: 1px solid var(--line); }
+dl.meta div { min-width: 0; }
+dl.meta dt { font: 12px var(--font-pixel); color: var(--fg-3); margin-bottom: 2px; }
+dl.meta dd { margin: 0; font-size: 13.5px; color: var(--fg-2); }
+.status { color: var(--gilt); font-weight: 600; }
+
+.decisions { list-style: none; counter-reset: d; margin: 28px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0 32px; }
+.decisions li { counter-increment: d; position: relative; padding: 12px 0 12px 34px; border-top: 1px solid var(--line); min-width: 0; }
+.decisions li::before { content: counter(d, decimal-leading-zero); position: absolute; left: 0; top: 13px; font: 12px var(--font-pixel); color: var(--fg-3); }
+.decisions b { display: block; }
+.decisions span { color: var(--fg-2); font-size: 14px; }
+
+/* chapters */
+section.ch { padding-block: 72px 8px; }
+.ch-head { display: flex; gap: 18px; align-items: baseline; margin-bottom: 8px; }
+.ch-num { font: 24px var(--font-pixel); color: var(--gilt); }
+h2 { font: 700 clamp(23px, 3.2vw, 30px)/1.25 var(--font-body); margin: 0; text-wrap: balance; }
+h3 { font: 600 19px/1.4 var(--font-body); margin: 48px 0 10px; text-wrap: balance; }
+h3 .k { font: 12px var(--font-pixel); color: var(--fg-3); margin-right: 10px; vertical-align: 2px; }
+h4 { font: 600 16px/1.4 var(--font-body); margin: 28px 0 8px; }
+p { margin: 0 0 14px; }
+.lead { color: var(--fg-2); font-size: 16px; }
+ul.tight, ol.tight { margin: 0 0 14px; padding-left: 20px; }
+ul.tight li, ol.tight li { margin: 4px 0; }
+.note { font-size: 13px; color: var(--fg-3); }
+
+/* tables */
+.tbl { overflow-x: auto; margin: 14px 0 22px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+table { border-collapse: collapse; width: 100%; font-size: 13.5px; line-height: 1.55; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+thead th { font: 500 12px var(--font-body); color: var(--fg-3); background: var(--sunk); position: sticky; top: 0; white-space: nowrap; }
+tbody tr:last-child td, tbody tr:last-child th { border-bottom: 0; }
+tbody th { font-weight: 600; color: var(--fg); white-space: nowrap; }
+td.num, th.num { text-align: right; white-space: nowrap; }
+td.nw { white-space: nowrap; }
+.tbl.wide-t table { min-width: 940px; }
+.tbl.mid-t table { min-width: 720px; }
+td .old { color: var(--fg-3); }
+.id { font: 12px var(--font-pixel); color: var(--fg-3); white-space: nowrap; }
+tr:target { background: #1E1A12; }
+tr:target .id { color: var(--gilt); }
+.tag { display: inline-block; font: 500 11.5px var(--font-body); padding: 1px 7px; border-radius: 3px; border: 1px solid var(--line-2); color: var(--fg-2); white-space: nowrap; }
+.tag.no { border-color: #6B1A24; color: #FF8C93; }
+.tag.yes { border-color: #4D5461; color: var(--fg); }
+.chip { display: inline-block; width: 0.9em; height: 0.9em; border-radius: 2px; vertical-align: -1px; margin-right: 4px; border: 1px solid #0007; }
+
+/* figures */
+figure { margin: 22px 0 30px; }
+.bfig { background: var(--sunk); border: 1px solid var(--line); border-radius: 6px; padding: 10px; }
+.tools { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
+.tools button { font: 12px var(--font-pixel); color: var(--fg-2); background: var(--panel); border: 1px solid var(--line-2); border-radius: 3px; padding: 4px 9px; cursor: pointer; }
+.tools button:hover { color: var(--fg); }
+.tools button[aria-pressed="true"] { color: var(--sunk); background: var(--fg-2); border-color: var(--fg-2); }
+.scale-note { font: 12px var(--font-pixel); color: var(--fg-3); margin-left: auto; }
+.stage { overflow-x: auto; }
+.cv { position: relative; max-width: none; }
+.cv canvas { display: block; width: 100%; height: auto; image-rendering: pixelated; image-rendering: crisp-edges; }
+.cv canvas.guide { position: absolute; inset: 0; }
+.bfig.gray canvas:first-child { filter: grayscale(1); }
+figcaption { font-size: 13px; color: var(--fg-3); margin-top: 10px; }
+figcaption b { color: var(--fg-2); font-weight: 600; }
+.hero-fig { margin-top: 36px; }
+
+/* AS-IS gallery */
+.asis { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr)); gap: 18px; margin: 18px 0 26px; }
+.asis-fig { margin: 0; min-width: 0; }
+.asis-img { position: relative; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
+.asis-img img { display: block; width: 100%; height: auto; }
+.mark { position: absolute; transform: translate(-50%, -50%); width: 26px; height: 26px; border-radius: 50%; background: var(--crimson); color: #0E1015; font: 12px/26px var(--font-pixel); text-align: center; text-decoration: none; box-shadow: 0 0 0 2px #0E1015; }
+.mark:hover { background: #fff; }
+
+/* palette */
+.ramps { display: grid; gap: 10px; margin: 18px 0 26px; }
+.ramp { display: grid; grid-template-columns: minmax(170px, 230px) 1fr; gap: 14px; align-items: start; padding: 12px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); }
+.ramp-head { min-width: 0; }
+.ramp-head b { font: 16px var(--font-pixel); color: var(--fg); margin-right: 8px; }
+.ramp-head span { font-weight: 600; }
+.ramp-head small { display: block; color: var(--fg-2); font-size: 12.5px; }
+.ramp-head p { margin: 4px 0 0; color: var(--fg-3); font-size: 12.5px; line-height: 1.5; }
+.ramp-sw { display: flex; flex-wrap: wrap; gap: 6px; min-width: 0; }
+.sw { all: unset; cursor: pointer; width: 74px; display: grid; grid-template-rows: 44px auto auto auto; border-radius: 4px; overflow: hidden; background: var(--sunk); border: 1px solid var(--line); }
+.sw:focus-visible { outline: 2px solid var(--gilt); }
+.sw-chip { background: var(--c); }
+.sw span:not(.sw-chip) { padding: 0 6px; font: 11px/1.6 var(--font-mono); color: var(--fg-2); }
+.sw-id { color: var(--fg) !important; font-family: var(--font-pixel) !important; font-size: 12px !important; padding-top: 3px !important; }
+.sw-l { padding-bottom: 4px !important; color: var(--fg-3) !important; }
+.sw.copied .sw-hex { color: var(--gilt); }
+
+.lmap { display: grid; gap: 4px; margin: 14px 0 6px; overflow-x: auto; }
+.lrow { display: grid; grid-template-columns: 170px minmax(520px, 1fr); gap: 12px; align-items: center; }
+.lrow-l { font-size: 13px; color: var(--fg-2); }
+.lrow-t { position: relative; height: 34px; background: linear-gradient(90deg, #000, #fff); border-radius: 3px; }
+.lband { position: absolute; top: 0; bottom: 0; border: 1px solid var(--gilt); background: rgba(194, 164, 100, 0.14); border-radius: 2px; }
+.ldot { position: absolute; width: 12px; height: 12px; border: 1px solid #0E1015; box-shadow: 0 0 0 1px #E4DFD566; border-radius: 2px; }
+.ldot.hi { top: 4px; } .ldot.lo { top: 18px; } .ldot.edge { top: 11px; border-style: dashed; border-radius: 50%; }
+.lscale { display: grid; grid-template-columns: 170px minmax(520px, 1fr); gap: 12px; font: 11px var(--font-mono); color: var(--fg-3); overflow-x: auto; }
+.lscale div:last-child { display: flex; justify-content: space-between; }
+
+/* character blocks */
+.char { border-top: 1px solid var(--line); margin-top: 48px; padding-top: 6px; }
+.char-head { display: flex; flex-wrap: wrap; gap: 6px 16px; align-items: baseline; }
+.char-head h3 { margin: 18px 0 4px; }
+.char-head .role { font-size: 13px; color: var(--fg-3); }
+.keyline { display: flex; flex-wrap: wrap; gap: 8px; margin: 6px 0 14px; }
+
+/* prompts */
+.pflow { counter-reset: s; list-style: none; padding: 0; margin: 14px 0 22px; display: grid; gap: 8px; }
+.pflow li { counter-increment: s; padding-left: 32px; position: relative; }
+.pflow li::before { content: counter(s); position: absolute; left: 0; top: 1px; width: 22px; height: 22px; border-radius: 50%; border: 1px solid var(--line-2); font: 12px/20px var(--font-pixel); text-align: center; color: var(--fg-2); }
+.prompts { display: grid; gap: 16px; margin-top: 18px; }
+.prompt { border: 1px solid var(--line); border-radius: 6px; background: var(--panel); padding: 14px 16px; min-width: 0; }
+.prompt.common { border-color: #5E5447; }
+.prompt header { display: flex; gap: 12px; align-items: baseline; flex-wrap: wrap; }
+.pid { font: 12px var(--font-pixel); color: var(--gilt); }
+.prompt h4 { margin: 0; }
+.pmeta { display: grid; gap: 2px; margin: 8px 0 10px; font-size: 13px; }
+.pmeta div { display: grid; grid-template-columns: 72px 1fr; gap: 10px; }
+.pmeta dt { color: var(--fg-3); }
+.pmeta dd { margin: 0; color: var(--fg-2); min-width: 0; }
+.pblock { margin-top: 8px; }
+.pbar { display: flex; justify-content: space-between; align-items: center; font: 12px var(--font-pixel); color: var(--fg-3); margin-bottom: 4px; }
+.btn-copy { font: 12px var(--font-body); color: var(--fg-2); background: var(--sunk); border: 1px solid var(--line-2); border-radius: 3px; padding: 2px 10px; cursor: pointer; }
+.btn-copy.copied { color: var(--gilt); border-color: var(--gilt); }
+.prompt pre { margin: 0; white-space: pre-wrap; word-break: break-word; font: 12.5px/1.6 var(--font-mono); color: #CBCFD5; background: var(--sunk); border: 1px solid var(--line); border-radius: 4px; padding: 10px 12px; max-height: 240px; overflow: auto; }
+
+footer.end { padding-block: 64px 80px; color: var(--fg-3); font-size: 13px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap: 0 28px; }
+.two > * { min-width: 0; }
+@media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
+</style>
+
+<div class="chapters gutter">
+  <nav class="wide" aria-label="장 목차">
+    <a href="#ch1"><span>1</span>기존 문제 분석</a>
+    <a href="#ch2"><span>2</span>아트 디렉션</a>
+    <a href="#ch3"><span>3</span>팔레트·픽셀 규격</a>
+    <a href="#ch4"><span>4</span>캐릭터 3종</a>
+    <a href="#ch5"><span>5</span>화면 명세</a>
+    <a href="#ch6"><span>6</span>이미지 프롬프트</a>
+    <a href="#ch7"><span>7</span>기존 vs 신규</a>
+    <a href="#appx"><span>A</span>검수·제작 순서</a>
+  </nav>
+</div>
+
+<header class="mast gutter">
+  <div class="wide">
+    <p class="eyebrow">ECLIPSE REQUIEM · Visual Design Bible v2.0</p>
+    <h1>비주얼 디자인 바이블 v2.0</h1>
+    <p class="sub">Dark Gothic Pixel Arcade — 기존 시각 디자인을 폐기하고 처음부터 다시 설계한 안</p>
+    <dl class="meta">
+      <div><dt>상태</dt><dd><span class="status">아트 디렉터 검토 대기</span> · 승인 전 개발 착수 없음</dd></div>
+      <div><dt>범위</dt><dd>타이틀 · 캐릭터 선택 · Stage 1 전투 · 보스전 · 클리어 · 게임오버, 캐릭터 3종, UI 전체</dd></div>
+      <div><dt>대체하는 문서</dt><dd>v1.1의 00 §4·§5(색·글꼴), 03(아트 디렉션), 02·04의 시각 수치. 05의 게임플레이 수치는 유지</dd></div>
+      <div><dt>기준</dt><dd>640×360 논리 픽셀 · 정수 배율 출력 · 2026-10-29</dd></div>
+    </dl>
+    <p class="thesis">차갑게 식은 석조 세계. 그 위에서 <em>위험만이 붉다.</em></p>
+    <ol class="decisions">
+      <li><b>픽셀 그리드는 하나</b><span>UI와 글자까지 640×360에 1:1로 그린다. 고해상 벡터 텍스트, 회전, 비정수 확대를 없앤다.</span></li>
+      <li><b>하늘의 천체는 개기일식</b><span>붉은 달 대신 검은 원반, 진주빛 코로나, 가장자리의 작은 붉은 홍염. 제목의 '일식'과 맞춘다.</span></li>
+      <li><b>기본색은 차콜 · 슬레이트 · 석재</b><span>크림슨은 적탄, 보스 패턴, 약점, 적의 눈, 홍염에만 쓴다. 보라와 마젠타는 팔레트에서 뺐다.</span></li>
+      <li><b>가장 밝은 것이 피해야 할 것</b><span>배경 L* 5–42, 캐릭터·적 20–85, 적탄 코어 97. 흑백으로 바꿔도 위계가 유지된다.</span></li>
+      <li><b>플레이어 탄 정체색 3종</b><span>세라핀 성광 금, 녹티스 폭풍 청, 모르가나 묘지 녹. 셋 다 적탄 색역과 겹치지 않는다.</span></li>
+      <li><b>패널 없는 HUD</b><span>자원은 좌하단, 점수는 우하단, 보스 HP는 상단 3px 바. 상시 점유 1.5%, 보스전 3.1%.</span></li>
+      <li><b>실루엣으로 구분되는 3인</b><span>창과 쇠고리(세라핀), 나방 날개(녹티스), 관(모르가나). 검정 실루엣만으로 누구인지 안다.</span></li>
+      <li><b>보스는 화면 높이의 절반 이하</b><span>종이 곧 몸이고, 종의 추가 약점이다. 회피 공간 66%를 확보한다(v1 보스는 높이 70%).</span></li>
+    </ol>
+    <figure class="bfig hero-fig" data-scene="combat" data-max="3">
+      <div class="tools"></div>
+      <div class="stage"></div>
+      <figcaption><b>Stage 1 일반 전투 — 640×360 네이티브 블록아웃.</b> 형태·명도·배치·크기를 검증하는 그림이며 최종 아트가 아닙니다. <b>흑백</b>으로 명도 위계를, <b>가이드</b>로 화면 밴드와 HUD 영역을 확인하세요. 모든 블록아웃은 정수 배율로만 확대됩니다.</figcaption>
+    </figure>
+  </div>
+</header>
+
+<main>
+<!-- ============================== 1 ============================== -->
+<section class="ch gutter" id="ch1">
+  <div class="wide">
+    <div class="ch-head"><span class="ch-num">01</span><h2>기존 디자인의 문제점</h2></div>
+    <div class="read" style="margin-inline:0">
+      <p class="lead">v1 빌드(2026-10-27)의 실제 화면을 캡처해 측정했습니다. 인상 평가가 아니라 수치와 코드 위치를 근거로 적었습니다.</p>
+    </div>
+
+    <h3><span class="k">1-1</span>측정 결과</h3>
+    <div class="tbl mid-t"><table>
+      <thead><tr><th>지표 (1920×1080 캡처)</th><th class="num">타이틀</th><th class="num">캐릭터 선택</th><th class="num">일반 전투</th><th class="num">보스 P1</th><th class="num">보스 P2</th><th>v2 목표</th></tr></thead>
+      <tbody>
+        <tr><th>유채색 픽셀 중 적·보라·마젠타 비율</th><td class="num">41.6%</td><td class="num">55.2%</td><td class="num">17.2%</td><td class="num">26.0%</td><td class="num">92.5%</td><td>일반 ≤ 5%, 보스 ≤ 15%</td></tr>
+        <tr><th>휘도 분포 p10–p90 (0–100)</th><td class="num">4.4–24.0</td><td class="num">7.8–34.1</td><td class="num">5.5–14.3</td><td class="num">5.5–27.3</td><td class="num">6.7–27.1</td><td>배경 5–42, 화면 전체 5–97</td></tr>
+        <tr><th>프레임당 고유 색 수</th><td class="num">14,715*</td><td class="num">21,168</td><td class="num">24,388</td><td class="num">48,441</td><td class="num">32,907</td><td>월드 ≤ 48 + UI ≤ 8</td></tr>
+        <tr><th>HUD 점유 (추정)</th><td class="num">—</td><td class="num">—</td><td class="num">3.5%</td><td class="num">10.5%</td><td class="num">10.5%</td><td>상시 1.5%, 보스전 3.1%</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">* 타이틀은 1280×800 캡처. 휘도는 감마 RGB 가중 평균(Rec.709 계수). 유채색 = 채도 &gt; 0.15이고 명도 &gt; 0.08인 픽셀. 적·보라·마젠타 = 색상각 255°–360°, 0°–20°.</p>
+    <ul class="tight">
+      <li>일반 전투 화면 픽셀의 80%가 휘도 5.5~14.3, 폭 9의 좁은 띠에 몰려 있습니다. 하늘·원경·근경·적이 한 덩어리로 보이는 직접 원인입니다.</li>
+      <li>고유 색 2만~4.8만 개는 블러 글로우, 가산 합성, 안티앨리어싱된 벡터 글자, 회전 확대가 만든 색입니다. 같은 크기의 정상적인 픽셀아트 프레임은 수십~백여 색입니다.</li>
+      <li>보스 2페이즈는 유채색의 92.5%가 적·보라 계열입니다. 위험 신호와 배경이 같은 색입니다.</li>
+    </ul>
+
+    <h3><span class="k">1-2</span>현재 화면 (번호 = 아래 문제 ID)</h3>
+    <div class="asis">
+      <figure class="asis-fig" data-k="title" data-marks="P-09,58,20;P-10,20,48;P-05,88,21;P-09,57,66"><div class="asis-img"><img alt="v1 타이틀 화면 캡처" width="960" height="540"></div><figcaption>타이틀 — 금 그라데이션 로고, 금 테두리 버튼, 대형 붉은 달, 회전 확대한 캐릭터</figcaption></figure>
+      <figure class="asis-fig" data-k="select" data-marks="P-01,50,40;P-09,35,13;P-05,90,19;P-10,12,39;P-11,23,40;P-13,50,8"><div class="asis-img"><img alt="v1 캐릭터 선택 화면 캡처" width="960" height="540"></div><figcaption>캐릭터 선택 — ×5 회전 일러스트, 금 프레임 카드 캐러셀</figcaption></figure>
+      <figure class="asis-fig" data-k="stage" data-marks="P-05,81,16;P-08,10,6;P-08,91,7;P-04,95,46;P-06,78,70;P-03,59,67;P-03,64,84;P-13,50,4"><div class="asis-img"><img alt="v1 일반 전투 화면 캡처" width="960" height="540"></div><figcaption>일반 전투 — 평탄한 명도, 장식용 적색, 보라 적탄, 상단 HUD 패널</figcaption></figure>
+      <figure class="asis-fig" data-k="boss" data-marks="P-08,50,5;P-04,72,30;P-07,80,58;P-13,50,12;P-03,30,6;P-12,64,20"><div class="asis-img"><img alt="v1 보스전 화면 캡처" width="960" height="540"></div><figcaption>보스전 — 높이 70% 보스, 보스 몸 위의 보라 링탄, 굵은 보라 HP 바</figcaption></figure>
+      <figure class="asis-fig" data-k="clear" data-marks="P-09,72,12;P-14,86,73;P-10,23,48"><div class="asis-img"><img alt="v1 스테이지 클리어 화면 캡처" width="960" height="540"></div><figcaption>클리어 — 금 프레임 결과 패널, 날개 달린 S 도장, 확대 일러스트</figcaption></figure>
+      <figure class="asis-fig" data-k="gameover" data-marks="P-14,50,21;P-14,50,36;P-10,50,78;P-09,42,58"><div class="asis-img"><img alt="v1 게임오버 화면 캡처" width="960" height="540"></div><figcaption>게임오버 — 대형 붉은 링과 붉은 제목, 중앙에 ×2.2 확대한 캐릭터</figcaption></figure>
+    </div>
+
+    <h3><span class="k">1-3</span>문제 목록</h3>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>ID</th><th>문제</th><th>증상 (화면 근거)</th><th>원인 (코드 · 문서)</th><th>영향</th><th>v2 처방</th></tr></thead>
+      <tbody>
+        <tr id="p-01"><td class="id">P-01</td><th>픽셀 밀도 혼재</th><td>월드는 1px=3px, UI는 1px 벡터 글꼴. 선택·타이틀 일러스트는 스프라이트를 ×5·×2.5로 키우고 −12.6° 회전</td><td><code>gfx/sprites.ts:51-52</code> heroKeyArt(id, 5, −0.22) · (2.5, −0.22), <code>core/constants.ts</code> FONT</td><td>한 화면에 픽셀 크기 3종 이상, 회전 계단 현상. 전형적인 '가짜 픽셀아트'</td><td>§3-5 단일 그리드, 회전·확대 금지</td></tr>
+        <tr id="p-02"><td class="id">P-02</td><th>픽셀 단위 설계 부재</th><td>덩어리진 형태, 재질 구분 없음, 균일한 검정 외곽선</td><td>벡터 도형 → 팔레트 양자화 → <code>outline()</code> 일괄 1px (<code>gfx/pix.ts</code>)</td><td>돌·천·뼈·금속이 같은 질감, 스티커 같은 인상</td><td>§3-5 셀아웃·클러스터·재질 램프</td></tr>
+        <tr id="p-03"><td class="id">P-03</td><th>색의 의미 붕괴</th><td>적색: 붉은 달, 창문 수십 개, HP 위험, 폭탄 아이콘, 보스 망토. 보라: 일반 적탄, 녹티스, 보스 HP 바, 안개</td><td>docs/00 §4 <code>accent.violet</code> = "적탄(일반), 녹티스 정체색"</td><td>위험 신호가 장식과 구분되지 않음</td><td>§3-2 기능 색 규칙</td></tr>
+        <tr id="p-04"><td class="id">P-04</td><th>탄 가독성</th><td>보라 구슬 적탄 + 블러 글로우. 보스 링탄이 금색 종 위에 겹침. 적탄·아군탄 모두 발광</td><td><code>game/bullets.ts</code> drawGlow, B02 보라</td><td>0.2초 안에 누구의 탄인지 판별 불가</td><td>§3-6 적탄 2계열, 흰 코어 = 판정</td></tr>
+        <tr id="p-05"><td class="id">P-05</td><th>붉은 달이 시선을 뺏음</th><td>지름 약 190px(1080p) 고채도 적색 원이 적 등장 구역(우상단)에 상시 노출</td><td><code>gfx/art/backdrop.ts</code> moon</td><td>화면에서 가장 채도 높은 면이 배경</td><td>§2-5 개기일식 + 홍염</td></tr>
+        <tr id="p-06"><td class="id">P-06</td><th>명도 평탄</th><td>하늘·원경·중경·적이 같은 남보라 저명도</td><td>레이어별 명도 규칙 없음</td><td>패럴랙스가 있어도 깊이가 안 보임. 흑사제 실루엣 소실</td><td>§3-3 명도 대역, §3-7 레이어 규격</td></tr>
+        <tr id="p-07"><td class="id">P-07</td><th>보스 과대</th><td>몸통 200×220 + 종 180×150(논리px). 화면 높이 70%, 우측 45% 점유</td><td><code>gfx/art/bosses.ts:15,68</code></td><td>회피 공간 축소. 몸과 종이 따로 읽힘</td><td>§5-4 보스 ≤ 160×176, 종 = 몸</td></tr>
+        <tr id="p-08"><td class="id">P-08</td><th>HUD 과대·장식</th><td>패널 4개 모두 금 테두리·모서리 장식. 보스전 상단 약 80px(7.4%) + 중앙 페이즈 자막</td><td><code>ui/hud.ts</code></td><td>플레이 영역 상단 침범, 시선 분산</td><td>§5-3 HUD 점유 1.5%</td></tr>
+        <tr id="p-09"><td class="id">P-09</td><th>금색 남용</th><td>모든 버튼의 금 테두리, 십자 커서 장식, 날개 달린 랭크 도장, 금 그라데이션·글로우 로고</td><td><code>gfx/ui.ts</code> button·panel, <code>ui/logo.ts</code></td><td>금색이 '선택됨·중요' 신호로 기능하지 않음</td><td>§3-2 금박은 화면당 2개 이하</td></tr>
+        <tr id="p-10"><td class="id">P-10</td><th>모바일 수집형 문법</th><td>대형 회전 일러스트 + 금 프레임 카드 + 좌우 화살표 캐러셀. 게임오버에서 캐릭터를 중앙에 ×2.2</td><td><code>scenes/select.ts</code>, <code>scenes/game.ts</code></td><td>가챠 화면 인상, 장르와 불일치</td><td>§5-2 조각상형 전신 픽셀아트 + 1:1 실시간 프리뷰</td></tr>
+        <tr id="p-11"><td class="id">P-11</td><th>캐릭터 실루엣 유사</th><td>셋 다 '긴 머리 소녀 + 대각선 무기 + 뒤로 흐르는 천'</td><td><code>gfx/art/heroines.ts</code> 공통 drawHeroine</td><td>색에 의존해서만 구분</td><td>§4 실루엣 키 3종</td></tr>
+        <tr id="p-12"><td class="id">P-12</td><th>효과 과잉</th><td>가산 글로우 패스 + 링 + 화면 플래시 + 차지 플래시 + 흔들림이 동시에 발생</td><td><code>game/world.ts</code> drawGlow, <code>game/fx.ts</code></td><td>픽셀 그리드 무시, 시각 피로</td><td>§2-7 이펙트 예산</td></tr>
+        <tr id="p-13"><td class="id">P-13</td><th>글꼴 혼재</th><td>Cinzel + Noto Serif KR + Noto Sans KR + 5×7 픽셀 폰트가 한 화면에 공존</td><td><code>core/constants.ts</code> FONT</td><td>위계 불명확, 해상도 혼재</td><td>§3-8 Galmuri + 5×7 두 계열</td></tr>
+        <tr id="p-14"><td class="id">P-14</td><th>결과 화면의 홍보 이미지화</th><td>대형 붉은 링 + 큰 붉은 제목 / 금 프레임 결과 패널 + 대형 S 도장</td><td><code>scenes/game.ts</code>, <code>scenes/clear.ts</code></td><td>정보가 장식에 묻힘</td><td>§5-5, §5-6</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="k">1-4</span>근본 원인</h3>
+    <ol class="tight read" style="margin-inline:0">
+      <li><b>규칙이 형용사였습니다.</b> '고딕', '피', '성광' 같은 분위기 단어는 있었지만 명도와 색의 기능 규칙이 없어서, 같은 색이 장식과 신호에 동시에 쓰였습니다.</li>
+      <li><b>에셋이 픽셀 단위로 그려지지 않았습니다.</b> 벡터로 생성해 양자화한 임시 에셋이었고, 규격이 없어 확대와 회전이 그대로 허용됐습니다.</li>
+      <li><b>UI가 다른 세계에서 왔습니다.</b> 게임 화면과 다른 해상도, 다른 미술 언어(웹 UI 패널)로 설계됐습니다.</li>
+    </ol>
+  </div>
+</section>
+
+<!-- ============================== 2 ============================== -->
+<section class="ch gutter" id="ch2">
+  <div class="wide">
+    <div class="ch-head"><span class="ch-num">02</span><h2>새 아트 디렉션 — Dark Gothic Pixel Arcade</h2></div>
+    <div class="read" style="margin-inline:0">
+      <p class="lead">끝나지 않는 개기일식 아래의 박명. 해는 검은 원반이 되었고 지평선은 사방에서 희미하게 빛납니다. 그 빛을 등진 성당과 묘역은 차가운 실루엣이 되고, 붉은색은 일식의 가장자리와 위험에만 남았습니다.</p>
+      <p>개기일식을 고른 이유는 실제 현상이 그대로 화면 규칙이 되기 때문입니다. 개기 중에는 하늘이 어두워지고(저명도 배경), 지평선이 360° 둘러 빛나며(실루엣 분리), 코로나는 진주빛이고(차가운 키 라이트), 붉은색은 태양 가장자리의 작은 홍염뿐입니다(적색의 최소 사용). 키워드는 <b>석재 · 재 · 정적 · 개기(Totality)</b>.</p>
+    </div>
+
+    <h3><span class="k">2-1</span>6가지 원칙</h3>
+    <div class="tbl mid-t"><table>
+      <thead><tr><th>#</th><th>원칙</th><th>규칙</th><th>검수 방법</th></tr></thead>
+      <tbody>
+        <tr><td class="id">1</td><th>하나의 픽셀 그리드</th><td>모든 요소를 640×360에서 1:1로 그린다. 확대·회전·비정수 배율 금지. UI와 글자 포함</td><td>1080p 캡처의 모든 픽셀 블록이 3×3. 1/3로 줄여도 정보 손실 없음</td></tr>
+        <tr><td class="id">2</td><th>명도가 먼저</th><td>네 개의 명도 대역(배경·행위자·적탄·UI)을 지킨다</td><td>흑백 변환 후 가장 밝은 점이 적탄 코어</td></tr>
+        <tr><td class="id">3</td><th>차가운 세계, 붉은 위험</th><td>환경은 색상 205–225°, 채도 30% 이하. 크림슨은 기능에만</td><td>일반 전투 유채색 중 적색계 ≤ 5%</td></tr>
+        <tr><td class="id">4</td><th>실루엣 우선</th><td>캐릭터·적·보스는 단색 실루엣으로 구분된다</td><td>§4 실루엣 테스트 3/3 정답</td></tr>
+        <tr><td class="id">5</td><th>빛은 그린다</th><td>조명은 팔레트 램프와 손으로 찍은 하이라이트로 만든다. 실시간 효과는 보조만</td><td>블러 0, 가산 스프라이트 동시 ≤ 24</td></tr>
+        <tr><td class="id">6</td><th>장식은 건축이 맡는다</th><td>고딕은 배경 건축의 실루엣(첨두 아치·버트레스·트레이서리)으로 표현. UI는 선·여백·글자만</td><td>UI 장식 요소 0, 금박 ≤ 2개/화면</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="k">2-2</span>레퍼런스에서 가져올 것과 버릴 것</h3>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>레퍼런스</th><th>가져올 것</th><th>버릴 것</th><th>v2 적용 위치</th></tr></thead>
+      <tbody>
+        <tr><th>Tengai (Sengoku Blade)</th><td>비행 캐릭터 측면 스프라이트 문법(앞으로 기운 상체, 뒤로 흐르는 천), 캐릭터마다 완전히 다른 샷, 짧은 차지 연출, 화면 가장자리의 작은 HUD</td><td>전국 시대 테마, 원색 팔레트, 실제 캐릭터·탄</td><td>§4 비행 스프라이트, §5-3 HUD</td></tr>
+        <tr><th>Deathsmiles</th><td>고딕 판타지와 횡스크롤 탄막의 결합, 느리고 촘촘한 탄 배열의 아름다움, 보스가 화면 일부만 차지하는 구도</td><td>과장된 아동 체형 일러스트, 분홍·보라 다용, 사역마 등 원작 요소</td><td>§5-4 보스 구도, 탄 패턴</td></tr>
+        <tr><th>Blasphemous</th><td>640×360 네이티브와 단일 픽셀 밀도, 인물 대비 거대한 종교 건축, 재질별 램프(돌·천·금속·뼈), 선택적 외곽선</td><td>고어 강도, 특정 종교 도상의 직접 인용, 환경 전반의 피 색</td><td>§3 규격, §3-7 배경</td></tr>
+        <tr><th>The Last Faith</th><td>픽셀 위의 절제된 동적 조명(림 라이트), 안개 레이어로 깊이 분리, 청회색 기조</td><td>고해상 후처리 블룸, 사실 비율 인체(슈팅 가독성에 불리)</td><td>§2-6 광원, 안개 밴드</td></tr>
+      </tbody>
+    </table></div>
+    <p class="read" style="margin-inline:0">조합 공식: Tengai의 <b>게임 문법</b> + Blasphemous의 <b>픽셀 규율</b> + The Last Faith의 <b>조명</b> + Deathsmiles의 <b>고딕 탄막 미감</b>. 어느 작품의 캐릭터·탄·UI도 복제하지 않습니다.</p>
+
+    <h3><span class="k">2-3</span>금지 목록</h3>
+    <div class="tbl mid-t"><table>
+      <thead><tr><th>금지</th><th>대신</th><th>검수 기준</th></tr></thead>
+      <tbody>
+        <tr><td><span class="tag no">금지</span> 모바일 수집형 과장 일러스트</td><td>선택 화면에도 인게임과 같은 그리드의 전신 픽셀아트(96×144)</td><td>일러스트 컷 0</td></tr>
+        <tr><td><span class="tag no">금지</span> 과도한 금 테두리·중세 장식</td><td>1px 선과 여백</td><td>금박 요소 ≤ 2개/화면, 면적 ≤ 0.5%</td></tr>
+        <tr><td><span class="tag no">금지</span> 적·보라의 무분별한 사용</td><td>§3-2 기능 색 규칙. 보라·마젠타는 팔레트에 없음</td><td>일반 전투 유채색 중 적색계 ≤ 5%</td></tr>
+        <tr><td><span class="tag no">금지</span> 글로우·블룸·렌즈 효과</td><td>그려 넣은 광원, 3단계 디더 후광</td><td>블러 0, 가산 스프라이트 ≤ 24</td></tr>
+        <tr><td><span class="tag no">금지</span> 콘셉트아트풍 전투 화면</td><td>640×360 블록아웃 → 인게임 캡처 기반 시안</td><td>시안은 반드시 640×360 원본 + 실제 HUD</td></tr>
+        <tr><td><span class="tag no">금지</span> 배경과 탄의 색 겹침</td><td>적탄 색을 배경 팔레트에서 제외, 어두운 외곽 + 흰 코어</td><td>모든 배경색 대비 ≥ 4.5:1 (§3-4)</td></tr>
+        <tr><td><span class="tag no">금지</span> 해상도만 낮춘 가짜 픽셀아트</td><td>1:1로 그린 픽셀아트</td><td>고유 색 수, 3×3 블록 검사</td></tr>
+        <tr><td><span class="tag no">금지</span> 플레이 영역을 침범하는 대형 HUD</td><td>패널 없는 가장자리 HUD</td><td>상시 점유 ≤ 2%</td></tr>
+        <tr><td><span class="tag no">금지</span> 플레이 중 화면 중앙의 큰 글자</td><td>상단 밴드의 5×7 캡션</td><td>전투 중 y 14–324 영역 안 텍스트 0 (점수 팝업 제외)</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="k">2-4</span>Stage 1 컬러 스크립트</h3>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>구간</th><th>TL</th><th>일식 상태</th><th>하늘</th><th>주 광원</th><th>안개</th><th>허용되는 적색</th></tr></thead>
+      <tbody>
+        <tr><th>A 잿빛 묘역</th><td class="nw">0:00–0:50</td><td>부분 일식 55% — 초승달 모양 태양, 반지름 12px</td><td>S0→S4, 별</td><td>태양 초승달(우상단, 차가운 백색)</td><td>지면 25%</td><td>적탄, 적의 눈</td></tr>
+        <tr><th>B 무너진 석교</th><td class="nw">0:50–1:55</td><td>부분 일식 75%, 구름이 가림</td><td>S0→S3</td><td>약해진 햇빛, 림 라이트 감소</td><td>중간</td><td>동일</td></tr>
+        <tr><th>C 검은 장막</th><td class="nw">1:55–2:25</td><td>안개에 가려 보이지 않음</td><td>S0~S2</td><td>플레이어 정체색 미광(반경 64px) + 적의 눈</td><td>짙음(시야 제한)</td><td>동일. 눈이 가장 먼저 보임</td></tr>
+        <tr><th>휴지</th><td class="nw">2:25–2:40</td><td>다이아몬드 링 — 개기 직전 섬광 1회 0.5 s</td><td>S0→S5, 지평선 박명 시작</td><td>다이아몬드 링 → 소멸</td><td>걷힘</td><td>—</td></tr>
+        <tr><th>D 침묵의 종루 · 보스</th><td class="nw">2:40–</td><td>개기일식. P2부터 홍염 확대</td><td>S0→S5, 사방 지평선 박명</td><td>진주빛 코로나 + 지평선. 보스 림: P1 진주 → P2·P3 크림슨</td><td>페이즈마다 증가</td><td>적탄, 보스 패턴·약점, 홍염, 보스 림(P2~)</td></tr>
+        <tr><th>클리어</th><td>—</td><td>개기 종료, 반대편 다이아몬드 링</td><td>한 단계 밝아짐</td><td>돌아오는 햇빛</td><td>없음</td><td>없음</td></tr>
+        <tr><th>게임오버</th><td>—</td><td>개기일식</td><td>전체 무채색 스왑</td><td>—</td><td>—</td><td>홍염 1~2px만</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="k">2-5</span>광원 규칙</h3>
+    <ul class="tight read" style="margin-inline:0">
+      <li><b>키 라이트는 우상단 30°</b>(일식 방향). 플레이어는 앞(오른쪽)이 밝고, 등 쪽은 램프 두 단계 어둡습니다.</li>
+      <li><b>적은 역광</b>. 몸은 어두운 톤(N2–N5), 위·오른쪽 가장자리에 1px 림(M0, 보스 P2부터 R2), 눈과 약점만 크림슨 1–2px. 그래서 플레이어(앞에서 밝음)와 적(실루엣 + 림)이 조명만으로도 갈립니다.</li>
+      <li><b>환경 광원 정리</b>. v1의 붉은 창문과 주황 가로등은 전부 없앱니다. 창은 불이 꺼진 상태(N1)입니다. 남는 광원은 화면당 4개 이하의 '영혼불'(진주빛 M0~M2, 3px + 2단 디더 후광)뿐입니다.</li>
+      <li><b>공기 원근</b>. 개기 중에는 지평선이 가장 밝고, 가까울수록 어둡습니다(원경 S1 실루엣 대 지평선 S4~S5). 행위자는 그 위에 중간~밝은 명도로 뜹니다.</li>
+      <li><b>그림자</b>. 레이어 사이 투영 그림자는 없습니다. 접지 그림자는 바닥 밴드 위의 1px N0 타원 하나입니다.</li>
+    </ul>
+
+    <h3><span class="k">2-6</span>이펙트 예산</h3>
+    <div class="tbl mid-t"><table>
+      <thead><tr><th>항목</th><th>한도</th><th>비고</th></tr></thead>
+      <tbody>
+        <tr><th>블러 · 블룸 · 렌즈 플레어 · 색수차</th><td>0</td><td>—</td></tr>
+        <tr><th>가산 합성 스프라이트 동시</th><td>≤ 24 (폭탄 중 ≤ 64)</td><td>미리 그린 3단계 디더 광원만</td></tr>
+        <tr><th>화면 플래시</th><td>≤ 2프레임, 불투명도 ≤ 35%, 옵션으로 0</td><td>흰 섬광보다 암전(N0 40%)을 우선</td></tr>
+        <tr><th>화면 흔들림</th><td>≤ 2 논리px, ≤ 8프레임</td><td>옵션으로 0</td></tr>
+        <tr><th>파티클</th><td>≤ 160, 정수 좌표, 1×1·2×2</td><td>재(N7·N8)와 뼈(B3) 위주</td></tr>
+        <tr><th>피격 플래시</th><td>약점 부위 1×1~3×3 백색 2프레임, 10 Hz 제한</td><td>몸 전체 백색 금지</td></tr>
+        <tr><th>탄 반짝임</th><td>15 fps 2프레임 교대</td><td>크기는 그대로, 명도만 바뀜</td></tr>
+        <tr><th>화면 전환</th><td>4단계 디더 페이드 × 3프레임</td><td>알파 페이드는 팔레트 밖 색을 만들어 금지</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ============================== 3 ============================== -->
+<section class="ch gutter" id="ch3">
+  <div class="wide">
+    <div class="ch-head"><span class="ch-num">03</span><h2>컬러 팔레트와 픽셀아트 규격</h2></div>
+
+    <h3><span class="k">3-1</span>마스터 팔레트 <span id="pal-count">68</span>색</h3>
+    <p class="read" style="margin-inline:0">램프 이름은 토큰 접두어입니다(예: <code>S3</code> = Slate 3번). 칸을 누르면 HEX가 복사됩니다. 같은 값이 저장소의 <code>design-v2/palette/</code>에 Aseprite·GIMP용 <code>.gpl</code>, Lospec용 <code>.hex</code>, 토큰 <code>.json</code>으로 들어 있습니다.</p>
+    <div class="ramps" id="ramps"></div>
+
+    <h3><span class="k">3-2</span>기능 색 규칙</h3>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>색</th><th>허용</th><th>금지</th></tr></thead>
+      <tbody>
+        <tr><th><span class="chip" style="background:#C91C30"></span>Crimson R</th><td>모든 적탄, 보스 약점·패턴 예고선, 적의 눈(소형 ≤ 2px, 중형 ≤ 6px), 일식 홍염, HP 마지막 칸, 분노 상태 보스 바, 컨티뉴 마지막 3초, 보스 림(P2~)</td><td>환경 조명·창문, 플레이어 관련 전부, UI 장식, 배경 면적</td></tr>
+        <tr><th><span class="chip" style="background:#D9AD52"></span>Lumen Gold G</th><td>세라핀의 탄·차지·폭탄, 쇠고리와 창끝(스프라이트 안 10px 이하), 세라핀 선택 시 스탯 블록</td><td>다른 캐릭터, UI 테두리</td></tr>
+        <tr><th><span class="chip" style="background:#3698D6"></span>Storm Azure A</th><td>녹티스의 탄·차지·폭탄, 날개 안점과 눈</td><td>환경</td></tr>
+        <tr><th><span class="chip" style="background:#349E6E"></span>Grave Green V</th><td>모르가나의 탄·혼령·등롱, 얼굴 아래 조명</td><td>환경, 회복 아이템</td></tr>
+        <tr><th><span class="chip" style="background:#C2A464"></span>Gilt U</th><td>메뉴 커서, NEW RECORD, S·EX 랭크 글자</td><td>테두리, 패널, 버튼 배경. 화면당 2개 초과</td></tr>
+        <tr><th><span class="chip" style="background:#B7C6D5"></span>Pearl M</th><td>일식 코로나, 적 림 라이트(P1까지), 영혼불, 회복 아이템</td><td>넓은 면</td></tr>
+        <tr><th>Slate · Stone · Ash · Bone · Bronze</th><td>환경, 캐릭터·적·보스의 재질</td><td>강조 신호로 쓰는 것</td></tr>
+        <tr><th>보라 · 마젠타</th><td colspan="2">팔레트에 없음</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">파워 아이템(P)은 현재 캐릭터의 정체색을 따릅니다. 아이템은 모양으로 구분합니다: P 보석, S 뼈 십자, H 진주 등롱, B 종.</p>
+
+    <h3><span class="k">3-3</span>명도 대역 — L* 지도</h3>
+    <p class="read" style="margin-inline:0">각 점은 팔레트 색 하나의 CIE L*입니다(0 검정 – 100 흰색). 금색 테두리 칸이 그 역할에 허용된 범위이고, 점선 원은 1px 가장자리·하이라이트에만 쓰는 색입니다.</p>
+    <div class="lscale"><div></div><div><span>0</span><span>25</span><span>50</span><span>75</span><span>100</span></div></div>
+    <div class="lmap" id="lmap"></div>
+    <div class="tbl mid-t"><table>
+      <thead><tr><th>대역</th><th>대상</th><th>L*</th><th>면적 규칙</th></tr></thead>
+      <tbody>
+        <tr><th>배경 면</th><td>하늘, 건축, 바닥</td><td class="nw">5–42</td><td>S7·S8·T6·T7(42–66)은 1px 가장자리와 하이라이트만, 화면의 3% 이하</td></tr>
+        <tr><th>행위자</th><td>플레이어, 적, 보스</td><td class="nw">20–85</td><td>실루엣 안에서 램프 3단계 이상 대비</td></tr>
+        <tr><th>플레이어 탄</th><td>정체색 램프 2–4</td><td class="nw">58–96</td><td>불투명도 75–85%, 코어 1px</td></tr>
+        <tr><th>적탄</th><td>크림슨 + 흰 코어</td><td class="nw">외곽 4 / 림 43–71 / 코어 97</td><td>흰 코어 = 판정</td></tr>
+        <tr><th>UI</th><td>B4, N8, U1</td><td class="nw">46–94</td><td>읽어야 하는 글자는 대비 4.5:1 이상</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="k">3-4</span>대비 검증 (팔레트에서 계산)</h3>
+    <div class="tbl mid-t"><table>
+      <thead><tr><th>조합</th><th class="num">결과</th><th>기준</th></tr></thead>
+      <tbody>
+        <tr><th>적탄 (흰 코어 R6와 외곽 R0 중 높은 쪽) vs 모든 배경색 · 최악</th><td class="num" data-c="bullet-worst"></td><td>≥ 4.5:1</td></tr>
+        <tr><th>적탄 흰 코어 R6 vs 하늘 S0–S6 · 최저</th><td class="num" data-c="core-sky"></td><td>≥ 4.5:1</td></tr>
+        <tr><th>적탄 외곽 R0 vs 진주광 M0–M2</th><td class="num" data-c="outline-pearl"></td><td>밝은 배경에서는 외곽이 분리</td></tr>
+        <tr><th>플레이어 탄 밝은 줄 G3·A3·V3 vs S2·T3·S5</th><td class="num"><span data-c="player-min"></span> – <span data-c="player-max"></span></td><td>≥ 3:1 (피드백용)</td></tr>
+        <tr><th>UI 본문 B4 vs 바닥 T1</th><td class="num" data-c="ui-b4"></td><td>≥ 4.5:1</td></tr>
+        <tr><th>UI 라벨 N8 vs 바닥 T1</th><td class="num" data-c="ui-n8"></td><td>≥ 4.5:1</td></tr>
+        <tr><th>UI 비활성 N7 vs 바닥 T1</th><td class="num" data-c="ui-n7"></td><td>비활성·보조 정보만</td></tr>
+      </tbody>
+    </table></div>
+    <p class="read note" style="margin-inline:0">적탄은 이중 대비로 설계했습니다. 어두운 배경에서는 크림슨 림과 흰 코어가, 밝은 배경(코로나·지평선·달빛 받은 돌)에서는 어두운 1px 외곽이 탄을 떼어 냅니다.</p>
+    <figure class="bfig" data-sheet="bullets" data-max="4">
+      <div class="tools"></div>
+      <div class="stage"></div>
+      <figcaption><b>탄·아이템 시트 (실제 크기).</b> 위: 적탄 2계열을 어두운 하늘, 석재, 밝은 지평선 위에 올린 대비 검사. 아래: 캐릭터별 기본탄, 차지 1단, 2단, 아이템, HUD 아이콘.</figcaption>
+    </figure>
+
+    <h3><span class="k">3-5</span>픽셀아트 규격</h3>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>항목</th><th>규격</th></tr></thead>
+      <tbody>
+        <tr><th>네이티브 해상도</th><td>640×360 (16:9). Blasphemous와 같은 기준</td></tr>
+        <tr><th>출력 배율</th><td>정수만: ×2 1280×720 · ×3 1920×1080 · ×4 2560×1440 · ×6 3840×2160. 남는 영역은 N0 레터박스</td></tr>
+        <tr><th>좌표</th><td>스프라이트, 카메라, UI 모두 정수 픽셀에 스냅. 서브픽셀은 내부 계산에만</td></tr>
+        <tr><th>회전</th><td>금지. 바늘탄은 16방향(22.5°) 미리 그림, 원형 탄은 회전 불필요, 기울어짐은 별도 프레임</td></tr>
+        <tr><th>확대·축소</th><td>금지(등장 연출 포함). 크기 변화는 프레임으로</td></tr>
+        <tr><th>외곽선</th><td>행위자: 1px 선택적 외곽선 — 광원 반대쪽(왼쪽·아래)은 N0, 광원 쪽(오른쪽·위)은 접한 색의 2단계 어두운 색. 배경: 외곽선 없음. 적탄: R0 1px 필수. 플레이어 탄: 없음</td></tr>
+        <tr><th>안티앨리어싱</th><td>곡선 계단을 줄이는 수작업 1단계만. 자동 AA·블러 금지</td></tr>
+        <tr><th>디더링</th><td>하늘·안개 같은 큰 그라데이션에만 12·25·50% 정렬 디더. 행위자·탄·UI 금지</td></tr>
+        <tr><th>램프</th><td>재질당 3~5단계. 어두울수록 슬레이트(청) 쪽, 밝을수록 따뜻한 쪽으로 색상 이동. 금속은 단계 간 대비를 크게</td></tr>
+        <tr><th>재질 표현</th><td>1px 노이즈 금지. 2×2 이상의 의도된 클러스터로 돌·천·뼈·금속을 구분</td></tr>
+        <tr><th>팔레트 사용량</th><td>마스터 68색, 장면당 ≤ 48색, 스프라이트당 ≤ 16색</td></tr>
+        <tr><th>애니메이션</th><td>기본 12 fps(60 Hz에서 5프레임 유지), 빠른 효과 20 fps(3프레임), 탄 반짝임 15 fps, 메뉴 커서 이동 4프레임</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="k">3-6</span>크기 규격 (논리 px)</h3>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>대상</th><th>캔버스</th><th>실루엣 목표</th><th>판정</th><th class="num">화면 높이 대비</th></tr></thead>
+      <tbody>
+        <tr><th>플레이어 비행 스프라이트</th><td>48×32</td><td>40×24 안팎</td><td>3×3 (r 1.5), 가슴 중앙</td><td class="num">≈ 7–9%</td></tr>
+        <tr><th>플레이어 전신 (선택 화면)</th><td>96×144</td><td>80×136</td><td>—</td><td class="num">40%</td></tr>
+        <tr><th>초상화</th><td>64×64</td><td>흉상</td><td>—</td><td class="num">—</td></tr>
+        <tr><th>소형 적 (박쥐, 촛대 망령)</th><td>22×14 · 14×26</td><td>—</td><td>r 6–8</td><td class="num">≤ 7%</td></tr>
+        <tr><th>중형 적 (종지기 해골, 흑사제)</th><td>30×42 · 40×48</td><td>—</td><td>r 12–14</td><td class="num">≤ 13%</td></tr>
+        <tr><th>대형 적 (묘역 기사)</th><td>56×64</td><td>—</td><td>r 20 + 방패 판정</td><td class="num">≤ 18%</td></tr>
+        <tr><th>미니보스 (그레이븐)</th><td>96×96</td><td>≤ 88</td><td>코어 r 14</td><td class="num">≤ 27%</td></tr>
+        <tr><th>보스 (아바돈)</th><td>160×176</td><td>≤ 150×170</td><td>코어 r 7 (×1.0), 종 r 32 (×0.5)</td><td class="num">≤ 49% <span class="old">(v1 70%)</span></td></tr>
+        <tr><th>적탄 S · M · L</th><td>7×7 · 11×11 · 17×17</td><td>—</td><td>r 1.5 · 2.5 · 4.5 = 흰 코어</td><td class="num">—</td></tr>
+        <tr><th>적탄 바늘</th><td>15×15 (16방향)</td><td>13×5 캡슐</td><td>캡슐 r 1.5</td><td class="num">—</td></tr>
+        <tr><th>아이템</th><td>9×9 (S는 5×7)</td><td>—</td><td>흡수 반경 32 / 자석 64</td><td class="num">—</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="k">3-7</span>패럴랙스 레이어 규격</h3>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>레이어</th><th>내용</th><th class="num">스크롤 계수</th><th>팔레트</th><th class="num">L*</th><th>디테일</th><th>제작 단위</th></tr></thead>
+      <tbody>
+        <tr><th>L0 하늘</th><td>디더 그라데이션, 별, 일식</td><td class="num">0 (별 0.02)</td><td>S0–S5, M, 보스전 R</td><td class="num">5–33</td><td>최저</td><td>640 고정</td></tr>
+        <tr><th>L1 원경</th><td>첨탑 도시 실루엣 한 장</td><td class="num">0.12</td><td>S1–S2</td><td class="num">9–14</td><td>실루엣만</td><td>1280 루프</td></tr>
+        <tr><th>안개 A</th><td>원경 아래 디더 띠</td><td class="num">0.2</td><td>S4 12–25%</td><td class="num">—</td><td>—</td><td>640 루프</td></tr>
+        <tr><th>L2 중경</th><td>성당 측면, 버트레스, 꺼진 창, 띠돌림</td><td class="num">0.35</td><td>T2–T5, S3 안개</td><td class="num">13–32</td><td>낮음, 트레이서리</td><td>176 모듈</td></tr>
+        <tr><th>L3 근경</th><td>무너진 회랑 아치, 묘역 담</td><td class="num">0.7</td><td>T1–T3</td><td class="num">8–18</td><td>중간, 돌 클러스터</td><td>40 베이 모듈</td></tr>
+        <tr><th>L4 플레이 바닥</th><td>바닥 36px, 묘비, 잔해</td><td class="num">1.0</td><td>T0–T5</td><td class="num">5–32</td><td>높음</td><td>320 모듈</td></tr>
+        <tr><th>전경 (선택)</th><td>철책, 마른 가지, 사슬</td><td class="num">1.5</td><td>N0 단색</td><td class="num">2</td><td>실루엣</td><td>화면 위·아래 10% 안에서만</td></tr>
+      </tbody>
+    </table></div>
+    <p class="note">Stage 1 기본 스크롤 속도 48 px/s(L4 기준). 보스 등장 시 0.2배로 감속해 정지.</p>
+
+    <h3><span class="k">3-8</span>UI 규격</h3>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>항목</th><th>규격</th></tr></thead>
+      <tbody>
+        <tr><th>렌더링</th><td>UI도 640×360 그리드에 1:1로 그리고 게임과 같은 정수 배율로 출력. 고해상 UI 레이어 폐지</td></tr>
+        <tr><th>숫자·라벨</th><td>자체 5×7 픽셀 폰트(고정폭 6px). 점수, 라벨, 캡션</td></tr>
+        <tr><th>한글·메뉴</th><td>Galmuri11 (12px, 행간 14) 본문·메뉴, Galmuri11 Bold 선택 항목·제목, Galmuri9 (10px) 보조. SIL OFL 1.1 — 상업 사용 가능, 게임에 포함 배포 가능</td></tr>
+        <tr><th>로고</th><td>손으로 찍은 커스텀 레터링 240×44 이내, 대문자 높이 20px. 본 B4 + N0 1px 그림자. 금 그라데이션·글로우 없음. 'C' 하나를 일식 원반으로 바꾸는 정도의 모티프만</td></tr>
+        <tr><th>글자 색</th><td>본문 B4, 라벨 N8, 비활성 N7, 강조(선택 1개) B5, 금박 U1은 커서·신기록·S랭크만, 경고 R4</td></tr>
+        <tr><th>가독성</th><td>플레이 영역 위의 모든 글자와 아이콘은 N0 4방향 1px 외곽선</td></tr>
+        <tr><th>간격</th><td>기본 단위 4px, 화면 안전 여백 6px(1080p 18px)</td></tr>
+        <tr><th>메뉴 상태</th><td>기본 N8 · 포커스 B5 + Bold + 왼쪽 금박 마름모 커서 · 누름 1프레임 N11 · 비활성 N6</td></tr>
+        <tr><th>패널</th><td>없음. 정보 영역이 필요하면 50% 체커 디더(N0)로 배경을 눌러 구분</td></tr>
+      </tbody>
+    </table></div>
+    <figure class="bfig" data-sheet="hud" data-max="4">
+      <div class="tools"></div>
+      <div class="stage"></div>
+      <figcaption><b>HUD 키트 (실제 크기).</b> 보스 바 3상태(피해 잔상, 전환 중 무적 해칭, 분노), 차지 게이지 4상태, 하단 HUD(모르가나 HP 4칸 중 마지막 1칸 위험 상태).</figcaption>
+    </figure>
+  </div>
+</section>
+
+<!-- ============================== 4 ============================== -->
+<section class="ch gutter" id="ch4">
+  <div class="wide">
+    <div class="ch-head"><span class="ch-num">04</span><h2>캐릭터 3종 재설계</h2></div>
+    <p class="lead read" style="margin-inline:0">이름과 전투 역할(밸런스·고속·확산)은 그대로 두고 외형을 처음부터 다시 정했습니다. 기준은 오른쪽을 향한 48×32 비행 스프라이트입니다. 전신·초상화는 이 스프라이트에서 출발합니다.</p>
+
+    <h3><span class="k">4-0</span>실루엣 구분</h3>
+    <figure class="bfig" data-sheet="silhouette" data-max="4">
+      <div class="tools"></div>
+      <div class="stage"></div>
+      <figcaption><b>실루엣 테스트 (48×32 블록아웃).</b> 왼쪽부터 컬러, 단색 실루엣, 밝은 석재 위. 세 형태가 직선+원 / 뒤로 젖힌 초승달 / 수평 상자로 갈립니다.</figcaption>
+    </figure>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th></th><th>세라핀</th><th>녹티스</th><th>모르가나</th></tr></thead>
+      <tbody>
+        <tr><th>역할 (유지)</th><td>밸런스 · 관통</td><td>고속 · 원거리 직선</td><td>확산 · 근접 화력, HP 4</td></tr>
+        <tr><th>실루엣 키</th><td>앞으로 뻗은 창 + 머리 뒤 쇠고리</td><td>뒤로 젖힌 나방 날개 두 장 + 더듬이</td><td>수평의 관 + 앞에 매달린 등롱</td></tr>
+        <tr><th>형태 언어</th><td>직선 · 삼각형</td><td>초승달 · 예각 곡선</td><td>사각형 · 육각형(무게)</td></tr>
+        <tr><th>가로:세로</th><td>1.7 : 1</td><td>2 : 1</td><td>1.5 : 1</td></tr>
+        <tr><th>움직임 서명</th><td>서코트 자락의 느린 물결 (6f @10 fps)</td><td>날개의 빠른 떨림 (4f @20 fps)</td><td>관의 느린 부유 ±1px / 1.2 s, 등롱의 진자</td></tr>
+        <tr><th>정체색</th><td><span class="chip" style="background:#D9AD52"></span>Lumen Gold G0–G4</td><td><span class="chip" style="background:#3698D6"></span>Storm Azure A0–A4</td><td><span class="chip" style="background:#349E6E"></span>Grave Green V0–V4</td></tr>
+        <tr><th>재질 램프</th><td>Bone(서코트), Ash(강철), 쇠고리</td><td>Ash(가죽, 날개막), Slate</td><td>Ash(상복), Stone(관 나무), 철띠</td></tr>
+        <tr><th>조명 개성</th><td>정면 키 라이트, 가장 밝은 캐릭터</td><td>측면 림 라이트, 눈 1px만 발광</td><td>등롱이 아래에서 비춤, 가장 어두운 캐릭터</td></tr>
+        <tr><th>v1에서 버린 것</th><td class="old">천사 날개, 흰 깃털 덩어리</td><td class="old">검은 깃털 날개, 보라 정체색</td><td class="old">고깔모자, 빗자루, 혈마젠타</td></tr>
+      </tbody>
+    </table></div>
+    <p class="read" style="margin-inline:0"><b>공통 규칙</b> — 판정 3×3은 스프라이트의 가슴 중앙. 집중 이동(Shift) 중에는 판정을 B5 점 + N0 외곽 + 정체색 1px 원(r 6)으로 표시. 피격 후 무적 1.5 s 동안 4프레임 표시 / 4프레임 50% 디더로 깜빡임. 재진입은 화면 왼쪽 밖에서 x 96까지 0.8 s.</p>
+
+    <!-- Seraphine -->
+    <div class="char" id="seraphine">
+      <div class="char-head"><h3>세라핀 SERAPHINE — 종을 잃은 성가 기사</h3><span class="role">밸런스형 · v1 칭호 '빛을 잇는 성창'</span></div>
+      <p class="read" style="margin-inline:0">무너진 성당의 마지막 성가대 기사입니다. 천사가 아니라 사람입니다. 날개 대신 머리 뒤에 떠 있는 <b>쇠고리</b>(침묵한 종의 왕관 고리를 녹여 만든 성구)가 그를 띄웁니다. 흰 서코트, 강철 판금, 사슬 두건, 기사의 창.</p>
+      <figure class="bfig" data-sheet="hero:seraphine" data-max="6"><div class="tools"></div><div class="stage"></div><figcaption><b>비행 스프라이트 블록아웃 48×32</b> — 컬러와 실루엣. 쇠고리의 구멍이 실루엣에서도 보여야 합니다.</figcaption></figure>
+      <div class="tbl wide-t"><table>
+        <thead><tr><th>산출물</th><th>명세</th></tr></thead>
+        <tbody>
+          <tr><th>1 전신 픽셀아트</th><td>96×144, 오른쪽을 향한 3/4 정면, 선 자세, 창을 세워 쥠(창끝이 머리 위 12px). 발목까지 오는 흰 서코트, 어깨·팔 판금(Ash), 사슬 두건과 짧은 흰 베일, 지름 26px 쇠고리. 6.2두신. 실루엣 안에서 가장 밝은 면은 서코트(B3–B5)라 내부 대비가 큼. 선택 화면 블록아웃(§5-2) 참고</td></tr>
+          <tr><th>2 비행 스프라이트</th><td>48×32. 상체 15° 앞으로, 무릎을 굽혀 뒤로 접은 기마 자세, 창을 겨드랑이에 끼워 수평(랜스 차지). 서코트 자락 두 갈래와 베일이 뒤로. 판정 = 가슴 갑옷 중앙(27, 16)</td></tr>
+          <tr><th>3 기본 공격</th><td><b>성가탄 Hymn Bolt</b> — 10×2 금빛 선 2줄(Lv1) / 3줄(Lv2) / 4줄(Lv3), 줄 간격 6px, 560 px/s, 0.15 s 간격. 윗줄 G3, 아랫줄 G2, 끝 1px G4, 불투명도 78%. 총구 섬광은 창끝 3×3 G3 2프레임</td></tr>
+          <tr><th>4 차지샷</th><td>모으기: 창끝으로 1px 선 4가닥이 수렴(4프레임 루프), 쇠고리 G1→G3 순환. <b>1단 관통 성창</b> — 44×5 광창(G1·G2·G4 코어·G2·G1), 관통, 뒤로 1px 잔상선 6프레임. <b>2단 쌍성창</b> — 66×5 두 줄(±6px) + 발사점에 9×17 빛 십자 2프레임. 화면 플래시 없음</td></tr>
+          <tr><th>5 폭탄</th><td><b>성역의 연도 Sanctum Litany</b> (v1 Golden Sanctum) — ① 쇠고리가 반경 48px 원(1px G2 + 디더)으로 6프레임 확장 → ② 화면 위에서 폭 5px 빛기둥 9개(G3 코어, G1 가장자리)가 왼쪽부터 4프레임 간격으로 내리꽂힘 → ③ 닿은 적탄은 뼈 조각(B3 1px)으로 바뀌어 플레이어에게 흡수. 배경 N0 30% 암전. 무적 1.8 s</td></tr>
+          <tr><th>6 피격</th><td>f1 전체를 B5로 팔레트 스왑(1프레임) → f2–f3 머리가 젖혀지고 창끝이 들림, 2px 뒤로 밀림, 쇠고리 기울어짐 → f4 복귀. 파편: 쇠고리에서 B4·N8 2×1 조각 5개. HUD 해당 칸이 3프레임 동안 금 감</td></tr>
+          <tr><th>7 선택 화면 초상화</th><td>64×64, 오른쪽 3/4. 사슬 두건과 베일, 쇠고리가 머리 뒤를 액자처럼 감쌈. 회색 눈, 결연하고 젊은 얼굴. 우상단 키 라이트, 왼쪽 그림자 N2. 표정 3종(기본·결의·부상), 배경 투명</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tbl mid-t"><table>
+        <thead><tr><th>애니메이션</th><th class="num">프레임</th><th class="num">fps</th><th>메모</th></tr></thead>
+        <tbody>
+          <tr><th>비행 루프</th><td class="num">6</td><td class="num">10</td><td>서코트 자락 물결, 몸 ±1px</td></tr>
+          <tr><th>상승 · 하강 기울기</th><td class="num">2 + 2</td><td class="num">12</td><td>머리 ∓1px, 자락이 반대로</td></tr>
+          <tr><th>전진 · 후퇴</th><td class="num">2 + 2</td><td class="num">12</td><td>자락 길이 변화</td></tr>
+          <tr><th>차지 유지 · 발사</th><td class="num">4 · 3</td><td class="num">12 · 20</td><td>쇠고리 밝기 순환</td></tr>
+          <tr><th>폭탄 시전</th><td class="num">8</td><td class="num">12</td><td>창을 세워 들어 올림</td></tr>
+          <tr><th>피격 · 격추</th><td class="num">4 · 10</td><td class="num">20 · 12</td><td>격추 시 쇠고리가 떨어져 바닥에 남음(게임오버 연출과 연결)</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <!-- Noctis -->
+    <div class="char" id="noctis">
+      <div class="char-head"><h3>녹티스 NOCTIS — 일식을 쫓는 나방</h3><span class="role">고속형 · v1 칭호 '밤의 추적자'</span></div>
+      <p class="read" style="margin-inline:0">빛을 잃은 세계에서 마지막 빛인 코로나를 쫓는 전령입니다. 등에 붙은 좁고 긴 <b>나방 날개</b> 한 쌍, 깃털 더듬이가 달린 두건, 얼굴 아래를 가린 긴 목도리, 손목 석궁과 접이식 낫. 날개 안점과 눈만 청색으로 빛납니다.</p>
+      <figure class="bfig" data-sheet="hero:noctis" data-max="6"><div class="tools"></div><div class="stage"></div><figcaption><b>비행 스프라이트 블록아웃 48×32</b> — 날개 두 장이 만드는 뒤로 젖힌 초승달 실루엣.</figcaption></figure>
+      <div class="tbl wide-t"><table>
+        <thead><tr><th>산출물</th><th>명세</th></tr></thead>
+        <tbody>
+          <tr><th>1 전신 픽셀아트</th><td>96×144. 날개를 반쯤 접어 망토처럼 늘어뜨린 선 자세(날개 끝이 무릎까지), 등 뒤의 접힌 낫 손잡이가 머리 위로 사선, 목도리 두 갈래가 발목까지. 가늘고 긴 7두신. 밝은 점은 날개 안점(A3·A4) 두 개와 눈 A4 1px</td></tr>
+          <tr><th>2 비행 스프라이트</th><td>48×32. 몸이 거의 수평(전방 5°), 위·아래 날개가 뒤로 젖혀짐, 목도리 두 줄이 일직선으로 뒤로 흘러 속도선 역할. 판정 = 가슴(30, 15)</td></tr>
+          <tr><th>3 기본 공격</th><td><b>바늘 연사 Needle Volley</b> — 8×1 바늘, Lv1 2줄(±1.5px) / Lv2 3줄 / Lv3 4줄, 720 px/s, 0.12 s 간격. 머리 3px A4, 몸 3px A3, 꼬리 2px A1. 좁은 차선이 '원거리 직선형'을 보여 줌</td></tr>
+          <tr><th>4 차지샷</th><td>모으기: 날개 안점이 A2→A4로 밝아지며 날개가 펼쳐짐. <b>1단 폭풍 볼트</b> — 26×5 지그재그 번개(3프레임 순환, A4 코어 + A2 테두리), 관통, 1150 px/s. <b>2단 초승달 사신</b> — 펼친 낫이 21×21 초승달로 회전(8방향 사전 프레임), 부메랑 궤도, 2프레임마다 A2 잔상 호</td></tr>
+          <tr><th>5 폭탄</th><td><b>월아 폭풍 Moonmoth Tempest</b> (v1 Blackwing Tempest) — ① 날개를 활짝 펼친 전용 32×48 프레임 → ② 화면 N0 40% 암전 0.5 s(일식처럼) → ③ 플레이어에서 오른쪽 끝까지 가로 번개 3줄(미리 그린 구간 조합, A4 2px 코어 + A2 1px), 적 12지점에 9×9 타격 → ④ 번개가 지난 적탄은 청색 점(A3)으로 소멸. 무적 1.5 s</td></tr>
+          <tr><th>6 피격</th><td>f1 B5 스왑 → f2–f3 날개가 접히며 2px 뒤로 회전, 목도리가 위로 튐 → f4 복귀. 파편: 날개 비늘 N9 1px 6개가 천천히 떨어짐</td></tr>
+          <tr><th>7 선택 화면 초상화</th><td>64×64. 더듬이 두건, 코까지 덮은 목도리, 한쪽 눈만 A4로 빛남. 측면 림 라이트(M1). 표정은 눈매로만(기본·집중·부상)</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tbl mid-t"><table>
+        <thead><tr><th>애니메이션</th><th class="num">프레임</th><th class="num">fps</th><th>메모</th></tr></thead>
+        <tbody>
+          <tr><th>비행 루프</th><td class="num">4</td><td class="num">20</td><td>날개 떨림이 속도감을 만듦</td></tr>
+          <tr><th>상승 · 하강</th><td class="num">2 + 2</td><td class="num">12</td><td>몸 기울기 ±1px</td></tr>
+          <tr><th>전진 · 후퇴</th><td class="num">2 + 2</td><td class="num">12</td><td>전진은 날개를 접어 실루엣이 가늘어짐, 후퇴는 펼침</td></tr>
+          <tr><th>차지 유지 · 발사</th><td class="num">4 · 3</td><td class="num">12 · 20</td><td>안점 밝기 순환</td></tr>
+          <tr><th>폭탄 시전</th><td class="num">8</td><td class="num">12</td><td>날개 전개</td></tr>
+          <tr><th>피격 · 격추</th><td class="num">4 · 10</td><td class="num">20 · 12</td><td>격추 시 날개 비늘이 흩어짐</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <!-- Morgana -->
+    <div class="char" id="morgana">
+      <div class="char-head"><h3>모르가나 MORGANA — 장례 행렬의 마녀</h3><span class="role">확산형 · v1 칭호 '재의 마녀'</span></div>
+      <p class="read" style="margin-inline:0">망자를 묘지로 인도하는 장의 마녀입니다. 고깔모자와 빗자루 대신 상복 베일을 쓰고, 공중에 뜬 <b>검은 관</b> 위에 옆으로 앉아 이동합니다. 긴 지팡이 끝 철제 등롱에 묘지 녹색 혼령불. 느리고 단단한(HP 4) 성격을 관의 무게감으로 보여 줍니다.</p>
+      <figure class="bfig" data-sheet="hero:morgana" data-max="6"><div class="tools"></div><div class="stage"></div><figcaption><b>비행 스프라이트 블록아웃 48×32</b> — 수평의 관과 앞쪽 등롱이 만드는 무거운 상자 실루엣.</figcaption></figure>
+      <div class="tbl wide-t"><table>
+        <thead><tr><th>산출물</th><th>명세</th></tr></thead>
+        <tbody>
+          <tr><th>1 전신 픽셀아트</th><td>96×144. 세워 둔 관(높이 120px) 옆에 서서 등롱 지팡이를 든 자세. 허리까지 오는 레이스 베일, 높은 깃의 상복(N1–N3). 얼굴은 등롱 녹빛이 아래에서 비춤(V2 하이라이트) — 다른 둘과 반대 방향의 조명</td></tr>
+          <tr><th>2 비행 스프라이트</th><td>48×32. 관(40×10) 위 뒤쪽에 옆으로 앉음, 지팡이가 앞으로 길게, 앞 끝의 등롱이 흔들림. 관 아래 사슬 두 가닥. 판정 = 몸통(18, 15)</td></tr>
+          <tr><th>3 기본 공격</th><td><b>혼령 산탄 Wisp Spread</b> — 6×4 물방울 혼령, Lv1 3갈래(±12°) / Lv2 4갈래 / Lv3 5갈래(±24°), 420 px/s, 수명 1.0 s. 마지막 0.2 s는 2단 디더로 사라져 사거리가 눈에 보임. 머리 V4, 몸 V3, 꼬리 V2</td></tr>
+          <tr><th>4 차지샷</th><td>모으기: 관 뚜껑이 1px 열리며 V3 빛이 새어 나오고 혼령 2개가 주위를 돎. <b>1단 조문객</b> — 7×7 추적 혼령 3개(2프레임 깜빡임). <b>2단 장송 합창</b> — 9×9 혼령 구체 7개가 부채꼴로 퍼졌다가 한 점으로 수렴, 24×24 링 붕괴 5프레임</td></tr>
+          <tr><th>5 폭탄</th><td><b>망자의 행렬 Procession of the Dead</b> (v1 Choir of the Departed) — 관이 완전히 열리고 12×16 유령 실루엣 16명(N9 몸 + V3 외곽 1px)이 2.4 s 동안 왼쪽에서 오른쪽으로 행진. 지나간 자리의 적탄을 먹어 녹색 점(V2)으로 바꾸고 지속 피해. 배경 N0 30% 암전. 무적 2.0 s</td></tr>
+          <tr><th>6 피격</th><td>f1 B5 스왑 → f2 관 앞머리가 들림(사전 기울기 프레임) → f3 등롱이 뒤로 진자 운동(3프레임) → f4 복귀. 파편: 나무 조각 T5 2×1 5개</td></tr>
+          <tr><th>7 선택 화면 초상화</th><td>64×64. 베일 아래 반쯤 감은 눈, 어두운 입술, 턱 아래에서 올라오는 녹빛. 키 라이트 없이 아래 조명만 써서 셋 중 가장 어두운 초상</td></tr>
+        </tbody>
+      </table></div>
+      <div class="tbl mid-t"><table>
+        <thead><tr><th>애니메이션</th><th class="num">프레임</th><th class="num">fps</th><th>메모</th></tr></thead>
+        <tbody>
+          <tr><th>부유 루프</th><td class="num">6</td><td class="num">10</td><td>관 ±1px, 사슬 흔들림, 등롱 진자</td></tr>
+          <tr><th>상승 · 하강</th><td class="num">2 + 2</td><td class="num">12</td><td>관이 2px 기울어진 사전 프레임</td></tr>
+          <tr><th>전진 · 후퇴</th><td class="num">2 + 2</td><td class="num">12</td><td>베일이 길어지거나 앞으로 쏠림</td></tr>
+          <tr><th>차지 유지 · 발사</th><td class="num">4 · 3</td><td class="num">12 · 20</td><td>뚜껑 틈 녹빛</td></tr>
+          <tr><th>폭탄 시전</th><td class="num">8</td><td class="num">12</td><td>관 뚜껑이 열림</td></tr>
+          <tr><th>피격 · 격추</th><td class="num">4 · 10</td><td class="num">20 · 12</td><td>격추 시 관이 떨어지며 뚜껑이 열림</td></tr>
+        </tbody>
+      </table></div>
+    </div>
+
+    <h3><span class="k">4-4</span>적 디자인 원칙 (Stage 1)</h3>
+    <ul class="tight read" style="margin-inline:0">
+      <li>모든 적은 왼쪽을 보고, 뼈·재·석재·청동 램프로만 만듭니다. 캐릭터 정체색은 쓰지 않습니다.</li>
+      <li>크림슨은 눈과 약점에만: 소형 2px 이하, 중형 6px 이하, 대형 12px 이하.</li>
+      <li>역광 림 1px(M0)로 실루엣을 배경에서 떼어 냅니다.</li>
+      <li>공격 예고: 눈·약점이 R4 → 흰색으로 2프레임 깜빡인 뒤 발사.</li>
+      <li>사망: 불꽃 폭발 대신 재(N7·N8 2×2 클러스터)로 8프레임 동안 흩어지고 뼈 조각 하나(B3)가 남습니다.</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================== 5 ============================== -->
+<section class="ch gutter" id="ch5">
+  <div class="wide">
+    <div class="ch-head"><span class="ch-num">05</span><h2>화면별 레이아웃과 디자인 명세</h2></div>
+    <p class="lead read" style="margin-inline:0">모든 좌표는 640×360 논리 px입니다(×3 = 1080p). 블록아웃은 각 화면의 실제 크기 구도이며, <b>가이드</b> 버튼으로 영역과 치수를 겹쳐 볼 수 있습니다. 가장 중요한 화면은 5-3과 5-4입니다.</p>
+
+    <h3 id="s-combat"><span class="k">5-3</span>Stage 1 일반 전투 화면</h3>
+    <figure class="bfig" data-scene="combat" data-max="3"><div class="tools"></div><div class="stage"></div><figcaption><b>Stage 1 A→B 구간.</b> 세라핀(좌측 1/3)이 성가탄을 쏘고, 오른쪽에서 종지기 해골 2기·박쥐 편대·촛대 망령이 진입. 5-way 크림슨 부채꼴, 조준 M탄, 뼈탄 3발, 바늘 1발.</figcaption></figure>
+    <div class="two">
+      <div>
+        <h4>목적</h4>
+        <p>0.2초 안에 <b>위험(적탄) → 적 → 나</b>의 순서로 구분되게 합니다. 홍보 이미지가 아니라 실제 플레이 순간처럼 보여야 합니다.</p>
+        <h4>구도</h4>
+        <ul class="tight">
+          <li>플레이어는 왼쪽에서 오른쪽으로 공격, 적은 오른쪽 화면 밖(x ≥ 656)에서 진입</li>
+          <li>상단 밴드는 비워 둠 — 일반 전투 중 HUD 없음</li>
+          <li>배경 건축이 고딕을 맡고, 화면 중앙 띠(y 60–300)는 하늘과 낮은 대비로 남겨 탄이 놓일 자리를 확보</li>
+        </ul>
+      </div>
+      <div>
+        <h4>화면 밴드</h4>
+        <div class="tbl"><table>
+          <thead><tr><th>영역</th><th>범위</th><th>용도</th></tr></thead>
+          <tbody>
+            <tr><th>상단 밴드</th><td class="nw">y 0–14</td><td>구간 캡션(2 s), 보스전 보스 바</td></tr>
+            <tr><th>주 플레이 밴드</th><td class="nw">y 14–324</td><td>적·탄·플레이어</td></tr>
+            <tr><th>바닥 밴드</th><td class="nw">y 324–360</td><td>지상 적 이동, HUD</td></tr>
+            <tr><th>플레이어 영역</th><td class="nw">x 0–200</td><td>기본 위치 (96, 176)</td></tr>
+            <tr><th>교전 영역</th><td class="nw">x 200–440</td><td>—</td></tr>
+            <tr><th>진입 영역</th><td class="nw">x 440–640</td><td>대형 적 체류 x 480–600</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+    <h4>HUD 요소</h4>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>요소</th><th>위치</th><th>크기</th><th>색</th><th>상태 변화</th></tr></thead>
+      <tbody>
+        <tr><th>HP 칸</th><td>(6, 345)부터 9px 간격</td><td>9×9 마름모</td><td>B4 / 빈칸 N4 / 마지막 1칸 R4</td><td>피격 시 칸이 3프레임 동안 금 감, 마지막 칸은 16프레임 주기 깜빡임</td></tr>
+        <tr><th>폭탄</th><td>HP 뒤 +5px</td><td>7×8 종 아이콘</td><td>N9 · N7</td><td>사용 시 4프레임 디더 소멸</td></tr>
+        <tr><th>파워</th><td>폭탄 뒤 +6px</td><td>'PWR' + 3×5 칸 3개</td><td>라벨 N8, 칸 = 정체색 2·3 / N4</td><td>Lv 상승 시 칸 1프레임 흰색</td></tr>
+        <tr><th>점수</th><td>오른쪽 정렬 x 634, y 347</td><td>5×7 8자리 + 'SCORE'</td><td>숫자 B4, 라벨 N8</td><td>즉시 갱신(롤링 없음)</td></tr>
+        <tr><th>체인</th><td>점수 위 y 337</td><td>5×7</td><td>N8</td><td>2 이상일 때만, 끊기면 8프레임 디더 소멸</td></tr>
+        <tr><th>차지 게이지</th><td>플레이어 아래 +2px</td><td>16×2 (+N0 테두리 18×4)</td><td>충전 N9 → 1단 이후 정체색 3 → 2단 윗줄 정체색 4 / 쿨다운 N5</td><td>차지 중에만 표시</td></tr>
+        <tr><th>구간 캡션</th><td>상단 중앙 y 5</td><td>5×7</td><td>N8 + N0 외곽</td><td>2 s 후 4단 디더 소멸</td></tr>
+        <tr><th>가림 규칙</th><td colspan="4">플레이어 또는 적탄이 HUD 박스 16px 안에 들어오면 HUD를 35%로(4프레임). 상시 HUD 점유 약 3,500px² / 230,400px² = 1.5%</td></tr>
+      </tbody>
+    </table></div>
+    <h4>그리기 순서</h4>
+    <p class="read" style="margin-inline:0">L0 → L1 → 안개 → L2 → L3 → L4 → 적 → 플레이어 탄(78%) → 플레이어 → 아이템 → <b>적탄(최상단)</b> → 전경 → HUD. 적탄은 HUD를 뺀 모든 것 위에 있습니다.</p>
+
+    <h3 id="s-boss"><span class="k">5-4</span>Stage 1 보스전 화면 — 벨키퍼 아바돈</h3>
+    <figure class="bfig" data-scene="boss" data-max="3"><div class="tools"></div><div class="stage"></div><figcaption><b>보스 1페이즈 '침묵의 종'.</b> 녹티스 플레이. 종에서 퍼지는 크림슨 링, 느린 뼈탄 3발, 망치에서 조준 바늘 4발과 점선 예고선. 상단 3px 보스 바, 하단 HUD.</figcaption></figure>
+    <figure class="bfig" data-sheet="bossPhases" data-max="3"><div class="tools"></div><div class="stage"></div><figcaption><b>보스 3페이즈 블록아웃 (160×176).</b> 종 자체가 몸이고, 종 아래 크림슨 추가 약점(×1.0), 종은 ×0.5. P1 진주빛 림 → P2 붉은 균열과 크림슨 림 → P3 하반부 붕괴, 뼈 우리 속 코어 노출.</figcaption></figure>
+    <div class="two">
+      <div>
+        <h4>목적</h4>
+        <p>거대함을 화면의 일부로 표현하면서 회피 공간을 66% 이상 남기고, 약점이 한눈에 보이게 합니다.</p>
+        <h4>배치</h4>
+        <ul class="tight">
+          <li>보스 캔버스 160×176을 (440, 52)에 배치 — 오른쪽 1/3, 화면 높이 49%</li>
+          <li>x 0–420은 회피 공간. 보스의 탄은 x 420 왼쪽에서 펼쳐지도록 설계</li>
+          <li>개기일식은 보스 머리 오른쪽 위(566, 52). 보스 실루엣의 역광이 됨</li>
+          <li>종루는 슬레이트 실루엣(S1)으로 뒤에 두어 청동 종(Z2)과 분리</li>
+        </ul>
+      </div>
+      <div>
+        <h4>보스 바</h4>
+        <div class="tbl"><table>
+          <tbody>
+            <tr><th>이름</th><td>(6, 4) 5×7 B4 'BELLKEEPER ABADDON'</td></tr>
+            <tr><th>바</th><td>x 120–616, y 5, 496×3, N0 테두리, 채움 R3 + 윗줄 R4</td></tr>
+            <tr><th>피해 잔상</th><td>R1, 0.4 s 뒤 줄어듦</td></tr>
+            <tr><th>페이즈 눈금</th><td>65% · 30% 위치에 N0 1px 끊김 + 위쪽 B4 1×3</td></tr>
+            <tr><th>타이머</th><td>오른쪽 정렬 x 634, 페이즈 남은 초</td></tr>
+            <tr><th>전환 중</th><td>N6 + N8 사선 해칭(무적)</td></tr>
+            <tr><th>분노 (90 s)</th><td>바·이름 R4, 16프레임 주기 R3↔R4</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+    </div>
+    <h4>페이즈별 시각 변화</h4>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>페이즈</th><th class="num">HP</th><th>보스 외형</th><th>림</th><th>하늘 · 일식</th><th>배경</th><th>대표 탄</th></tr></thead>
+      <tbody>
+        <tr><th>P1 Silent Toll</th><td class="num">100–65%</td><td>온전한 종, 망치를 들어 올림</td><td>M0 진주</td><td>개기, 작은 홍염 2개</td><td>지면 안개 15%</td><td>링탄(M 크림슨 16발), 망치 바늘</td></tr>
+        <tr><th>P2 Lament Bell</th><td class="num">65–30%</td><td>붉은 균열 2줄(R3 1px), 가장자리 이 빠짐</td><td>R2</td><td>홍염 확대 + R1 외곽 디더</td><td>안개 25%, 종루 벽에 1px R2 균열</td><td>뼈탄 커튼 + 링</td></tr>
+        <tr><th>P3 Funeral Collapse</th><td class="num">30–0%</td><td>종 하반부 붕괴, 뼈 우리 속 코어(지름 18) 노출</td><td>R2</td><td>홍염 최대, 하늘 한 단계 어두워짐</td><td>낙석 증가</td><td>코어 직사 + 연속 링</td></tr>
+        <tr><th>마지막 종</th><td class="num">≤ 8%</td><td>코어 2프레임 맥동(R3↔R4)</td><td>—</td><td>—</td><td>—</td><td>—</td></tr>
+        <tr><th>전환</th><td class="num">—</td><td>균열 애니메이션 1.2 s</td><td>—</td><td>—</td><td>—</td><td>화면의 적탄이 뼈 조각(B3)으로 바뀌어 플레이어에게 흡수</td></tr>
+        <tr><th>격파</th><td class="num">0</td><td>종 파편 24개(사전 기울기 4프레임)가 떨어지고 코어가 안으로 무너짐(R4→N0)</td><td>—</td><td>3프레임 완전 암전 → 다이아몬드 링 → 개기 종료</td><td>—</td><td>—</td></tr>
+      </tbody>
+    </table></div>
+    <h4>보스 탄과 예고 규칙</h4>
+    <ul class="tight read" style="margin-inline:0">
+      <li>보스도 일반 적탄과 같은 두 계열(크림슨·뼈)만 씁니다. 보스 전용 색 없음.</li>
+      <li>링탄 예고: 종 가장자리 외곽선이 0.4 s 동안 R4. 조준 바늘 예고: R1 점선(3px 간격) 0.5 s.</li>
+      <li>피격 표시는 코어 1×1~3×3 흰색 2프레임(10 Hz 제한)과 종 표면의 N10 2px 불꽃뿐입니다. 몸 전체 백색 섬광 없음.</li>
+      <li>페이즈 이름은 화면 중앙이 아니라 상단 밴드의 보스 이름 자리에 2 s 동안 'II · LAMENT BELL'로 바뀌어 표시됩니다.</li>
+    </ul>
+
+    <h3 id="s-title"><span class="k">5-1</span>타이틀 화면</h3>
+    <figure class="bfig" data-scene="title" data-max="3"><div class="tools"></div><div class="stage"></div><figcaption><b>타이틀.</b> 개기일식 아래 종루 난간 위 세 인물의 작은 뒷모습. 왼쪽은 로고 자리(별도 레터링 발주)와 텍스트 메뉴.</figcaption></figure>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>요소</th><th>위치 · 크기</th><th>명세</th></tr></thead>
+      <tbody>
+        <tr><th>목적</th><td colspan="2">3초 안에 '고딕 픽셀 아케이드'임을 전달하고 바로 시작하게 합니다. 캐릭터 일러스트를 쓰지 않습니다. 거대한 건축과 작은 인물의 대비로 분위기를 냅니다.</td></tr>
+        <tr><th>로고</th><td>(40, 64) 240×44</td><td>§3-8 로고 규격. 등장: 4단계 디더 페이드 × 3프레임</td></tr>
+        <tr><th>부제</th><td>(40, 116)</td><td>'일식의 진혼곡' Galmuri11 N8</td></tr>
+        <tr><th>메뉴</th><td>(40, 170)부터 16px 간격</td><td>START · STORY · OPTIONS · ARCHIVE(잠김 N6) · CREDITS. 포커스 B5 Bold + 금박 커서(28, y+3)</td></tr>
+        <tr><th>장면</th><td>x 320–640</td><td>개기일식(492, 96) 반지름 22, 종루 난간(360–640, y 265~), 세 인물 약 24px(430, 237)이 일식을 바라봄. 모르가나의 등롱만 녹색 1px</td></tr>
+        <tr><th>하단</th><td>y 344</td><td>버전 N7 왼쪽, 최고 점수 N7</td></tr>
+        <tr><th>모션</th><td colspan="2">재 입자 낙하 30개, 별 2개씩 깜빡임, 코로나 광선 4초 주기 1프레임 교대. 20초 무입력 시 어트랙트 데모</td></tr>
+        <tr><th>금지</th><td colspan="2"><span class="tag no">금지</span> 캐릭터 일러스트, 금 테두리 버튼, 로고 글로우, 화면 전체 붉은 톤</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 id="s-select"><span class="k">5-2</span>캐릭터 선택 화면</h3>
+    <figure class="bfig" data-scene="select" data-max="3"><div class="tools"></div><div class="stage"></div><figcaption><b>캐릭터 선택.</b> 성당 회랑, 높은 창의 빛기둥 아래 받침대 위 전신 96×144(조각상처럼). 왼쪽은 실제 크기 비행 스프라이트 목록, 오른쪽은 스탯과 1:1 실시간 프리뷰.</figcaption></figure>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>요소</th><th>위치 · 크기</th><th>명세</th></tr></thead>
+      <tbody>
+        <tr><th>목적</th><td colspan="2">세 캐릭터의 '플레이 차이'를 5초 안에 비교하고 고르게 합니다. 외모 감상이 아니라 샷의 차이를 보여 줍니다.</td></tr>
+        <tr><th>목록</th><td>x 18–150, 58px 간격</td><td>48×32 비행 스프라이트(실제 크기, 선택 시 비행 루프 재생) + 이름 Galmuri11 + 역할 Galmuri9. 선택 B5 Bold + 금박 커서, 나머지 N7/N6</td></tr>
+        <tr><th>전신</th><td>(208, 156) 96×144</td><td>받침대(196, 300) 위. 높은 창에서 내려오는 12% 디더 빛기둥이 유일한 조명. 교체 시 4단계 디더 디졸브</td></tr>
+        <tr><th>이름 · 칭호</th><td>(452, 24)</td><td>Galmuri11 Bold B5 / Galmuri9 N8. 아래 1px N4 구분선</td></tr>
+        <tr><th>스탯</th><td>(452, 64)부터 12px 간격</td><td>HP · SPEED · POWER · RANGE, 5×5 블록 10칸. 채움 = 선택 캐릭터 정체색 2, 빈칸 N3. 화면의 유일한 유채색 강조</td></tr>
+        <tr><th>탭</th><td>(452, 124)</td><td>BASIC · CHARGE · BOMB 5×7, 현재 탭 B4 + 정체색 3 밑줄 1px. 3초마다 자동 순환</td></tr>
+        <tr><th>프리뷰</th><td>(452, 140) 172×96</td><td>실제 게임 엔진의 1:1 크롭(축소 없음). 플레이어가 청동 종 허수아비를 향해 현재 탭의 공격을 사용. N5 1px 테두리</td></tr>
+        <tr><th>설명</th><td>(452, 244)</td><td>Galmuri9 두 줄, N8 / N7</td></tr>
+        <tr><th>키 안내</th><td>y 341</td><td>1px N5 키캡 + 5×7 라벨</td></tr>
+        <tr><th>금지</th><td colspan="3"><span class="tag no">금지</span> 카드 프레임, 캐러셀 화살표, 회전 일러스트, 배경의 큰 달·일식</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 id="s-clear"><span class="k">5-5</span>스테이지 클리어 화면</h3>
+    <figure class="bfig" data-scene="clear" data-max="3"><div class="tools"></div><div class="stage"></div><figcaption><b>스테이지 클리어.</b> 왼쪽 하늘에서 개기가 끝나는 다이아몬드 링. 오른쪽 절반은 50% 체커 디더로 눌러 결과 열을 올림(패널 없음). 금박은 S와 NEW RECORD 둘뿐.</figcaption></figure>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>요소</th><th>위치 · 크기</th><th>명세</th></tr></thead>
+      <tbody>
+        <tr><th>목적</th><td colspan="2">결과를 읽게 합니다. 축하는 일식이 끝나는 빛으로 표현하고 장식은 쓰지 않습니다.</td></tr>
+        <tr><th>배경</th><td>전체</td><td>보스 아레나 그대로, 하늘 한 단계 밝게(S1→S5). 다이아몬드 링(196, 70)</td></tr>
+        <tr><th>캐릭터</th><td>(96, 168) 48×32</td><td>실제 크기 비행 루프. 확대 일러스트 없음</td></tr>
+        <tr><th>결과 열</th><td>x 312–616</td><td>x 288부터 N0 50% 체커 디더 + 1px N4 경계. 제목 Galmuri11 Bold B5, 부제 Galmuri9 N8, 구분선 N5</td></tr>
+        <tr><th>항목</th><td>y 78부터 15px 간격</td><td>SCORE · ENEMIES · MAX CHAIN · GRAZE · DAMAGE · BOMBS · BOSS TIME. 라벨 N8 왼쪽, 값 B4 오른쪽 정렬, 사이 50% N3 점선. 0.4 s 간격 순차 카운트업</td></tr>
+        <tr><th>랭크</th><td>(312, 212) 17×17 전용 글리프</td><td>C·B·A는 B4, S·EX만 U1 금박. 옆에 달성 조건(B4)과 NEW RECORD(U1)</td></tr>
+        <tr><th>선택지</th><td>y 284</td><td>NEXT STAGE · TITLE 텍스트, 포커스 커서</td></tr>
+        <tr><th>금지</th><td colspan="2"><span class="tag no">금지</span> 금 프레임 패널, 날개 달린 도장, 확대 캐릭터, 색종이 효과</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3 id="s-gameover"><span class="k">5-6</span>게임오버 화면</h3>
+    <figure class="bfig" data-scene="gameover" data-max="3"><div class="tools"></div><div class="stage"></div><figcaption><b>게임오버.</b> 스테이지 화면을 무채색(Ash 램프)으로 팔레트 스왑하고 50% 체커 디더로 누름. 남는 색은 일식의 홍염뿐. 바닥에 떨어진 세라핀의 쇠고리.</figcaption></figure>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>요소</th><th>위치 · 크기</th><th>명세</th></tr></thead>
+      <tbody>
+        <tr><th>목적</th><td colspan="2">실패를 조용히 알리고, 컨티뉴 결정을 빠르게 하게 합니다. 결정 하나뿐이므로 이 화면만 중앙 정렬합니다.</td></tr>
+        <tr><th>연출</th><td>0–1.2 s</td><td>격추 → 0.5 s 정지 → 12프레임에 걸쳐 전체 팔레트를 Ash 램프로 스왑 → 종 1회 → 글자 등장(디더 페이드)</td></tr>
+        <tr><th>제목</th><td>중앙 y 112</td><td>GAME OVER, Galmuri11 Bold B4. 붉은 글자 없음</td></tr>
+        <tr><th>카운트다운</th><td>중앙 y 156, 11×14 숫자</td><td>B4. 마지막 3초만 R4(이 화면의 유일한 적색 UI)</td></tr>
+        <tr><th>선택지</th><td>y 196</td><td>YES · NO, 포커스 B5 Bold + 금박 커서. 아래 Galmuri9 N7 안내 한 줄</td></tr>
+        <tr><th>하단</th><td>y 344</td><td>SCORE · STAGE · 구간 N7</td></tr>
+        <tr><th>컨티뉴 시</th><td colspan="2">색이 왼쪽에서 오른쪽으로 12프레임 디더 와이프로 돌아오고 플레이어 재진입</td></tr>
+        <tr><th>금지</th><td colspan="2"><span class="tag no">금지</span> 대형 붉은 링, 큰 붉은 제목, 화면 중앙의 확대 캐릭터</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ============================== 6 ============================== -->
+<section class="ch gutter" id="ch6">
+  <div class="wide">
+    <div class="ch-head"><span class="ch-num">06</span><h2>화면 시안용 이미지 프롬프트</h2></div>
+    <div class="read" style="margin-inline:0">
+      <p class="lead">생성 이미지는 <b>방향을 확인하는 시안</b>입니다. 이미지 생성기는 픽셀 그리드와 팔레트를 지키지 못하기 때문에, 결과를 그대로 쓰면 그 자체가 가짜 픽셀아트가 됩니다.</p>
+      <ol class="pflow">
+        <li>이 문서의 640×360 블록아웃으로 구도를 먼저 확정합니다.</li>
+        <li>아래 프롬프트로 무드 시안을 4~8장 뽑습니다. 모든 프롬프트 앞에 공통 스타일 블록을, 네거티브에 공통 네거티브를 붙입니다.</li>
+        <li>고른 시안을 nearest-neighbor로 640×360까지 줄이고 v2 팔레트로 다시 칠합니다.</li>
+        <li>실제 HUD를 얹고 부록 A의 검수 게이트를 통과시킵니다.</li>
+      </ol>
+      <p class="note">원본: 저장소 <code>eclipse-requiem/design-v2/prompts.md</code>. 비율 표기는 Midjourney 문법 예시입니다.</p>
+    </div>
+    <div class="prompts" id="prompts"></div>
+  </div>
+</section>
+
+<!-- ============================== 7 ============================== -->
+<section class="ch gutter" id="ch7">
+  <div class="wide">
+    <div class="ch-head"><span class="ch-num">07</span><h2>기존 디자인과 신규 디자인 비교</h2></div>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>항목</th><th>v1 (기존)</th><th>v2 (신규)</th></tr></thead>
+      <tbody>
+        <tr><th>방향 키워드</th><td class="old">고딕 다크 판타지, 피, 성광, 보랏빛 저주</td><td>Dark Gothic Pixel Arcade — 석재, 재, 정적, 개기일식</td></tr>
+        <tr><th>해상도 · 픽셀 밀도</th><td class="old">월드 640×360 + UI 1920×1080 + 고해상 글로우 패스, 일러스트 ×5·×2.5 회전</td><td>640×360 단일 그리드, 정수 배율만, 회전·확대 금지</td></tr>
+        <tr><th>제작 방식</th><td class="old">벡터 도형 → 양자화 → 일괄 외곽선</td><td>1:1 수작업 픽셀, 셀아웃, 재질 램프, 클러스터</td></tr>
+        <tr><th>글꼴</th><td class="old">Cinzel, Noto Serif KR, Noto Sans KR, 5×7 혼용</td><td>5×7 픽셀 폰트 + Galmuri 두 계열</td></tr>
+        <tr><th>기본 색</th><td class="old">블루블랙, 보라 암흑, 혈적</td><td>차콜, 슬레이트 블루, 석재 회색</td></tr>
+        <tr><th>적색의 용도</th><td class="old">달, 창문, HP, 폭탄 아이콘, 망토, 모르가나</td><td>적탄, 보스 패턴·약점, 적의 눈, 홍염만</td></tr>
+        <tr><th>보라</th><td class="old">일반 적탄, 녹티스, 보스 바, 안개</td><td>팔레트에 없음</td></tr>
+        <tr><th>금색</th><td class="old">모든 패널·버튼 테두리, 로고 그라데이션, 랭크 도장</td><td>메뉴 커서, 신기록, S·EX 랭크만 (화면당 2개 이하)</td></tr>
+        <tr><th>하늘의 천체</th><td class="old">고채도 붉은 달 (1080p 지름 약 190px)</td><td>개기일식: 검은 원반, 진주빛 코로나, 작은 홍염. 스테이지 진행에 따라 부분 → 다이아몬드 링 → 개기</td></tr>
+        <tr><th>명도 구조</th><td class="old">80% 픽셀이 휘도 5.5–14.3에 몰림</td><td>배경 L* 5–42, 행위자 20–85, 적탄 코어 97</td></tr>
+        <tr><th>적탄</th><td class="old">보라·청록 구슬 + 블러 글로우</td><td>크림슨·뼈 2계열, 어두운 외곽 + 흰 코어(= 판정), 글로우 없음</td></tr>
+        <tr><th>플레이어 탄</th><td class="old">금·보라(월백)·마젠타, 모두 발광</td><td>성광 금 · 폭풍 청 · 묘지 녹, 불투명도 78–80%, 발광 없음</td></tr>
+        <tr><th>이펙트</th><td class="old">가산 글로우 + 링 + 플래시 + 흔들림 동시</td><td>예산제: 블러 0, 가산 ≤ 24, 플래시 ≤ 2프레임, 암전 우선</td></tr>
+        <tr><th>배경</th><td class="old">레이어는 있으나 명도가 같아 깊이 없음, 붉은 창문·주황 등</td><td>5층 + 전경, 지평선 박명 대비 실루엣, 꺼진 창, 영혼불 ≤ 4</td></tr>
+        <tr><th>HUD 형태</th><td class="old">금 테두리 패널 4개 (상태·점수·차지·보스)</td><td>패널 없음, 아이콘과 5×7 숫자만, N0 외곽선</td></tr>
+        <tr><th>HUD 점유</th><td class="old">일반 약 3.5%, 보스전 약 10.5%</td><td>일반 1.5%, 보스전 3.1%</td></tr>
+        <tr><th>보스 HP 바</th><td class="old">화면 폭 굵은 보라 바 + 금 십자 + 중앙 페이즈 자막</td><td>상단 496×3 크림슨 바, 눈금 2개, 페이즈명은 상단 밴드에</td></tr>
+        <tr><th>차지 게이지</th><td class="old">하단 중앙 패널</td><td>플레이어 아래 16×2, 차지 중에만</td></tr>
+        <tr><th>보스 크기</th><td class="old">화면 높이 70%, 몸과 종이 따로</td><td>높이 49% 이하, 종이 곧 몸, 추가 약점</td></tr>
+        <tr><th>세라핀</th><td class="old">천사 날개, 금, 대각선 성창</td><td>사람 기사, 쇠고리로 비행, 수평 랜스 — 직선 + 원</td></tr>
+        <tr><th>녹티스</th><td class="old">검은 깃털 날개, 보라</td><td>나방 날개와 더듬이 두건, 폭풍 청 — 초승달</td></tr>
+        <tr><th>모르가나</th><td class="old">고깔모자 마녀, 빗자루, 혈마젠타</td><td>상복 베일, 떠다니는 관, 묘지 녹 등롱 — 상자</td></tr>
+        <tr><th>타이틀</th><td class="old">대형 캐릭터 일러스트, 금 로고, 금 버튼, 붉은 달</td><td>종루 위 작은 세 인물, 개기일식, 텍스트 메뉴</td></tr>
+        <tr><th>캐릭터 선택</th><td class="old">회전 일러스트 카드 캐러셀</td><td>조각상형 전신 + 실제 크기 스프라이트 + 1:1 실시간 프리뷰</td></tr>
+        <tr><th>클리어</th><td class="old">금 프레임 패널, 날개 달린 S 도장</td><td>디더로 누른 결과 열, 17×17 랭크 글자</td></tr>
+        <tr><th>게임오버</th><td class="old">대형 붉은 링과 제목, 확대 캐릭터</td><td>무채색 팔레트 스왑, 홍염만 남김, 떨어진 쇠고리</td></tr>
+        <tr><th>적 사망</th><td class="old">불꽃 폭발 + 섬광</td><td>재로 흩어짐 + 뼈 조각 하나</td></tr>
+        <tr><th>피격 플래시</th><td class="old">몸 전체 백색 (보스는 연사 중 계속 흰색)</td><td>약점 부위만, 10 Hz 제한</td></tr>
+        <tr><th>화면 전환</th><td class="old">알파 페이드, 잉크 와이프</td><td>4단계 디더 페이드</td></tr>
+      </tbody>
+    </table></div>
+  </div>
+</section>
+
+<!-- ============================== Appendix ============================== -->
+<section class="ch gutter" id="appx">
+  <div class="wide">
+    <div class="ch-head"><span class="ch-num">A</span><h2>검수 게이트와 제작 순서</h2></div>
+    <h3><span class="k">A-1</span>아트 디렉터 검수 게이트</h3>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>게이트</th><th>검사</th><th>통과 기준</th></tr></thead>
+      <tbody>
+        <tr><th>G1 그리드</th><td>1080p 캡처를 1/3로 nearest 축소 후 원본과 비교</td><td>차이 0 (모든 블록 3×3)</td></tr>
+        <tr><th>G2 팔레트</th><td>캡처의 고유 색 수, 팔레트 외 색</td><td>월드 ≤ 48색, 팔레트 외 색 0 (플레이어 탄 반투명 혼합 제외)</td></tr>
+        <tr><th>G3 명도</th><td>흑백 변환</td><td>가장 밝은 점이 적탄 코어, 배경 면 L* ≤ 42</td></tr>
+        <tr><th>G4 실루엣</th><td>캐릭터·적·보스 단색 실루엣을 처음 보는 5명에게 제시</td><td>캐릭터 3/3, 적 5/5 정답률 ≥ 80%</td></tr>
+        <tr><th>G5 탄 가독성</th><td>전투 캡처를 0.2초 노출 후 적탄 위치 표시</td><td>5명 평균 적탄 검출률 ≥ 90%, 아군탄 오인 0</td></tr>
+        <tr><th>G6 HUD</th><td>HUD 박스 면적 측정, 가림 규칙 동작</td><td>상시 ≤ 2%, 보스전 ≤ 3.5%</td></tr>
+        <tr><th>G7 적색</th><td>유채색 중 적색계 비율</td><td>일반 ≤ 5%, 보스 ≤ 15%</td></tr>
+        <tr><th>G8 이펙트</th><td>폭탄·차지·보스 격파 중 프레임 분석</td><td>블러 0, 가산 ≤ 24(폭탄 ≤ 64), 플래시 ≤ 2프레임</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="k">A-2</span>에셋 목록과 프레임 수</h3>
+    <div class="tbl wide-t"><table>
+      <thead><tr><th>분류</th><th>에셋</th><th class="num">프레임 (추정)</th></tr></thead>
+      <tbody>
+        <tr><th>플레이어 (각)</th><td>비행 루프, 상승·하강, 전진·후퇴, 차지 유지, 발사, 폭탄, 피격, 격추</td><td class="num">세라핀 43 · 녹티스 41 · 모르가나 43</td></tr>
+        <tr><th>플레이어 (각)</th><td>전신 96×144 1, 초상화 64×64 3, HUD 아이콘 1</td><td class="num">5 × 3</td></tr>
+        <tr><th>플레이어 탄·효과</th><td>기본탄, 차지 1단·2단, 폭탄 효과, 피격 파편</td><td class="num">캐릭터당 약 40</td></tr>
+        <tr><th>적탄</th><td>크림슨 S·M·L, 바늘 16방향, 뼈 M·L, 소멸 4프레임</td><td class="num">약 34</td></tr>
+        <tr><th>적 5종</th><td>박쥐, 촛대 망령, 종지기 해골, 흑사제, 묘역 기사 — 대기·예고·사망</td><td class="num">약 90</td></tr>
+        <tr><th>미니보스</th><td>묘지기 그레이븐 96×96 — 대기·채찍·관 열기·퇴장</td><td class="num">약 40</td></tr>
+        <tr><th>보스</th><td>아바돈 3페이즈 본체, 팔·망치 포즈, 코어 맥동, 파편 24</td><td class="num">약 90</td></tr>
+        <tr><th>배경</th><td>L0–L4 + 안개 + 전경, 일식 6상태</td><td class="num">모듈 약 30</td></tr>
+        <tr><th>UI</th><td>5×7 폰트, 아이콘, 커서, 랭크 글리프, 카운트다운 숫자, 로고</td><td class="num">약 60</td></tr>
+      </tbody>
+    </table></div>
+
+    <h3><span class="k">A-3</span>제작 순서 (승인 후)</h3>
+    <ol class="tight read" style="margin-inline:0">
+      <li>렌더러를 640×360 단일 그리드로 전환(고해상 UI 레이어와 글로우 패스 제거), 팔레트·5×7 폰트·Galmuri 적용</li>
+      <li>적탄 2계열과 플레이어 탄 — 가독성 게이트 G3·G5를 가장 먼저 통과시킴</li>
+      <li>플레이어 3종 비행 스프라이트 — 실루엣 게이트 G4 통과까지 반복</li>
+      <li>Stage 1 배경 5층 + 안개 + 일식 상태</li>
+      <li>적 5종 → 보스 3페이즈 → 미니보스</li>
+      <li>HUD와 메뉴 화면 6종</li>
+      <li>차지·폭탄 효과, 전신·초상화</li>
+    </ol>
+    <p class="read note" style="margin-inline:0">이 문서가 승인되기 전에는 게임 코드에 손대지 않습니다.</p>
+  </div>
+</section>
+</main>
+
+<footer class="end gutter">
+  <div class="wide">ECLIPSE REQUIEM Visual Design Bible v2.0 · 블록아웃은 이 페이지에서 640×360으로 직접 그린 형태·명도 검증용 그림입니다. 한글 픽셀 글꼴: Galmuri (SIL OFL 1.1, quiple). v1 캡처는 2026-10-27 빌드.</div>
+</footer>
+
+<script id="data-palette" type="application/json">/*@PALETTE@*/</script>
+<script id="data-prompts" type="application/json">/*@PROMPTS@*/</script>
+<script id="data-asis" type="application/json">/*@ASIS@*/</script>
+<script>/*@BLOCKOUT_JS@*/</script>
+<script>/*@PAGE_JS@*/</script>
