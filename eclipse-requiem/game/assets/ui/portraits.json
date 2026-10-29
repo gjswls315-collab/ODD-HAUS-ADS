@@ -1,0 +1,136 @@
+{
+ "frames": [
+  {
+   "filename": "seraphine 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 96,
+    "h": 148
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 96,
+    "h": 148
+   },
+   "sourceSize": {
+    "w": 96,
+    "h": 148
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "noctis 0",
+   "frame": {
+    "x": 97,
+    "y": 0,
+    "w": 96,
+    "h": 148
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 96,
+    "h": 148
+   },
+   "sourceSize": {
+    "w": 96,
+    "h": 148
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "morgana 0",
+   "frame": {
+    "x": 194,
+    "y": 0,
+    "w": 96,
+    "h": 148
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 96,
+    "h": 148
+   },
+   "sourceSize": {
+    "w": 96,
+    "h": 148
+   },
+   "duration": 1000
+  }
+ ],
+ "meta": {
+  "app": "eclipse-requiem tools/art (placeholder art, replace with final Aseprite export)",
+  "version": "1",
+  "image": "portraits.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 290,
+   "h": 148
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "seraphine",
+    "from": 0,
+    "to": 0,
+    "direction": "forward"
+   },
+   {
+    "name": "noctis",
+    "from": 1,
+    "to": 1,
+    "direction": "forward"
+   },
+   {
+    "name": "morgana",
+    "from": 2,
+    "to": 2,
+    "direction": "forward"
+   }
+  ],
+  "slices": [
+   {
+    "name": "pivot",
+    "color": "#0000ffff",
+    "keys": [
+     {
+      "frame": 0,
+      "bounds": {
+       "x": 48,
+       "y": 147,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 1,
+      "bounds": {
+       "x": 48,
+       "y": 147,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 2,
+      "bounds": {
+       "x": 48,
+       "y": 147,
+       "w": 1,
+       "h": 1
+      }
+     }
+    ]
+   }
+  ]
+ }
+}

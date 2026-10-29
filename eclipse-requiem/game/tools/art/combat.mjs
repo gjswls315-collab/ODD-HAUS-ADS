@@ -172,6 +172,7 @@ function fx() {
   s.add('belldrop_mark', [0, 1].map((f) => { const b = new Bitmap(56, 12); b.ellRing(28, 6, 26 - f * 2, 5 - f * 0.6, 1, 'R3'); b.ell(28, 6, 22 - f * 2, 3.5, { c: 'R1', d: 6 }); return b; }), { duration: 120, pivot: [28, 6] });
   s.add('dust', [0, 1, 2, 3].map((f) => { const b = new Bitmap(20, 14); for (let k = 0; k < 9; k++) { const a = (k / 9) * Math.PI, d = 3 + f * 2.2; b.ell(10 + Math.cos(a) * d * 1.4, 11 - Math.sin(a) * d * 0.6, 2.4 - f * 0.4, 2 - f * 0.3, f < 2 ? 'N7' : { c: 'N6', d: 8 }); } return b; }), { duration: 70, pivot: [10, 12] });
   s.add('warn', [0, 1].map((f) => { const b = new Bitmap(11, 11); b.poly([[5.5, 0], [11, 10], [0, 10]], 'R0'); b.poly([[5.5, 2], [9.3, 9], [1.7, 9]], f ? 'R4' : 'R3'); b.rect(5, 4, 1, 3, 'R6'); b.plot(5, 8, 'R6'); return b; }), { duration: 120 });
+  s.add('teledot', [0, 1].map((f) => { const b = new Bitmap(3, 3); b.rect(0, 1, 3, 1, f ? 'R3' : 'R2'); b.rect(1, 0, 1, 3, f ? 'R3' : 'R2'); b.plot(1, 1, f ? 'R6' : 'R4'); return b; }), { duration: 90 });
   // black-fog vision mask: transparent hole (r 132) with a dithered falloff to opaque near-black
   const V = 360, vis = new Bitmap(V, V);
   for (let y = 0; y < V; y++) for (let x = 0; x < V; x++) {

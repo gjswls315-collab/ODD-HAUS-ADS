@@ -1,0 +1,538 @@
+{
+ "frames": [
+  {
+   "filename": "hp 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 9,
+    "h": 9
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 9,
+    "h": 9
+   },
+   "sourceSize": {
+    "w": 9,
+    "h": 9
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "hp 1",
+   "frame": {
+    "x": 10,
+    "y": 0,
+    "w": 9,
+    "h": 9
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 9,
+    "h": 9
+   },
+   "sourceSize": {
+    "w": 9,
+    "h": 9
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "hp 2",
+   "frame": {
+    "x": 20,
+    "y": 0,
+    "w": 9,
+    "h": 9
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 9,
+    "h": 9
+   },
+   "sourceSize": {
+    "w": 9,
+    "h": 9
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "bomb 0",
+   "frame": {
+    "x": 30,
+    "y": 0,
+    "w": 9,
+    "h": 10
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 9,
+    "h": 10
+   },
+   "sourceSize": {
+    "w": 9,
+    "h": 10
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "bomb 1",
+   "frame": {
+    "x": 40,
+    "y": 0,
+    "w": 9,
+    "h": 10
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 9,
+    "h": 10
+   },
+   "sourceSize": {
+    "w": 9,
+    "h": 10
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "pip 0",
+   "frame": {
+    "x": 50,
+    "y": 0,
+    "w": 5,
+    "h": 8
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 5,
+    "h": 8
+   },
+   "sourceSize": {
+    "w": 5,
+    "h": 8
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "pip 1",
+   "frame": {
+    "x": 56,
+    "y": 0,
+    "w": 5,
+    "h": 8
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 5,
+    "h": 8
+   },
+   "sourceSize": {
+    "w": 5,
+    "h": 8
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "pip 2",
+   "frame": {
+    "x": 62,
+    "y": 0,
+    "w": 5,
+    "h": 8
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 5,
+    "h": 8
+   },
+   "sourceSize": {
+    "w": 5,
+    "h": 8
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "pip 3",
+   "frame": {
+    "x": 68,
+    "y": 0,
+    "w": 5,
+    "h": 8
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 5,
+    "h": 8
+   },
+   "sourceSize": {
+    "w": 5,
+    "h": 8
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "icon_seraphine 0",
+   "frame": {
+    "x": 74,
+    "y": 0,
+    "w": 16,
+    "h": 16
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 16,
+    "h": 16
+   },
+   "sourceSize": {
+    "w": 16,
+    "h": 16
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "icon_noctis 0",
+   "frame": {
+    "x": 91,
+    "y": 0,
+    "w": 16,
+    "h": 16
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 16,
+    "h": 16
+   },
+   "sourceSize": {
+    "w": 16,
+    "h": 16
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "icon_morgana 0",
+   "frame": {
+    "x": 108,
+    "y": 0,
+    "w": 16,
+    "h": 16
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 16,
+    "h": 16
+   },
+   "sourceSize": {
+    "w": 16,
+    "h": 16
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "cursor 0",
+   "frame": {
+    "x": 125,
+    "y": 0,
+    "w": 7,
+    "h": 7
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 7,
+    "h": 7
+   },
+   "sourceSize": {
+    "w": 7,
+    "h": 7
+   },
+   "duration": 400
+  },
+  {
+   "filename": "cursor 1",
+   "frame": {
+    "x": 133,
+    "y": 0,
+    "w": 7,
+    "h": 7
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 7,
+    "h": 7
+   },
+   "sourceSize": {
+    "w": 7,
+    "h": 7
+   },
+   "duration": 400
+  },
+  {
+   "filename": "skull 0",
+   "frame": {
+    "x": 141,
+    "y": 0,
+    "w": 9,
+    "h": 9
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 9,
+    "h": 9
+   },
+   "sourceSize": {
+    "w": 9,
+    "h": 9
+   },
+   "duration": 1000
+  }
+ ],
+ "meta": {
+  "app": "eclipse-requiem tools/art (placeholder art, replace with final Aseprite export)",
+  "version": "1",
+  "image": "hud.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 150,
+   "h": 16
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "hp",
+    "from": 0,
+    "to": 2,
+    "direction": "forward"
+   },
+   {
+    "name": "bomb",
+    "from": 3,
+    "to": 4,
+    "direction": "forward"
+   },
+   {
+    "name": "pip",
+    "from": 5,
+    "to": 8,
+    "direction": "forward"
+   },
+   {
+    "name": "icon_seraphine",
+    "from": 9,
+    "to": 9,
+    "direction": "forward"
+   },
+   {
+    "name": "icon_noctis",
+    "from": 10,
+    "to": 10,
+    "direction": "forward"
+   },
+   {
+    "name": "icon_morgana",
+    "from": 11,
+    "to": 11,
+    "direction": "forward"
+   },
+   {
+    "name": "cursor",
+    "from": 12,
+    "to": 13,
+    "direction": "forward"
+   },
+   {
+    "name": "skull",
+    "from": 14,
+    "to": 14,
+    "direction": "forward"
+   }
+  ],
+  "slices": [
+   {
+    "name": "pivot",
+    "color": "#0000ffff",
+    "keys": [
+     {
+      "frame": 0,
+      "bounds": {
+       "x": 4,
+       "y": 4,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 1,
+      "bounds": {
+       "x": 4,
+       "y": 4,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 2,
+      "bounds": {
+       "x": 4,
+       "y": 4,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 3,
+      "bounds": {
+       "x": 4,
+       "y": 5,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 4,
+      "bounds": {
+       "x": 4,
+       "y": 5,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 5,
+      "bounds": {
+       "x": 2,
+       "y": 4,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 6,
+      "bounds": {
+       "x": 2,
+       "y": 4,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 7,
+      "bounds": {
+       "x": 2,
+       "y": 4,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 8,
+      "bounds": {
+       "x": 2,
+       "y": 4,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 9,
+      "bounds": {
+       "x": 8,
+       "y": 8,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 10,
+      "bounds": {
+       "x": 8,
+       "y": 8,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 11,
+      "bounds": {
+       "x": 8,
+       "y": 8,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 12,
+      "bounds": {
+       "x": 3,
+       "y": 3,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 13,
+      "bounds": {
+       "x": 3,
+       "y": 3,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 14,
+      "bounds": {
+       "x": 4,
+       "y": 4,
+       "w": 1,
+       "h": 1
+      }
+     }
+    ]
+   }
+  ]
+ }
+}

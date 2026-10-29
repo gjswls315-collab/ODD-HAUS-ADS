@@ -1,0 +1,14 @@
+{
+ "chars": "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ.,:/-+x%!?()*<>='[]_·×",
+ "cols": 16,
+ "cell": [
+  6,
+  8
+ ],
+ "glyph": [
+  5,
+  7
+ ],
+ "advance": 6,
+ "space": 4
+}
