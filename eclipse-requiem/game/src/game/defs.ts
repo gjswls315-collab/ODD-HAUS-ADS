@@ -1,4 +1,4 @@
-import { HeroId } from '../gfx/art/heroines';
+import { HeroId } from '../gfx/sprites';
 import { GlowColor } from '../gfx/sprites';
 
 // Character and enemy data (docs/00 §6, docs/05 §5). Values are the documented initial proposals.
@@ -35,21 +35,21 @@ export const CHARS: CharDef[] = [
     id: 'seraphine', name: 'SERAPHINE', nameKr: '세라핀', title: 'Lance of Bound Light', titleKr: '빛을 잇는 성창',
     role: 'Balanced', roleKr: '밸런스형', speed: 180, hp: 3, fireInterval: 0.15, dpsMul: 1.0,
     basic: '직선형 성광탄 2연발', charge: '관통 성창 → 2중 대성창', bomb: '황금 성역', bombEn: 'GOLDEN SANCTUM', bombInvuln: 1.8,
-    color: '#D8B35E', glow: 'gold', sigil: 'cross', stats: [6, 6, 7, 7], difficulty: 1, difficultyLabel: '입문 추천',
+    color: '#D9AD52', glow: 'gold', sigil: 'cross', stats: [6, 6, 7, 7], difficulty: 1, difficultyLabel: '입문 추천',
     tip: '초보자에게 추천하는 균형 잡힌 성기사', line: '빛이 꺼진 밤이라도, 나는 길을 잇는다.',
   },
   {
     id: 'noctis', name: 'NOCTIS', nameKr: '녹티스', title: 'Hunter of the Night', titleKr: '밤의 추적자',
     role: 'Speed', roleKr: '고속형', speed: 215, hp: 3, fireInterval: 0.12, dpsMul: 0.9,
     basic: '좁은 고속 3연사', charge: '직선 관통탄 → 그림자 낫 투척', bomb: '흑익 폭풍', bombEn: 'BLACKWING TEMPEST', bombInvuln: 1.5,
-    color: '#7B5CC7', glow: 'silver', sigil: 'moon', stats: [6, 9, 6, 9], difficulty: 3, difficultyLabel: '숙련',
+    color: '#3698D6', glow: 'cyan', sigil: 'moon', stats: [6, 9, 6, 9], difficulty: 3, difficultyLabel: '숙련',
     tip: '빠르게 파고들어 먼저 베어라', line: '사냥은 이미 시작됐어.',
   },
   {
     id: 'morgana', name: 'MORGANA', nameKr: '모르가나', title: 'Witch of Ashes', titleKr: '재의 마녀',
     role: 'Spread', roleKr: '확산형', speed: 160, hp: 4, fireInterval: 0.18, dpsMul: 1.2,
     basic: '3갈래 확산 마탄 (Lv3 5갈래)', charge: '추적 영혼 3 → 영혼 구체 7', bomb: '망자의 합창', bombEn: 'CHOIR OF THE DEPARTED', bombInvuln: 2.0,
-    color: '#A8326E', glow: 'pink', sigil: 'rune', stats: [8, 4, 9, 4], difficulty: 2, difficultyLabel: '중급',
+    color: '#349E6E', glow: 'green', sigil: 'rune', stats: [8, 4, 9, 4], difficulty: 2, difficultyLabel: '중급',
     tip: '가까이 붙을수록 저주는 깊어진다', line: '잠들지 못한 자들이여, 노래하라.',
   },
 ];

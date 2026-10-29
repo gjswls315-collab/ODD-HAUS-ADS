@@ -1673,9 +1673,163 @@
    "duration": 1000
   },
   {
-   "filename": "bellshard 0",
+   "filename": "rubble 0",
    "frame": {
     "x": 15,
+    "y": 398,
+    "w": 28,
+    "h": 28
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 28,
+    "h": 28
+   },
+   "sourceSize": {
+    "w": 28,
+    "h": 28
+   },
+   "duration": 70
+  },
+  {
+   "filename": "rubble 1",
+   "frame": {
+    "x": 44,
+    "y": 398,
+    "w": 28,
+    "h": 28
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 28,
+    "h": 28
+   },
+   "sourceSize": {
+    "w": 28,
+    "h": 28
+   },
+   "duration": 70
+  },
+  {
+   "filename": "rubble 2",
+   "frame": {
+    "x": 73,
+    "y": 398,
+    "w": 28,
+    "h": 28
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 28,
+    "h": 28
+   },
+   "sourceSize": {
+    "w": 28,
+    "h": 28
+   },
+   "duration": 70
+  },
+  {
+   "filename": "rubble 3",
+   "frame": {
+    "x": 102,
+    "y": 398,
+    "w": 28,
+    "h": 28
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 28,
+    "h": 28
+   },
+   "sourceSize": {
+    "w": 28,
+    "h": 28
+   },
+   "duration": 70
+  },
+  {
+   "filename": "gravecross 0",
+   "frame": {
+    "x": 131,
+    "y": 398,
+    "w": 22,
+    "h": 54
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 22,
+    "h": 54
+   },
+   "sourceSize": {
+    "w": 22,
+    "h": 54
+   },
+   "duration": 80
+  },
+  {
+   "filename": "gravecross 1",
+   "frame": {
+    "x": 154,
+    "y": 398,
+    "w": 22,
+    "h": 54
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 22,
+    "h": 54
+   },
+   "sourceSize": {
+    "w": 22,
+    "h": 54
+   },
+   "duration": 80
+  },
+  {
+   "filename": "gravecross 2",
+   "frame": {
+    "x": 177,
+    "y": 398,
+    "w": 22,
+    "h": 54
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 22,
+    "h": 54
+   },
+   "sourceSize": {
+    "w": 22,
+    "h": 54
+   },
+   "duration": 80
+  },
+  {
+   "filename": "bellshard 0",
+   "frame": {
+    "x": 200,
     "y": 398,
     "w": 18,
     "h": 18
@@ -1697,7 +1851,7 @@
   {
    "filename": "bellshard 1",
    "frame": {
-    "x": 34,
+    "x": 219,
     "y": 398,
     "w": 18,
     "h": 18
@@ -1719,7 +1873,7 @@
   {
    "filename": "bellshard 2",
    "frame": {
-    "x": 53,
+    "x": 238,
     "y": 398,
     "w": 18,
     "h": 18
@@ -1741,7 +1895,7 @@
   {
    "filename": "bellshard 3",
    "frame": {
-    "x": 72,
+    "x": 257,
     "y": 398,
     "w": 18,
     "h": 18
@@ -1763,7 +1917,7 @@
   {
    "filename": "bellshard 4",
    "frame": {
-    "x": 91,
+    "x": 276,
     "y": 398,
     "w": 18,
     "h": 18
@@ -1785,7 +1939,7 @@
   {
    "filename": "bellshard 5",
    "frame": {
-    "x": 110,
+    "x": 295,
     "y": 398,
     "w": 18,
     "h": 18
@@ -1807,7 +1961,7 @@
   {
    "filename": "lightning 0",
    "frame": {
-    "x": 129,
+    "x": 314,
     "y": 398,
     "w": 28,
     "h": 120
@@ -1829,7 +1983,7 @@
   {
    "filename": "lightning 1",
    "frame": {
-    "x": 158,
+    "x": 343,
     "y": 398,
     "w": 28,
     "h": 120
@@ -1851,7 +2005,7 @@
   {
    "filename": "lightning 2",
    "frame": {
-    "x": 187,
+    "x": 372,
     "y": 398,
     "w": 28,
     "h": 120
@@ -1873,7 +2027,7 @@
   {
    "filename": "lightning_tele 0",
    "frame": {
-    "x": 216,
+    "x": 401,
     "y": 398,
     "w": 11,
     "h": 9
@@ -1895,7 +2049,7 @@
   {
    "filename": "lightning_tele 1",
    "frame": {
-    "x": 228,
+    "x": 413,
     "y": 398,
     "w": 11,
     "h": 9
@@ -1917,7 +2071,7 @@
   {
    "filename": "belldrop 0",
    "frame": {
-    "x": 240,
+    "x": 425,
     "y": 398,
     "w": 44,
     "h": 48
@@ -1939,8 +2093,8 @@
   {
    "filename": "belldrop_mark 0",
    "frame": {
-    "x": 285,
-    "y": 398,
+    "x": 0,
+    "y": 519,
     "w": 56,
     "h": 12
    },
@@ -1961,8 +2115,8 @@
   {
    "filename": "belldrop_mark 1",
    "frame": {
-    "x": 342,
-    "y": 398,
+    "x": 57,
+    "y": 519,
     "w": 56,
     "h": 12
    },
@@ -1983,8 +2137,8 @@
   {
    "filename": "dust 0",
    "frame": {
-    "x": 399,
-    "y": 398,
+    "x": 114,
+    "y": 519,
     "w": 20,
     "h": 14
    },
@@ -2005,8 +2159,8 @@
   {
    "filename": "dust 1",
    "frame": {
-    "x": 420,
-    "y": 398,
+    "x": 135,
+    "y": 519,
     "w": 20,
     "h": 14
    },
@@ -2027,8 +2181,8 @@
   {
    "filename": "dust 2",
    "frame": {
-    "x": 441,
-    "y": 398,
+    "x": 156,
+    "y": 519,
     "w": 20,
     "h": 14
    },
@@ -2049,8 +2203,8 @@
   {
    "filename": "dust 3",
    "frame": {
-    "x": 462,
-    "y": 398,
+    "x": 177,
+    "y": 519,
     "w": 20,
     "h": 14
    },
@@ -2071,8 +2225,8 @@
   {
    "filename": "warn 0",
    "frame": {
-    "x": 483,
-    "y": 398,
+    "x": 198,
+    "y": 519,
     "w": 11,
     "h": 11
    },
@@ -2093,8 +2247,8 @@
   {
    "filename": "warn 1",
    "frame": {
-    "x": 495,
-    "y": 398,
+    "x": 210,
+    "y": 519,
     "w": 11,
     "h": 11
    },
@@ -2115,8 +2269,8 @@
   {
    "filename": "teledot 0",
    "frame": {
-    "x": 507,
-    "y": 398,
+    "x": 222,
+    "y": 519,
     "w": 3,
     "h": 3
    },
@@ -2137,7 +2291,7 @@
   {
    "filename": "teledot 1",
    "frame": {
-    "x": 0,
+    "x": 226,
     "y": 519,
     "w": 3,
     "h": 3
@@ -2157,24 +2311,90 @@
    "duration": 90
   },
   {
-   "filename": "vision 0",
+   "filename": "hitbox 0",
    "frame": {
-    "x": 4,
+    "x": 230,
     "y": 519,
-    "w": 360,
-    "h": 360
+    "w": 9,
+    "h": 9
    },
    "rotated": false,
    "trimmed": false,
    "spriteSourceSize": {
     "x": 0,
     "y": 0,
-    "w": 360,
-    "h": 360
+    "w": 9,
+    "h": 9
    },
    "sourceSize": {
-    "w": 360,
-    "h": 360
+    "w": 9,
+    "h": 9
+   },
+   "duration": 100
+  },
+  {
+   "filename": "hitbox 1",
+   "frame": {
+    "x": 240,
+    "y": 519,
+    "w": 9,
+    "h": 9
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 9,
+    "h": 9
+   },
+   "sourceSize": {
+    "w": 9,
+    "h": 9
+   },
+   "duration": 100
+  },
+  {
+   "filename": "vision 0",
+   "frame": {
+    "x": 0,
+    "y": 534,
+    "w": 320,
+    "h": 320
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 320
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 320
+   },
+   "duration": 1000
+  },
+  {
+   "filename": "vision 1",
+   "frame": {
+    "x": 0,
+    "y": 855,
+    "w": 320,
+    "h": 320
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 320,
+    "h": 320
+   },
+   "sourceSize": {
+    "w": 320,
+    "h": 320
    },
    "duration": 1000
   }
@@ -2186,7 +2406,7 @@
   "format": "RGBA8888",
   "size": {
    "w": 512,
-   "h": 879
+   "h": 1175
   },
   "scale": "1",
   "frameTags": [
@@ -2275,57 +2495,75 @@
     "direction": "forward"
    },
    {
-    "name": "bellshard",
+    "name": "rubble",
     "from": 76,
-    "to": 81,
+    "to": 79,
+    "direction": "forward"
+   },
+   {
+    "name": "gravecross",
+    "from": 80,
+    "to": 82,
+    "direction": "forward"
+   },
+   {
+    "name": "bellshard",
+    "from": 83,
+    "to": 88,
     "direction": "forward"
    },
    {
     "name": "lightning",
-    "from": 82,
-    "to": 84,
+    "from": 89,
+    "to": 91,
     "direction": "forward"
    },
    {
     "name": "lightning_tele",
-    "from": 85,
-    "to": 86,
-    "direction": "forward"
-   },
-   {
-    "name": "belldrop",
-    "from": 87,
-    "to": 87,
-    "direction": "forward"
-   },
-   {
-    "name": "belldrop_mark",
-    "from": 88,
-    "to": 89,
-    "direction": "forward"
-   },
-   {
-    "name": "dust",
-    "from": 90,
+    "from": 92,
     "to": 93,
     "direction": "forward"
    },
    {
-    "name": "warn",
+    "name": "belldrop",
     "from": 94,
-    "to": 95,
+    "to": 94,
+    "direction": "forward"
+   },
+   {
+    "name": "belldrop_mark",
+    "from": 95,
+    "to": 96,
+    "direction": "forward"
+   },
+   {
+    "name": "dust",
+    "from": 97,
+    "to": 100,
+    "direction": "forward"
+   },
+   {
+    "name": "warn",
+    "from": 101,
+    "to": 102,
     "direction": "forward"
    },
    {
     "name": "teledot",
-    "from": 96,
-    "to": 97,
+    "from": 103,
+    "to": 104,
+    "direction": "forward"
+   },
+   {
+    "name": "hitbox",
+    "from": 105,
+    "to": 106,
     "direction": "forward"
    },
    {
     "name": "vision",
-    "from": 98,
-    "to": 98,
+    "from": 107,
+    "to": 108,
     "direction": "forward"
    }
   ],
@@ -3021,8 +3259,8 @@
      {
       "frame": 76,
       "bounds": {
-       "x": 9,
-       "y": 9,
+       "x": 14,
+       "y": 14,
        "w": 1,
        "h": 1
       }
@@ -3030,8 +3268,8 @@
      {
       "frame": 77,
       "bounds": {
-       "x": 9,
-       "y": 9,
+       "x": 14,
+       "y": 14,
        "w": 1,
        "h": 1
       }
@@ -3039,8 +3277,8 @@
      {
       "frame": 78,
       "bounds": {
-       "x": 9,
-       "y": 9,
+       "x": 14,
+       "y": 14,
        "w": 1,
        "h": 1
       }
@@ -3048,8 +3286,8 @@
      {
       "frame": 79,
       "bounds": {
-       "x": 9,
-       "y": 9,
+       "x": 14,
+       "y": 14,
        "w": 1,
        "h": 1
       }
@@ -3057,8 +3295,8 @@
      {
       "frame": 80,
       "bounds": {
-       "x": 9,
-       "y": 9,
+       "x": 11,
+       "y": 53,
        "w": 1,
        "h": 1
       }
@@ -3066,8 +3304,8 @@
      {
       "frame": 81,
       "bounds": {
-       "x": 9,
-       "y": 9,
+       "x": 11,
+       "y": 53,
        "w": 1,
        "h": 1
       }
@@ -3075,8 +3313,8 @@
      {
       "frame": 82,
       "bounds": {
-       "x": 14,
-       "y": 0,
+       "x": 11,
+       "y": 53,
        "w": 1,
        "h": 1
       }
@@ -3084,8 +3322,8 @@
      {
       "frame": 83,
       "bounds": {
-       "x": 14,
-       "y": 0,
+       "x": 9,
+       "y": 9,
        "w": 1,
        "h": 1
       }
@@ -3093,8 +3331,8 @@
      {
       "frame": 84,
       "bounds": {
-       "x": 14,
-       "y": 0,
+       "x": 9,
+       "y": 9,
        "w": 1,
        "h": 1
       }
@@ -3102,14 +3340,68 @@
      {
       "frame": 85,
       "bounds": {
-       "x": 5,
-       "y": 0,
+       "x": 9,
+       "y": 9,
        "w": 1,
        "h": 1
       }
      },
      {
       "frame": 86,
+      "bounds": {
+       "x": 9,
+       "y": 9,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 87,
+      "bounds": {
+       "x": 9,
+       "y": 9,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 88,
+      "bounds": {
+       "x": 9,
+       "y": 9,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 89,
+      "bounds": {
+       "x": 14,
+       "y": 0,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 90,
+      "bounds": {
+       "x": 14,
+       "y": 0,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 91,
+      "bounds": {
+       "x": 14,
+       "y": 0,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 92,
       "bounds": {
        "x": 5,
        "y": 0,
@@ -3118,7 +3410,16 @@
       }
      },
      {
-      "frame": 87,
+      "frame": 93,
+      "bounds": {
+       "x": 5,
+       "y": 0,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 94,
       "bounds": {
        "x": 22,
        "y": 40,
@@ -3127,73 +3428,10 @@
       }
      },
      {
-      "frame": 88,
-      "bounds": {
-       "x": 28,
-       "y": 6,
-       "w": 1,
-       "h": 1
-      }
-     },
-     {
-      "frame": 89,
-      "bounds": {
-       "x": 28,
-       "y": 6,
-       "w": 1,
-       "h": 1
-      }
-     },
-     {
-      "frame": 90,
-      "bounds": {
-       "x": 10,
-       "y": 12,
-       "w": 1,
-       "h": 1
-      }
-     },
-     {
-      "frame": 91,
-      "bounds": {
-       "x": 10,
-       "y": 12,
-       "w": 1,
-       "h": 1
-      }
-     },
-     {
-      "frame": 92,
-      "bounds": {
-       "x": 10,
-       "y": 12,
-       "w": 1,
-       "h": 1
-      }
-     },
-     {
-      "frame": 93,
-      "bounds": {
-       "x": 10,
-       "y": 12,
-       "w": 1,
-       "h": 1
-      }
-     },
-     {
-      "frame": 94,
-      "bounds": {
-       "x": 5,
-       "y": 5,
-       "w": 1,
-       "h": 1
-      }
-     },
-     {
       "frame": 95,
       "bounds": {
-       "x": 5,
-       "y": 5,
+       "x": 28,
+       "y": 6,
        "w": 1,
        "h": 1
       }
@@ -3201,8 +3439,8 @@
      {
       "frame": 96,
       "bounds": {
-       "x": 1,
-       "y": 1,
+       "x": 28,
+       "y": 6,
        "w": 1,
        "h": 1
       }
@@ -3210,8 +3448,8 @@
      {
       "frame": 97,
       "bounds": {
-       "x": 1,
-       "y": 1,
+       "x": 10,
+       "y": 12,
        "w": 1,
        "h": 1
       }
@@ -3219,8 +3457,98 @@
      {
       "frame": 98,
       "bounds": {
-       "x": 180,
-       "y": 180,
+       "x": 10,
+       "y": 12,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 99,
+      "bounds": {
+       "x": 10,
+       "y": 12,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 100,
+      "bounds": {
+       "x": 10,
+       "y": 12,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 101,
+      "bounds": {
+       "x": 5,
+       "y": 5,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 102,
+      "bounds": {
+       "x": 5,
+       "y": 5,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 103,
+      "bounds": {
+       "x": 1,
+       "y": 1,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 104,
+      "bounds": {
+       "x": 1,
+       "y": 1,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 105,
+      "bounds": {
+       "x": 4,
+       "y": 4,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 106,
+      "bounds": {
+       "x": 4,
+       "y": 4,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 107,
+      "bounds": {
+       "x": 160,
+       "y": 160,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 108,
+      "bounds": {
+       "x": 160,
+       "y": 160,
        "w": 1,
        "h": 1
       }

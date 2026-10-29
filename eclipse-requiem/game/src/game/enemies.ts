@@ -2,7 +2,8 @@ import { G } from '../core/app';
 import { W } from '../core/constants';
 import { DEG, fxRng as R, TAU } from '../core/math';
 import { Ctx } from '../gfx/canvas';
-import { ART } from '../gfx/sprites';
+import { sheet } from '../gfx/assets';
+import { SHEET } from '../gfx/sprites';
 import { ENEMIES, EnemyDef, EnemyKind } from './defs';
 import { ItemKind } from './items';
 import type { HitCircle, Target, World } from './world';
@@ -91,11 +92,15 @@ export class Enemy implements Target {
     if (charge) {
       this.guardBreak = 1.5;
       G.audio.sfx('crack');
-      this.w.fx.spark(this.x - 20, this.y, 14, ['#B9B3AA', '#FFFFFF', '#6E6A60'], 120, { life: 0.5 });
-      this.w.fx.popup(this.x - 10, this.y - 46, 'GUARD BREAK', '#D8B35E');
+      this.w.fx.anim(SHEET.fx, 'spark_metal', this.x - 20, this.y);
+      this.w.fx.spark(this.x - 20, this.y, 14, ['#A6ACB5', '#ECEEF1', '#656D7A'], 120, { life: 0.5 });
+      this.w.fx.popup(this.x - 10, this.y - 46, 'GUARD BREAK', '#F2D58C');
       return 1;
     }
-    if (R.next() < 0.3) G.audio.sfx('shield');
+    if (R.next() < 0.3) {
+      G.audio.sfx('shield');
+      this.w.fx.anim(SHEET.fx, 'spark_metal', this.x - 22, this.y + R.range(-10, 10));
+    }
     return 0.25;
   }
 
@@ -113,7 +118,7 @@ export class Enemy implements Target {
     w.onEnemyKilled(this);
     const big = this.kind === 'sentinel';
     const mid = this.kind === 'skeleton' || this.kind === 'cleric';
-    w.fx.explosion(this.x, this.y, big ? 'l' : mid ? 'm' : 's', this.kind === 'candle' ? ['#E8DDFF', '#9A6BFF', '#7B5CC7', '#2A2733'] : undefined);
+    w.fx.explosion(this.x, this.y, big ? 'l' : mid ? 'm' : 's', this.kind === 'candle' ? ['#E6EEF5', '#B7C6D5', '#7F93A8', '#20242C'] : undefined);
     G.audio.sfx(big ? 'explodeM' : mid ? 'explodeM' : 'explodeS');
     if (big) w.fx.shake(2, 0.1);
     else if (mid) w.fx.shake(1, 0.08);
@@ -297,7 +302,7 @@ export class Enemy implements Target {
       if (this.st >= next - 0.6 && this.tele <= 0 && this.fired <= this.attackIdx) {
         this.tele = 0.6;
         this.fired = this.attackIdx + 1;
-        this.w.fx.spark(this.x - 6, this.y + 38, 6, ['#5E5A66', '#3A3742'], 40, { dir: -Math.PI / 2, spread: 1.2, life: 0.5 });
+        this.w.fx.anim(SHEET.fx, 'dust', this.x - 6, this.y + 40);
       }
       if (this.st >= next) {
         const bx = this.x - 26;
@@ -326,72 +331,26 @@ export class Enemy implements Target {
   }
 
   // ---------------- drawing ----------------
-  private frame() {
-    const frames = this.flash > 0 ? ART.enemyFlash[this.kind] : ART.enemy[this.kind];
-    let i = 0;
-    if (this.kind === 'bat') i = Math.floor(this.age * 10) % 4;
-    else if (this.kind === 'candle') i = Math.floor(this.age * 8) % 4;
-    else if (this.kind === 'skeleton') i = this.tele > 0 ? 1 : 0;
-    else if (this.kind === 'cleric') i = this.tele > 0 ? 1 : 0;
-    else if (this.kind === 'sentinel') i = this.guardBreak > 0 ? 3 : this.tele > 0 ? 2 : Math.floor(this.age * 2) % 2;
-    return frames[i];
+  /** Tag in sprites/enemies for the current state: <kind>, <kind>_tele while telegraphing, sentinel_break on guard break. */
+  private tag() {
+    const k = this.kind;
+    if (k === 'sentinel' && this.guardBreak > 0) return 'sentinel_break';
+    if (this.tele > 0 && k !== 'bat') return k + '_tele';
+    return k;
   }
 
   draw(g: Ctx) {
     if (this.wait > 0) return;
-    const f = this.frame();
-    const ox = this.kind === 'sentinel' ? 37 : Math.floor(f.width / 2);
-    const oy = this.kind === 'sentinel' ? 42 : Math.floor(f.height / 2);
-    if (this.kind === 'cleric') {
-      // black wing afterimages
-      g.globalAlpha = 0.25;
-      g.drawImage(f, Math.round(this.x - ox + 6), Math.round(this.y - oy - 2));
-      g.globalAlpha = 1;
-    }
-    g.drawImage(f, Math.round(this.x - ox), Math.round(this.y - oy));
+    const sh = sheet(SHEET.enemies), tag = this.tag();
+    const i = sh.index(tag, this.age);
+    if (this.kind === 'cleric') sh.draw(g, tag, i, this.x + 6, this.y - 2, { alpha: 0.25 }); // black-wing afterimage
+    sh.draw(g, tag, i, this.x, this.y, { flash: this.flash > 0 });
   }
 
-  /** Light points drawn above the black fog so enemies stay readable (docs/05 §8). */
+  /** Over the black fog (docs/05 §8) enemies are re-drawn faintly so their silhouettes and eyes stay readable. */
   drawLights(g: Ctx) {
     if (this.wait > 0) return;
-    const x = Math.round(this.x), y = Math.round(this.y);
-    g.fillStyle = this.kind === 'candle' ? '#B79CFF' : this.kind === 'sentinel' ? '#FF8A6A' : this.kind === 'cleric' ? '#E05060' : '#BFF4FF';
-    if (this.kind === 'candle') {
-      g.fillRect(x - 1, y - 9, 2, 3);
-    } else if (this.kind === 'bat') {
-      g.fillRect(x - 2, y - 4, 1, 1);
-      g.fillRect(x + 1, y - 4, 1, 1);
-    } else if (this.kind === 'skeleton') {
-      g.fillRect(x - 6, y - 15, 1, 1);
-      g.fillRect(x - 2, y - 15, 1, 1);
-    } else if (this.kind === 'cleric') {
-      g.fillRect(x - 5, y - 14, 2, 1);
-      g.fillRect(x - 2, y - 14, 2, 1);
-    } else {
-      g.fillRect(x - 5, y - 31, 3, 1);
-    }
-  }
-
-  drawGlow(ctx: Ctx) {
-    if (this.wait > 0) return;
-    const k = this.kind;
-    if (k === 'candle') {
-      const s = this.tele > 0 ? 40 : 22;
-      ctx.globalAlpha = 0.6;
-      ctx.drawImage(ART.glow.violet, this.x - s / 2, this.y - 9 - s / 2, s, s);
-    } else if (k === 'skeleton' && this.tele > 0) {
-      ctx.globalAlpha = 0.7;
-      ctx.drawImage(ART.glow.gold, this.x - 13 - 16, this.y - 10 - 16, 32, 32);
-    } else if (k === 'cleric' && this.tele > 0) {
-      ctx.globalAlpha = 0.5;
-      ctx.drawImage(ART.glow.red, this.x - 20, this.y - 20, 40, 40);
-    } else if (k === 'sentinel') {
-      ctx.globalAlpha = 0.35;
-      ctx.drawImage(ART.glow.red, this.x - 10, this.y - 38, 16, 12);
-    } else {
-      ctx.globalAlpha = 0.3;
-      ctx.drawImage(ART.glow.cyan, this.x - 8, this.y - 10, 16, 12);
-    }
-    ctx.globalAlpha = 1;
+    const sh = sheet(SHEET.enemies), tag = this.tag();
+    sh.draw(g, tag, sh.index(tag, this.age), this.x, this.y, { alpha: 0.4 });
   }
 }

@@ -1,10 +1,11 @@
 import { G } from '../core/app';
 import { H, W } from '../core/constants';
 import { fxRng as R, TAU } from '../core/math';
+import { sheet } from '../gfx/assets';
 import { Ctx } from '../gfx/canvas';
 import { Renderer } from '../gfx/renderer';
-import { ART } from '../gfx/sprites';
-import { HeroId } from '../gfx/art/heroines';
+import { ditherFill } from '../gfx/dither';
+import { HeroId, SHEET } from '../gfx/sprites';
 import { BulletPool } from './bullets';
 import { CHARS, CharDef, SCORE } from './defs';
 import { Enemy, Group } from './enemies';
@@ -113,7 +114,7 @@ export class World {
   addScore(n: number, x?: number, y?: number, useChain = false) {
     const v = Math.round(useChain ? n * this.chainMul : n);
     this.score += v;
-    if (x !== undefined && y !== undefined) this.fx.popup(x, y, String(v), v >= 2000 ? '#D8B35E' : '#E9E1D3');
+    if (x !== undefined && y !== undefined) this.fx.popup(x, y, String(v), v >= 2000 ? '#F2D58C' : '#D9CDB6');
   }
   hudPing(what: string) {
     this.pings[what] = this.t;
@@ -133,7 +134,7 @@ export class World {
   onGroupWipe(gr: Group) {
     this.stats.wipes++;
     this.addScore(SCORE.wipe, gr.lastX, gr.lastY - 18);
-    this.fx.popup(gr.lastX, gr.lastY - 28, 'WIPE', '#D8B35E');
+    this.fx.popup(gr.lastX, gr.lastY - 28, 'WIPE', '#F2D58C');
     G.audio.sfx('ding');
     if (gr.drop) this.items.spawn(gr.drop, gr.lastX, gr.lastY);
     if (gr.dropS) this.items.scatter('S', gr.dropS, gr.lastX, gr.lastY);
@@ -184,7 +185,7 @@ export class World {
           if (b.hp <= 0) {
             b.alive = false;
             this.items.spawn('mote', b.x, b.y);
-            this.fx.spark(b.x, b.y, 6, ['#BFF4FF', '#59B7C9'], 60, { life: 0.3 });
+            this.fx.anim(SHEET.fx, 'cancel', b.x, b.y);
           }
           return;
         }
@@ -200,11 +201,12 @@ export class World {
         s.hit.add(t);
         const sx = s.len > 0 ? Math.min(s.x, c.x - c.r * 0.5) : s.x;
         if (s.kind === 'basic') {
-          if (R.next() < 0.5) this.fx.spark(sx, s.y, 2, c.mul < 0.5 ? ['#8A8F99', '#C8D2EA'] : ['#FFFFFF', this.ch.color], 60, { life: 0.18, dir: Math.PI, spread: 1.2 });
+          if (R.next() < 0.35) this.fx.hit(sx + R.range(-2, 2), s.y + R.range(-2, 2), c.mul < 0.5);
         } else {
-          this.fx.spark(sx, s.y, 8, ['#FFFFFF', this.ch.color], 120, { life: 0.3, glow: this.ch.glow });
-          if (this.ch.id === 'noctis' && s.kind === 'scythe') this.fx.spark(c.x, c.y, 10, ['#B3263B', '#E05060', '#5A1A26'], 90, { life: 0.8, grav: 40, size: 2 });
-          if (s.kind === 'orb' || s.kind === 'spirit') this.fx.ring(s.x, s.y, 2, 80, 0.25, '#E8DDFF', 1, 'violet');
+          this.fx.anim(SHEET.fx, 'hit_core', sx, s.y);
+          this.fx.spark(sx, s.y, 6, ['#ECEEF1', this.ch.color], 120, { life: 0.3 });
+          if (this.ch.id === 'noctis' && s.kind === 'scythe') this.fx.anim(SHEET.heroFx('noctis'), 'strike', c.x, c.y);
+          if (s.kind === 'orb' || s.kind === 'spirit') this.fx.anim(SHEET.heroFx('morgana'), 'release', s.x, s.y);
         }
         if (!s.pierce) {
           s.life = 0;
@@ -285,10 +287,11 @@ export class World {
         if (t.x < bandX) {
           this.bombHit.add(t);
           this.bombDamage(t, 280);
-          this.fx.spark(t.x, t.y, 14, ['#B3263B', '#2C2340', '#E05060'], 120, { life: 0.6, size: 2 });
+          this.fx.anim(SHEET.heroFx('noctis'), 'strike', t.x, t.y);
+          this.fx.spark(t.x, t.y, 10, ['#E0F5FF', '#3698D6', '#12334F'], 120, { life: 0.6, size: 2 });
         }
       }
-      if (R.next() < 0.9) this.fx.spark(bandX, R.range(20, H - 20), 3, ['#120E18', '#2C2340', '#5A4A80'], 160, { dir: 0, spread: 0.6, life: 0.6, size: 2 });
+      if (R.next() < 0.9) this.fx.spark(bandX, R.range(20, H - 20), 3, ['#07080B', '#12334F', '#1D5F8C'], 160, { dir: 0, spread: 0.6, life: 0.6, size: 2 });
       if (a < 1.0) this.cancelBullets();
     } else {
       // choir: continuous bullet cleansing and damage over 3 s
@@ -297,86 +300,36 @@ export class World {
         for (const t of [...this.targets()]) if (this.onScreen(t)) this.bombDamage(t, 320 / 12);
       }
       this.cancelBullets();
-      if (R.next() < 0.6) this.fx.spark(R.range(0, W), H + 4, 1, ['#E8DDFF', '#9D86E0', '#A8326E'], 90, { dir: -Math.PI / 2, spread: 0.3, life: 1.6, drag: 0, size: 2, glow: 'violet' });
+      if (R.next() < 0.6) this.fx.spark(R.range(0, W), H + 4, 1, ['#DAFAE7', '#79DCA4', '#349E6E'], 90, { dir: -Math.PI / 2, spread: 0.3, life: 1.6, drag: 0, size: 2 });
     }
   }
 
+  /** Bomb visuals from the hero effect sheets; the field darkens with an ordered dither so the effect reads. */
   private drawBomb(g: Ctx) {
     if (this.bombT <= 0) return;
     const a = this.bombAge, p = this.player;
+    const fx = sheet(SHEET.heroFx(this.bombKind));
+    const fade = Math.min(1, this.bombT / 0.4, a / 0.15);
+    ditherFill(g, 0, 0, W, H, Math.round(6 * fade), '#07080B');
     if (this.bombKind === 'seraphine') {
-      const k = Math.min(1, a / 0.4), fade = Math.min(1, this.bombT / 0.4);
-      g.globalAlpha = 0.85 * fade;
-      g.fillStyle = '#F3E6C4';
-      const cx = Math.round(p.x + 60), cy = Math.round(p.y);
-      const L = 400 * k;
-      g.fillRect(cx - 3, cy - L, 6, L * 2);
-      g.fillRect(cx - L * 0.8, cy - 3, L * 1.6, 6);
-      g.strokeStyle = '#D8B35E';
-      g.lineWidth = 2;
-      for (let i = 0; i < 3; i++) {
-        g.beginPath();
-        g.arc(cx, cy, (40 + i * 70) * k + a * 40, 0, TAU);
-        g.stroke();
-      }
+      // GOLDEN SANCTUM: light pillars sweeping the screen + expanding halo
       for (let i = 0; i < 6; i++) {
-        const x = ((i * 113 + a * 60) % W);
-        g.globalAlpha = 0.25 * fade;
-        g.fillRect(Math.round(x), 0, 10, H);
+        const x = ((i * 113 + a * 60) % (W + 40)) - 20;
+        if (fade > 0.3 || i % 2 === 0) fx.draw(g, 'pillar', fx.index('pillar', a + i * 0.07), x, 0);
       }
-      g.globalAlpha = 1;
+      fx.draw(g, 'halo', fx.index('halo', a), p.x + 60, p.y);
+      if (a < 0.5) fx.draw(g, 'cross', fx.index('cross', a, false), p.x + 60, p.y);
     } else if (this.bombKind === 'noctis') {
+      // BLACKWING TEMPEST: a band of black wings sweeping right
       const bandX = p.x + (W - p.x + 60) * Math.min(1, a / 0.9);
-      g.globalAlpha = Math.min(1, this.bombT / 0.3);
-      g.fillStyle = '#120E18';
-      for (let i = 0; i < 14; i++) {
-        const y = (i / 13) * H;
-        const x = bandX - 20 - ((i * 37) % 50);
-        g.beginPath();
-        g.moveTo(x, y);
-        g.lineTo(x - 40, y - 10);
-        g.lineTo(x - 26, y + 6);
-        g.fill();
-      }
-      g.fillStyle = '#B3263B';
-      g.fillRect(Math.round(bandX) - 2, 0, 2, H);
-      g.globalAlpha = 1;
+      for (let y = 0; y < H; y += 120) fx.draw(g, 'storm', fx.index('storm', a + y / 400), bandX - 10, y);
     } else {
-      const fade = Math.min(1, this.bombT / 0.5, a / 0.3);
-      g.globalAlpha = 0.5 * fade;
-      g.strokeStyle = '#B79CFF';
-      g.lineWidth = 1;
-      const cx = p.x, cy = p.y;
-      for (let i = 0; i < 3; i++) {
-        g.beginPath();
-        g.arc(cx, cy, 40 + i * 26 + Math.sin(a * 3 + i) * 4, a * (i % 2 ? 1 : -1), a * (i % 2 ? 1 : -1) + TAU * 0.85);
-        g.stroke();
-      }
-      // ghosts circling
+      // CHOIR OF THE DEPARTED: ghosts circling the witch
       for (let i = 0; i < 8; i++) {
         const ang = a * 1.4 + (i / 8) * TAU, rr = 70 + Math.sin(a * 2 + i) * 20;
-        const gx = Math.round(cx + Math.cos(ang) * rr), gy = Math.round(cy + Math.sin(ang) * rr * 0.7);
-        g.globalAlpha = 0.7 * fade;
-        g.fillStyle = '#E8DDFF';
-        g.fillRect(gx - 3, gy - 4, 6, 7);
-        g.fillStyle = '#7A5FC0';
-        g.fillRect(gx - 2, gy - 2, 1, 2);
-        g.fillRect(gx + 1, gy - 2, 1, 2);
+        fx.draw(g, 'ghost', fx.index('ghost', a + i * 0.1), p.x + Math.cos(ang) * rr, p.y + Math.sin(ang) * rr * 0.7, { flipX: Math.sin(ang) > 0, dither: Math.round(16 * fade) });
       }
-      g.globalAlpha = 1;
     }
-  }
-
-  private drawBombGlow(ctx: Ctx) {
-    if (this.bombT <= 0) return;
-    const p = this.player;
-    const glow = this.bombKind === 'seraphine' ? ART.glow.gold : this.bombKind === 'noctis' ? ART.glow.red : ART.glow.violet;
-    const k = Math.min(1, this.bombT / 0.5);
-    ctx.globalAlpha = 0.7 * k;
-    const s = 260 + this.bombAge * 200;
-    const cx = this.bombKind === 'seraphine' ? p.x + 60 : this.bombKind === 'noctis' ? p.x + (W - p.x + 60) * Math.min(1, this.bombAge / 0.9) : p.x;
-    ctx.drawImage(glow, cx - s / 2, p.y - s / 2, s, s);
-    ctx.globalAlpha = 1;
   }
 
   // ---------------- lifecycle ----------------
@@ -448,7 +401,7 @@ export class World {
         this.score += SCORE.graze;
         if (this.chainT > 0) this.chainT = Math.min(2.0, this.chainT + 0.2);
         G.audio.sfx('graze');
-        if (R.next() < 0.5) this.fx.spark(p.x, p.y, 2, ['#FFFFFF', '#C8D2EA'], 50, { life: 0.2 });
+        if (R.next() < 0.5) this.fx.anim(SHEET.fx, 'graze', p.x + R.range(-6, 6), p.y + R.range(-6, 6));
       }
     }
     if (!vulnerable) return;
@@ -466,7 +419,7 @@ export class World {
   }
 
   // ---------------- rendering ----------------
-  /** Draw world pixels into a 640x360 context. */
+  /** Draw the 640x360 world: stage back layers -> actors -> effects -> fog/foreground -> telegraphs -> enemy bullets (always on top). */
   drawWorld(g: Ctx) {
     if (this.bg) this.bg.drawBack(g);
     for (const h of this.hazards) h.drawBack?.(g);
@@ -490,49 +443,22 @@ export class World {
     for (const h of this.hazards) h.drawTele?.(g);
     this.boss?.drawTele(g);
     this.midboss?.drawTele(g);
-    this.bullets.draw(g);
+    this.bullets.draw(g, this.t);
     this.player.drawHitbox(g);
+    this.fx.drawPopups(g);
   }
 
-  private fogCanvas: HTMLCanvasElement | null = null;
+  /** Black fog (docs/05 §8): the 'vision' sprite (a hole with a dithered edge) follows the player; the rest is filled. */
   private drawFogMask(g: Ctx) {
-    if (!this.fogCanvas) {
-      this.fogCanvas = document.createElement('canvas');
-      this.fogCanvas.width = W;
-      this.fogCanvas.height = H;
-    }
-    const f = this.fogCanvas.getContext('2d')!;
-    f.globalCompositeOperation = 'source-over';
-    f.clearRect(0, 0, W, H);
-    f.fillStyle = 'rgba(4,4,8,0.78)';
-    f.fillRect(0, 0, W, H);
-    f.globalCompositeOperation = 'destination-out';
-    const p = this.player;
-    const r = this.fog.radius;
-    const grd = f.createRadialGradient(p.x, p.y, r - 24, p.x, p.y, r);
-    grd.addColorStop(0, 'rgba(0,0,0,1)');
-    grd.addColorStop(1, 'rgba(0,0,0,0)');
-    f.fillStyle = grd;
-    f.beginPath();
-    f.arc(p.x, p.y, r, 0, TAU);
-    f.fill();
-    g.drawImage(this.fogCanvas, 0, 0);
-  }
-
-  drawGlow(ctx: Ctx) {
-    ctx.globalCompositeOperation = 'lighter';
-    this.bg?.drawGlow(ctx);
-    for (const e of this.enemies) e.drawGlow(ctx);
-    this.midboss?.drawGlow(ctx);
-    this.boss?.drawGlow(ctx);
-    for (const h of this.hazards) h.drawGlow?.(ctx);
-    this.player.drawGlow(ctx);
-    this.items.drawGlow(ctx);
-    this.bullets.drawGlow(ctx);
-    this.fx.drawGlow(ctx);
-    this.drawBombGlow(ctx);
-    ctx.globalCompositeOperation = 'source-over';
-    ctx.globalAlpha = 1;
+    const fx = sheet(SHEET.fx), p = this.player, f = this.fog.radius >= 135 ? 0 : 1;
+    const { w, h } = fx.size('vision', f);
+    const x = Math.round(p.x - w / 2), y = Math.round(p.y - h / 2);
+    fx.draw(g, 'vision', f, x + w / 2, y + h / 2);
+    g.fillStyle = 'rgba(7,8,11,0.84)';
+    if (y > 0) g.fillRect(0, 0, W, y);
+    if (y + h < H) g.fillRect(0, y + h, W, H - y - h);
+    if (x > 0) g.fillRect(0, Math.max(0, y), x, Math.min(H, y + h) - Math.max(0, y));
+    if (x + w < W) g.fillRect(x + w, Math.max(0, y), W - x - w, Math.min(H, y + h) - Math.max(0, y));
   }
 
   render(r: Renderer) {
@@ -541,11 +467,5 @@ export class World {
     r.shakeX = this.fx.shakeX;
     r.shakeY = this.fx.shakeY;
     r.presentWorld();
-    const ctx = r.ctx;
-    ctx.save();
-    r.clipView();
-    r.worldTransform();
-    this.drawGlow(ctx);
-    ctx.restore();
   }
 }

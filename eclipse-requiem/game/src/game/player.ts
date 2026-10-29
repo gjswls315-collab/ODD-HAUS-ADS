@@ -2,8 +2,8 @@ import { G } from '../core/app';
 import { H, W } from '../core/constants';
 import { clamp, DEG, fxRng as R, TAU } from '../core/math';
 import { Ctx } from '../gfx/canvas';
-import { HERO_ANCHOR } from '../gfx/art/heroines';
-import { ART } from '../gfx/sprites';
+import { sheet } from '../gfx/assets';
+import { SHEET } from '../gfx/sprites';
 import { CharDef } from './defs';
 import type { Target, World } from './world';
 
@@ -58,6 +58,11 @@ export class Player {
   bombsUsed = 0;
   livesLost = 0;
   moving = 0;
+  /** smoothed vertical input for the tilt frames (-1 up .. 1 down) */
+  tilt = 0;
+  castT = 0;
+  hurtT = 0;
+  muzzleT = 0;
   /** Scripted input for the character-select shot preview. */
   demo: { charge: boolean; bomb: boolean } | null = null;
 
@@ -80,6 +85,10 @@ export class Player {
     const s = G.save.settings;
     this.anim += dt;
     this.hitFlash = Math.max(0, this.hitFlash - dt);
+    this.castT = Math.max(0, this.castT - dt);
+    this.hurtT = Math.max(0, this.hurtT - dt);
+    this.muzzleT = Math.max(0, this.muzzleT - dt);
+    this.tilt += (this.moving - this.tilt) * Math.min(1, dt * 12);
     if (this.invuln > 0) this.invuln -= dt;
     if (this.chargeCool > 0) this.chargeCool -= dt;
 
@@ -135,16 +144,17 @@ export class Player {
       if (this.chargeT >= CHARGE_L1 && this.chargeNotified < 1) {
         this.chargeNotified = 1;
         G.audio.sfx('charge1');
-        this.w.fx.ring(this.x, this.y, 4, 70, 0.3, this.ch.color, 1, this.ch.glow);
+        this.w.fx.ring(this.x, this.y);
       }
       if (this.chargeT >= CHARGE_L2 && this.chargeNotified < 2) {
         this.chargeNotified = 2;
         G.audio.sfx('charge2');
-        this.w.fx.ring(this.x, this.y, 6, 110, 0.4, '#FFFFFF', 1, this.ch.glow);
+        this.w.fx.ring(this.x, this.y);
+        this.w.fx.anim(SHEET.heroFx(this.ch.id), 'release', this.x, this.y);
       }
-      if (R.next() < 0.5) {
-        const a = R.range(0, TAU), d = R.range(10, 20);
-        this.w.fx.spark(this.x + Math.cos(a) * d, this.y + Math.sin(a) * d, 1, [this.ch.color, '#FFFFFF'], 30, { dir: a + Math.PI, spread: 0.1, life: 0.3, drag: 0 });
+      if (R.next() < 0.35) {
+        const a = R.range(0, TAU), d = R.range(12, 20);
+        this.w.fx.spark(this.x + Math.cos(a) * d, this.y + Math.sin(a) * d, 1, [this.ch.color, '#ECEEF1'], 30, { dir: a + Math.PI, spread: 0.1, life: 0.3, drag: 0, size: 1 });
       }
     } else if (this.charging) {
       this.charging = false;
@@ -185,6 +195,7 @@ export class Player {
     const mul = POWER_MUL[lv - 1];
     const x = this.x + 14, y = this.y;
     G.audio.sfx('shot');
+    this.muzzleT = 0.1;
     if (this.ch.id === 'seraphine') {
       // DPS 100 at Lv1: 2 bolts / 0.15 s -> 7.5 each; extra streams split the same multiplied DPS
       const lanes = lv === 1 ? [-3, 3] : lv === 2 ? [-5, 0, 5] : [-7, -2.5, 2.5, 7];
@@ -208,7 +219,9 @@ export class Player {
     this.chargeCool = CHARGE_COOLDOWN;
     G.audio.sfx('release');
     this.w.fx.shake(level === 2 ? 2 : 1, 0.12);
-    this.w.fx.light(this.x + 20, this.y, level === 2 ? 60 : 36, 0.25, this.ch.glow, 1);
+    this.castT = 0.27;
+    this.w.fx.anim(SHEET.heroFx(this.ch.id), 'release', this.x + 16, this.y);
+    if (this.ch.id === 'seraphine' && level === 2) this.w.fx.anim(SHEET.heroFx('seraphine'), 'cross', this.x + 18, this.y);
     this.w.chargeFlash = 0.15;
     this.w.stats.charges++;
     const id = this.ch.id;
@@ -238,6 +251,7 @@ export class Player {
     this.invuln = Math.max(this.invuln, this.ch.bombInvuln);
     this.charging = false;
     this.chargeT = 0;
+    this.castT = 0.4;
     this.w.startBomb(this.ch.id);
   }
 
@@ -293,10 +307,12 @@ export class Player {
     this.hp--;
     this.hitsTaken++;
     this.hitFlash = 0.12;
+    this.hurtT = 0.32;
     G.audio.sfx('playerHit');
     this.w.fx.shake(3, 0.25);
-    this.w.fx.flash(0.25, '#D94C3A');
-    this.w.fx.spark(this.x, this.y, 16, ['#FFFFFF', this.ch.color, '#D94C3A'], 120, { life: 0.4 });
+    this.w.fx.flash(0.25, '#C91C30');
+    this.w.fx.anim(SHEET.fx, 'hit_core', this.x, this.y);
+    this.w.fx.spark(this.x, this.y, 12, ['#ECEEF1', this.ch.color, '#C91C30'], 120, { life: 0.4 });
     this.w.clearBulletsNear(this.x, this.y, 22);
     this.w.hudPing('hp');
     if (this.hp <= 0) this.die();
@@ -315,7 +331,8 @@ export class Player {
     this.chargeT = 0;
     this.respawnT = 1.0;
     G.audio.sfx('death');
-    this.w.fx.explosion(this.x, this.y, 'm', ['#FFFFFF', this.ch.color, '#D94C3A', '#5A4A60']);
+    this.w.fx.anim(SHEET.heroFx(this.ch.id), 'death', this.x, this.y);
+    this.w.fx.spark(this.x, this.y, 18, ['#ECEEF1', this.ch.color, '#C91C30', '#4D5461'], 140, { life: 0.7, size: 2 });
     this.w.fx.shake(3, 0.3);
     // power -1 level, scatter 2 P (docs/05 §7)
     const lost = Math.min(this.pp, 4);
@@ -348,130 +365,77 @@ export class Player {
     this.invuln = 2.8;
   }
 
+  /** Body tag for the current state (sprites/hero_<id>: fly, up, down, charge, hit, cast). */
+  private bodyTag() {
+    if (this.hurtT > 0) return 'hit';
+    if (this.castT > 0) return 'cast';
+    if (this.charging && this.chargeT > 0.05) return 'charge';
+    if (this.tilt < -0.35) return 'up';
+    if (this.tilt > 0.35) return 'down';
+    return 'fly';
+  }
+
   draw(g: Ctx) {
     if (this.dead) return;
-    const blink = this.invuln > 0 && Math.floor(this.anim * 20) % 2 === 0;
-    const frames = this.hitFlash > 0 ? ART.heroFlash[this.ch.id] : ART.hero[this.ch.id];
-    const fi = Math.floor(this.anim * 9) % 4;
-    const f = frames[[0, 1, 2, 1][fi]];
-    const bob = Math.round(Math.sin(this.anim * 3) * 1);
-    if (blink) g.globalAlpha = 0.35;
-    g.drawImage(f, Math.round(this.x - HERO_ANCHOR.x), Math.round(this.y - HERO_ANCHOR.y + bob));
-    g.globalAlpha = 1;
-    // charge aura / magic circle
-    if (this.charging && this.chargeT > 0.05) {
-      const k = this.chargeT / CHARGE_L2;
-      g.strokeStyle = this.ch.color;
-      g.globalAlpha = 0.5 + 0.5 * k;
-      g.lineWidth = 1;
-      const r = 8 + k * 10;
-      g.beginPath();
-      g.arc(Math.round(this.x), Math.round(this.y), r, this.anim * 3, this.anim * 3 + TAU * k);
-      g.stroke();
-      if (this.chargeT >= CHARGE_L2 && Math.floor(this.anim * 8) % 2 === 0) {
-        g.beginPath();
-        g.arc(Math.round(this.x), Math.round(this.y), r + 3, 0, TAU);
-        g.stroke();
-      }
-      g.globalAlpha = 1;
+    // invulnerability: classic arcade flicker (skip alternate 1/20 s) instead of translucency
+    if (this.invuln > 0 && this.hurtT <= 0 && Math.floor(this.anim * 20) % 2 === 0) return;
+    const body = sheet(SHEET.hero(this.ch.id)), fx = sheet(SHEET.heroFx(this.ch.id));
+    const x = Math.round(this.x), y = Math.round(this.y);
+    const charged = this.charging && this.chargeT > 0.05;
+    if (charged) {
+      const tag = this.chargeT >= CHARGE_L2 ? 'aura_full' : 'aura';
+      fx.draw(g, tag, fx.index(tag, this.anim), x, y);
+    }
+    const tag = this.bodyTag();
+    const t = tag === 'hit' ? 0.32 - this.hurtT : tag === 'cast' ? 0.27 - this.castT : this.anim;
+    body.draw(g, tag, body.index(tag, t, tag !== 'hit' && tag !== 'cast'), x, y, { flash: this.hitFlash > 0 });
+    if (this.muzzleT > 0 && this.entering <= 0) fx.draw(g, 'muzzle', fx.index('muzzle', 0.1 - this.muzzleT, false), x + 15, y);
+    if (charged) {
+      // 16x2 charge gauge under the character (fills to L1, then L2)
+      const k = Math.min(1, this.chargeT / CHARGE_L2), l1 = Math.round((CHARGE_L1 / CHARGE_L2) * 16);
+      g.fillStyle = '#07080B';
+      g.fillRect(x - 9, y + 17, 18, 4);
+      g.fillStyle = '#2B3039';
+      g.fillRect(x - 8, y + 18, 16, 2);
+      g.fillStyle = this.chargeT >= CHARGE_L2 && Math.floor(this.anim * 10) % 2 ? '#ECEEF1' : this.ch.color;
+      g.fillRect(x - 8, y + 18, Math.round(16 * k), 2);
+      g.fillStyle = '#07080B';
+      g.fillRect(x - 8 + l1, y + 18, 1, 2);
     }
   }
 
   drawHitbox(g: Ctx) {
     if (this.dead || !(this.focus || this.charging)) return;
-    const x = Math.round(this.x), y = Math.round(this.y);
-    g.fillStyle = '#D94C3A';
-    g.beginPath();
-    g.arc(x + 0.5, y + 0.5, 4.5, 0, TAU);
-    g.fill();
-    g.fillStyle = '#FFFFFF';
-    g.fillRect(x - 1, y - 1, 3, 3);
+    const fx = sheet(SHEET.fx);
+    fx.draw(g, 'hitbox', fx.index('hitbox', this.anim), Math.round(this.x), Math.round(this.y));
   }
 
+  /** Player shots from sprites/hero_<id>_fx. Directional shots use pre-rotated frames; nothing is rotated at runtime. */
   drawShots(g: Ctx) {
     const vis = G.save.settings.shotVis / 100;
-    g.globalAlpha = vis;
-    const prev = g.globalCompositeOperation;
-    g.globalCompositeOperation = 'lighter';
+    const fx = sheet(SHEET.heroFx(this.ch.id));
+    const o = { alpha: vis < 1 ? vis : undefined };
     for (const s of this.shots) {
-      const x = Math.round(s.x), y = Math.round(s.y);
+      const x = s.x, y = s.y;
       if (s.kind === 'basic') {
-        const spr = ART.shot[this.ch.id];
         if (this.ch.id === 'morgana') {
-          g.save();
-          g.translate(x, y);
-          g.rotate(Math.atan2(s.vy, s.vx));
-          g.drawImage(spr, -5, -3);
-          g.restore();
-        } else g.drawImage(spr, x - spr.width + 2, y - Math.floor(spr.height / 2));
-      } else if (s.kind === 'lance' || s.kind === 'bolt') {
-        const col = this.ch.id === 'seraphine' ? '#D8B35E' : '#C8D2EA';
-        const th = s.kind === 'lance' ? (s.len > 50 ? 4 : 3) : 2;
-        g.fillStyle = col;
-        g.fillRect(x - s.len, y - th / 2, s.len, th);
-        g.fillStyle = '#FFFFFF';
-        g.fillRect(x - s.len * 0.7, y - 0.5, s.len * 0.7, 1);
-        g.beginPath();
-        g.moveTo(x + 6, y);
-        g.lineTo(x, y - th);
-        g.lineTo(x, y + th);
-        g.fillStyle = col;
-        g.fill();
+          const deg = Math.atan2(s.vy, s.vx) / DEG;
+          const i = clamp(Math.round((deg + 24) / 12), 0, 4);
+          fx.draw(g, 'shot', i, x, y, o);
+        } else fx.draw(g, 'shot', fx.index('shot', s.age), x, y, o);
+      } else if (s.kind === 'lance') {
+        const tag = s.len > 50 ? 'charge2' : 'charge1';
+        fx.draw(g, tag, fx.index(tag, s.age), x + 2, y, o);
+      } else if (s.kind === 'bolt') {
+        fx.draw(g, 'charge1', fx.index('charge1', s.age), x + 2, y, o);
       } else if (s.kind === 'scythe') {
-        g.save();
-        g.translate(x, y);
-        g.rotate(s.ang);
-        g.strokeStyle = '#C8D2EA';
-        g.lineWidth = 3;
-        g.beginPath();
-        g.arc(0, 0, 11, 0, Math.PI * 1.2);
-        g.stroke();
-        g.strokeStyle = '#B3263B';
-        g.lineWidth = 1;
-        g.beginPath();
-        g.arc(0, 0, 13, 0.2, Math.PI * 1.1);
-        g.stroke();
-        g.restore();
+        fx.draw(g, 'scythe', Math.floor(((s.ang % TAU) + TAU) % TAU / (TAU / 8)) % 8, x, y, o);
+      } else if (s.kind === 'spirit') {
+        const a = ((Math.atan2(s.vy, s.vx) % TAU) + TAU) % TAU;
+        fx.draw(g, 'spirit', Math.round(a / (TAU / 16)) % 16, x, y, o);
       } else {
-        g.fillStyle = s.kind === 'orb' ? '#B79CFF' : '#E89AC9';
-        g.beginPath();
-        g.arc(x, y, s.kind === 'orb' ? 3 : 2.5, 0, TAU);
-        g.fill();
-        g.fillStyle = '#FFFFFF';
-        g.fillRect(x - 1, y - 1, 2, 2);
+        fx.draw(g, 'orb', fx.index('orb', s.age), x, y, o);
       }
     }
-    g.globalCompositeOperation = prev;
-    g.globalAlpha = 1;
-  }
-
-  drawGlow(ctx: Ctx) {
-    const glow = ART.glow[this.ch.glow];
-    ctx.globalAlpha = 0.25 * (G.save.settings.shotVis / 100);
-    for (const s of this.shots) {
-      if (s.kind === 'basic') {
-        ctx.drawImage(glow, s.x - 9, s.y - 9, 18, 18);
-      } else if (s.kind === 'lance' || s.kind === 'bolt') {
-        ctx.globalAlpha = 0.55;
-        for (let i = 0; i < s.len; i += 10) ctx.drawImage(glow, s.x - i - 12, s.y - 12, 24, 24);
-        ctx.globalAlpha = 0.25;
-      } else {
-        ctx.globalAlpha = 0.6;
-        const sz = s.kind === 'scythe' ? 46 : 22;
-        ctx.drawImage(s.kind === 'scythe' ? ART.glow.silver : glow, s.x - sz / 2, s.y - sz / 2, sz, sz);
-        ctx.globalAlpha = 0.25;
-      }
-    }
-    if (!this.dead && this.charging) {
-      const k = this.chargeT / CHARGE_L2;
-      ctx.globalAlpha = 0.25 + 0.5 * k;
-      const sz = 30 + 40 * k;
-      ctx.drawImage(glow, this.x - sz / 2, this.y - sz / 2, sz, sz);
-    }
-    if (!this.dead && this.entering <= 0) {
-      ctx.globalAlpha = 0.18;
-      ctx.drawImage(glow, this.x - 22, this.y - 22, 44, 44);
-    }
-    ctx.globalAlpha = 1;
   }
 }

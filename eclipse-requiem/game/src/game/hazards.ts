@@ -1,8 +1,9 @@
 import { G } from '../core/app';
 import { H } from '../core/constants';
-import { fxRng as R, TAU } from '../core/math';
+import { fxRng as R } from '../core/math';
+import { sheet } from '../gfx/assets';
 import { Ctx } from '../gfx/canvas';
-import { ART } from '../gfx/sprites';
+import { SHEET } from '../gfx/sprites';
 import type { HitCircle, Target, World } from './world';
 
 // Stage gimmicks (docs/05 §8): lightning cross, collapse debris, and the boss's bell-shadow drop.
@@ -12,8 +13,9 @@ export interface Hazard {
   update(dt: number): void;
   drawBack?(g: Ctx): void;
   drawTele?(g: Ctx): void;
-  drawGlow?(ctx: Ctx): void;
 }
+
+const fxs = () => sheet(SHEET.fx);
 
 /** Lightning cross: 1.0 s red guide line, then a vertical strike. */
 export class Lightning implements Hazard {
@@ -37,57 +39,28 @@ export class Lightning implements Hazard {
     }
     if (this.t > this.tele + this.active + 0.3) this.done = true;
   }
+  /** The iron grave cross that conducts the strike: dark, flickers red while charging. */
   drawBack(g: Ctx) {
     if (!this.withCross) return;
-    // the cross structure rising from the ground glows while charging
-    const x = Math.round(this.x), base = H - 30;
-    g.fillStyle = '#09090C';
-    g.fillRect(x - 2, base - 46, 4, 50);
-    g.fillRect(x - 9, base - 36, 18, 4);
-    if (this.t < this.tele) {
-      g.fillStyle = Math.floor(this.t * 12) % 2 ? '#D94C3A' : '#8A2A36';
-      g.fillRect(x - 1, base - 45, 2, 48);
-      g.fillRect(x - 8, base - 35, 16, 2);
-    }
+    const f = this.t < this.tele ? 1 + (Math.floor(this.t * 12) % 2) : 0;
+    fxs().draw(g, 'gravecross', f, this.x, H - 26);
   }
   drawTele(g: Ctx) {
-    const x = Math.round(this.x);
+    const fx = fxs(), x = Math.round(this.x);
     if (this.t < this.tele) {
-      const a = 0.4 + 0.5 * (0.5 + 0.5 * Math.sin(this.t * TAU * 4));
-      g.globalAlpha = a;
-      g.fillStyle = '#D94C3A';
-      g.fillRect(x - 1, 0, 2, H);
-      g.globalAlpha = a * 0.35;
-      g.fillRect(x - this.width / 2, 0, 1, H);
-      g.fillRect(x + this.width / 2 - 1, 0, 1, H);
-      g.globalAlpha = 1;
-    } else if (this.t < this.tele + this.active) {
-      const k = 1 - (this.t - this.tele) / this.active;
-      g.fillStyle = '#FFE3E3';
-      g.fillRect(x - Math.round((this.width / 2) * (0.6 + 0.4 * k)), 0, Math.round(this.width * (0.6 + 0.4 * k)), H);
-      g.fillStyle = '#FFFFFF';
-      // jagged core
-      let jx = x;
-      for (let y = 0; y < H; y += 6) {
-        jx = x + R.int(-3, 3);
-        g.fillRect(jx - 1, y, 3, 6);
+      // guide: warning marker at the top edge + a blinking dotted column, edges every 24 px
+      const f = Math.floor(this.t * 10) % 2;
+      fx.draw(g, 'lightning_tele', f, x, 2);
+      for (let y = 14 + (Math.floor(this.t * 40) % 8); y < H; y += 8) fx.draw(g, 'teledot', f, x, y);
+      if (f) for (let y = 20; y < H; y += 24) {
+        fx.draw(g, 'teledot', 0, x - this.width / 2, y);
+        fx.draw(g, 'teledot', 0, x + this.width / 2, y);
       }
+    } else if (this.t < this.tele + this.active) {
+      const i = Math.floor((this.t - this.tele) / 0.04) % 2;
+      for (let y = 0; y < H; y += 120) fx.draw(g, 'lightning', (i + y / 120) % 2, x, y);
     } else {
-      g.globalAlpha = 1 - (this.t - this.tele - this.active) / 0.3;
-      g.fillStyle = '#D94C3A';
-      g.fillRect(x - 2, 0, 4, H);
-      g.globalAlpha = 1;
-    }
-  }
-  drawGlow(ctx: Ctx) {
-    if (this.t >= this.tele && this.t < this.tele + this.active + 0.2) {
-      ctx.globalAlpha = 0.8;
-      for (let y = 0; y < H; y += 40) ctx.drawImage(ART.glow.red, this.x - 40, y - 40, 80, 80);
-      ctx.globalAlpha = 1;
-    } else if (this.t < this.tele) {
-      ctx.globalAlpha = 0.25;
-      ctx.drawImage(ART.glow.red, this.x - 14, H - 80, 28, 60);
-      ctx.globalAlpha = 1;
+      for (let y = 0; y < H; y += 120) fx.draw(g, 'lightning', 2, x, y);
     }
   }
 }
@@ -101,8 +74,10 @@ export class Debris implements Hazard, Target {
   r: number;
   hp = 40;
   isBoss = false;
+  private spin: number;
   constructor(private w: World, public x: number, private tele = 0.8, public harmless = false) {
-    this.r = R.range(10, 16);
+    this.r = R.range(10, 12.5);
+    this.spin = R.int(0, 3);
   }
   get yPos() {
     return this.y;
@@ -118,7 +93,8 @@ export class Debris implements Hazard, Target {
     if (this.hp <= 0 && this.alive) {
       this.alive = false;
       this.done = true;
-      this.w.fx.explosion(this.x, this.y, 's', ['#B9B3AA', '#6E6A60', '#3A3742']);
+      this.w.fx.explosion(this.x, this.y, 's', ['#8A7D76', '#6C605C', '#403838']);
+      for (let i = 0; i < 3; i++) this.w.fx.anim(SHEET.fx, 'debris', this.x, this.y, { vx: R.range(-60, 60), vy: R.range(-80, -20), grav: 300, delay: 0 });
       G.audio.sfx('explodeS');
       this.w.items.spawn('S', this.x, this.y);
     }
@@ -126,7 +102,7 @@ export class Debris implements Hazard, Target {
   update(dt: number) {
     this.t += dt;
     if (this.t < this.tele) {
-      if (R.next() < 0.5) this.w.fx.spark(this.x + R.range(-8, 8), 2, 1, ['#6E6A60', '#3A3742'], 20, { dir: Math.PI / 2, spread: 0.3, life: 0.6, drag: 0, grav: 60 });
+      if (R.next() < 0.5) this.w.fx.spark(this.x + R.range(-8, 8), 2, 1, ['#6C605C', '#403838'], 20, { dir: Math.PI / 2, spread: 0.3, life: 0.6, drag: 0, grav: 60 });
       return;
     }
     this.y += 220 * dt;
@@ -138,30 +114,12 @@ export class Debris implements Hazard, Target {
     }
   }
   drawTele(g: Ctx) {
+    const fx = fxs();
     if (this.t < this.tele) {
-      g.globalAlpha = 0.5 + 0.5 * Math.sin(this.t * 30);
-      g.fillStyle = '#D94C3A';
-      g.fillRect(Math.round(this.x - this.r), 0, Math.round(this.r * 2), 2);
-      g.globalAlpha = 1;
+      fx.draw(g, 'warn', Math.floor(this.t * 10) % 2, this.x, 8);
       return;
     }
-    const x = Math.round(this.x), y = Math.round(this.y), r = Math.round(this.r);
-    g.fillStyle = '#0B0B0F';
-    g.beginPath();
-    g.moveTo(x - r - 1, y + r * 0.4);
-    g.lineTo(x - r * 0.4, y - r - 1);
-    g.lineTo(x + r + 1, y - r * 0.3);
-    g.lineTo(x + r * 0.6, y + r + 1);
-    g.fill();
-    g.fillStyle = '#3A3742';
-    g.beginPath();
-    g.moveTo(x - r, y + r * 0.4);
-    g.lineTo(x - r * 0.4, y - r);
-    g.lineTo(x + r, y - r * 0.3);
-    g.lineTo(x + r * 0.6, y + r);
-    g.fill();
-    g.fillStyle = '#6E6A60';
-    g.fillRect(x - r * 0.4, y - r + 1, r, 1);
+    fx.draw(g, 'rubble', this.spin + Math.floor((this.t - this.tele) * 10), this.x, this.y);
   }
 }
 
@@ -178,7 +136,9 @@ export class BellDrop implements Hazard {
       G.audio.sfx('toll', 0.6);
       G.audio.sfx('explodeM');
       this.w.fx.shake(3, 0.2);
-      this.w.fx.ring(this.x, this.y, 10, 260, 0.4, '#BFF4FF', 2, 'cyan');
+      this.w.fx.ring(this.x, this.y, true);
+      this.w.fx.anim(SHEET.fx, 'burst_m', this.x, this.y);
+      for (let i = 0; i < 5; i++) this.w.fx.anim(SHEET.fx, 'bellshard', this.x, this.y, { vx: R.range(-90, 90), vy: R.range(-140, -40), grav: 360 });
       this.w.bullets.radial('B02', this.x, this.y, 12, R.range(0, 30), 50);
     }
     if (this.t >= this.tele && this.t < this.tele + 0.2) {
@@ -188,49 +148,19 @@ export class BellDrop implements Hazard {
     if (this.t > this.tele + 0.5) this.done = true;
   }
   drawTele(g: Ctx) {
-    const x = Math.round(this.x), y = Math.round(this.y);
+    const fx = fxs(), x = this.x, y = this.y;
     if (this.t < this.tele) {
-      const k = this.t / this.tele;
+      const k = this.t / this.tele, f = Math.floor(this.t * 10) % 2;
+      // shrinking ring of marker dots around the locked position + ground mark
       const r = 80 - 32 * k;
-      g.strokeStyle = '#D94C3A';
-      g.globalAlpha = 0.5 + 0.4 * Math.sin(this.t * 20);
-      g.lineWidth = 1;
-      g.beginPath();
-      g.arc(x, y, r, 0, TAU);
-      g.stroke();
-      g.globalAlpha = 0.25 + 0.2 * k;
-      g.fillStyle = '#0B0B0F';
-      g.beginPath();
-      g.arc(x, y, 48 * k, 0, TAU);
-      g.fill();
-      // falling ghost bell from above
+      for (let i = 0; i < 24; i++) {
+        const a = (i / 24) * Math.PI * 2 + this.t;
+        fx.draw(g, 'teledot', f, x + Math.cos(a) * r, y + Math.sin(a) * r);
+      }
+      fx.draw(g, 'belldrop_mark', f, x, y);
+      // the ghost bell falls from above and solidifies
       const by = -60 + (y + 10) * Math.pow(k, 3);
-      g.globalAlpha = 0.6;
-      g.fillStyle = '#59B7C9';
-      g.beginPath();
-      g.moveTo(x - 30, by + 30);
-      g.quadraticCurveTo(x - 24, by - 26, x, by - 28);
-      g.quadraticCurveTo(x + 24, by - 26, x + 30, by + 30);
-      g.closePath();
-      g.fill();
-      g.globalAlpha = 1;
-    } else if (this.t < this.tele + 0.25) {
-      g.fillStyle = '#BFF4FF';
-      g.globalAlpha = 1 - (this.t - this.tele) / 0.25;
-      g.beginPath();
-      g.arc(x, y, 48, 0, TAU);
-      g.fill();
-      g.globalAlpha = 1;
+      fx.draw(g, 'belldrop', 0, x, by, { dither: 4 + Math.round(12 * k) });
     }
-  }
-  drawGlow(ctx: Ctx) {
-    if (this.t < this.tele) {
-      ctx.globalAlpha = 0.3 * (this.t / this.tele);
-      ctx.drawImage(ART.glow.cyan, this.x - 50, this.y - 90, 100, 100);
-    } else if (this.t < this.tele + 0.3) {
-      ctx.globalAlpha = 0.9;
-      ctx.drawImage(ART.glow.cyan, this.x - 70, this.y - 70, 140, 140);
-    }
-    ctx.globalAlpha = 1;
   }
 }

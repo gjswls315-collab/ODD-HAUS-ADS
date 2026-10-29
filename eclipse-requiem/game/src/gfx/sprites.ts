@@ -1,74 +1,36 @@
-import { abaddonArm, abaddonBell, abaddonBody, ghostFaces } from './art/bosses';
-import { batFrames, candleFrames, clericFrames, gravenFrames, sentinelFrames, skeletonFrames } from './art/enemies';
-import { heroFrames, HeroId, heroKeyArt, heroPortrait } from './art/heroines';
-import { bulletSprites, glowTexture, itemFrames, shotSprites } from './art/items';
-import { silhouette } from './pix';
+import { PAL } from './palette';
 
-// Central sprite registry, filled once at boot.
+// Sheet keys and shared art types. All graphics are files under game/assets (see assets/README.md);
+// this module only names them.
 
-type Frames = HTMLCanvasElement[];
+export type HeroId = 'seraphine' | 'noctis' | 'morgana';
+export const HEROES: HeroId[] = ['seraphine', 'noctis', 'morgana'];
 
-export const ART = {
-  hero: {} as Record<HeroId, Frames>,
-  heroFlash: {} as Record<HeroId, Frames>,
-  heroBig: {} as Record<HeroId, HTMLCanvasElement>,
-  heroKey: {} as Record<HeroId, HTMLCanvasElement>,
-  heroCard: {} as Record<HeroId, HTMLCanvasElement>,
-  enemy: {} as Record<string, Frames>,
-  enemyFlash: {} as Record<string, Frames>,
-  boss: {} as {
-    body: HTMLCanvasElement;
-    bodyFlash: HTMLCanvasElement;
-    bell: HTMLCanvasElement[];
-    faces: HTMLCanvasElement[];
-    arm: Record<string, HTMLCanvasElement>;
-    armBack: HTMLCanvasElement;
-  },
-  item: {} as Record<string, Frames>,
-  bullet: {} as Record<string, HTMLCanvasElement>,
-  shot: {} as Record<string, HTMLCanvasElement>,
-  glow: {} as Record<string, HTMLCanvasElement>,
-};
-
-export const GLOW_COLORS = {
-  gold: '#FFD47A',
-  red: '#FF3A50',
-  violet: '#9A6BFF',
-  cyan: '#5FE0FF',
-  white: '#FFFFFF',
-  pink: '#FF7AC8',
-  silver: '#C8D8FF',
-  orange: '#FF8A3A',
-  green: '#6AFFC0',
+export const SHEET = {
+  hero: (id: HeroId) => 'sprites/hero_' + id,
+  heroFx: (id: HeroId) => 'sprites/hero_' + id + '_fx',
+  enemies: 'sprites/enemies',
+  boss: 'sprites/boss_abaddon',
+  bullets: 'sprites/bullets',
+  items: 'sprites/items',
+  fx: 'sprites/fx',
+  hud: 'ui/hud',
+  portraits: 'ui/portraits',
+  logo: 'ui/logo',
 } as const;
-export type GlowColor = keyof typeof GLOW_COLORS;
 
-export function buildArt() {
-  for (const id of ['seraphine', 'noctis', 'morgana'] as HeroId[]) {
-    ART.hero[id] = heroFrames(id);
-    ART.heroFlash[id] = ART.hero[id].map((c) => silhouette(c, '#FFFFFF'));
-    ART.heroBig[id] = heroPortrait(id, 4);
-    ART.heroKey[id] = heroKeyArt(id, 5, -0.22);
-    ART.heroCard[id] = heroKeyArt(id, 2.5, -0.22);
-  }
-  ART.enemy.bat = batFrames();
-  ART.enemy.candle = candleFrames();
-  ART.enemy.skeleton = skeletonFrames();
-  ART.enemy.cleric = clericFrames();
-  ART.enemy.sentinel = sentinelFrames();
-  ART.enemy.graven = gravenFrames();
-  for (const k of Object.keys(ART.enemy)) ART.enemyFlash[k] = ART.enemy[k].map((c) => silhouette(c, '#FFFFFF'));
-  const body = abaddonBody();
-  ART.boss = {
-    body,
-    bodyFlash: silhouette(body, '#FFFFFF'),
-    bell: [0, 1, 2, 3].map((n) => abaddonBell(n)),
-    faces: [ghostFaces(0), ghostFaces(1)],
-    arm: { down: abaddonArm('down'), raise: abaddonArm('raise'), reach: abaddonArm('reach') },
-    armBack: abaddonArm('down', true),
-  };
-  for (const k of ['P', 'H', 'B', 'S'] as const) ART.item[k] = itemFrames(k);
-  ART.bullet = bulletSprites();
-  ART.shot = shotSprites();
-  for (const [k, c] of Object.entries(GLOW_COLORS)) ART.glow[k] = glowTexture(c);
-}
+/** Accent ramps per character / effect (palette ramp ids). Kept as a name for older call sites. */
+export type GlowColor = 'gold' | 'red' | 'violet' | 'cyan' | 'white' | 'pink' | 'silver' | 'orange' | 'green';
+
+/** Light, mid and dark accent of each effect colour, from the palette. */
+export const ACCENT: Record<GlowColor, [string, string, string]> = {
+  gold: [PAL.G4, PAL.G2, PAL.G1],
+  red: [PAL.R5, PAL.R3, PAL.R1],
+  violet: [PAL.M2, PAL.M0, PAL.S4],
+  cyan: [PAL.A4, PAL.A2, PAL.A1],
+  white: [PAL.N11, PAL.N9, PAL.N6],
+  pink: [PAL.V4, PAL.V2, PAL.V1],
+  silver: [PAL.A4, PAL.A3, PAL.A1],
+  orange: [PAL.R6, PAL.R4, PAL.R2],
+  green: [PAL.V4, PAL.V2, PAL.V1],
+};

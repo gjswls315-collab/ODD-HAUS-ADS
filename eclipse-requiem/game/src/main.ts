@@ -4,7 +4,7 @@ import { buildArt } from './gfx/sprites';
 import { IntroScene } from './scenes/intro';
 import { ArtSheetScene } from './scenes/artsheet';
 import { GameScene } from './scenes/game';
-import { HeroId } from './gfx/art/heroines';
+import { HeroId } from './gfx/sprites';
 
 async function loadFonts() {
   if (!document.fonts) return;

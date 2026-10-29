@@ -1,6 +1,6 @@
 import { G } from '../core/app';
 import { DEG, Rng } from '../core/math';
-import { Section } from '../gfx/art/backdrop';
+import { Section } from './stagebg';
 import { Abaddon } from './boss';
 import { Enemy, EnemyOpts, Group } from './enemies';
 import { Debris, Lightning } from './hazards';

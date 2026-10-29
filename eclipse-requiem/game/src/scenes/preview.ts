@@ -1,7 +1,7 @@
 import { G, Scene } from '../core/app';
 import { C } from '../core/constants';
 import { clamp, TAU } from '../core/math';
-import { HeroId } from '../gfx/art/heroines';
+import { HeroId } from '../gfx/sprites';
 import { rgba } from '../gfx/canvas';
 import { ART } from '../gfx/sprites';
 import { button, keyHints, panel, text } from '../gfx/ui';

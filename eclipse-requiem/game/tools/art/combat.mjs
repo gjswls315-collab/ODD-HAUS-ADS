@@ -143,6 +143,22 @@ function fx() {
     b.poly(pts, 'T3'); b.poly(pts.map(([x, y]) => [x * 0.7 + 2.6, y * 0.7 + 1.6]), 'T4'); b.selout(); if (v % 2) b.plot(9, 5, 'T6');
     return b;
   }), { duration: 1000 });
+  s.add('rubble', [0, 1, 2, 3].map((v) => {
+    const b = new Bitmap(28, 28), pts = [], rr = rng(70 + v);
+    for (let k = 0; k < 7; k++) { const a = (k / 7) * Math.PI * 2 + v * 0.5 + rr.range(-0.25, 0.25), d = rr.range(9, 12.5); pts.push([14 + Math.cos(a) * d, 14 + Math.sin(a) * d]); }
+    b.poly(pts, 'T2'); b.poly(pts.map(([x, y]) => [x * 0.78 + 2.4, y * 0.78 + 1.6]), 'T3'); b.poly(pts.map(([x, y]) => [x * 0.45 + 5.5, y * 0.45 + 4.5]), 'T4');
+    b.line(pts[2][0], pts[2][1], 14, 14, 'T1'); b.plot(10, 8, 'T6'); b.plot(11, 8, 'T5'); b.selout(); b.rim('T7', ['top']);
+    return b;
+  }), { duration: 70 });
+  // iron grave cross that conducts the red lightning (stage gimmick): dark, then charged
+  s.add('gravecross', [0, 1, 2].map((f) => {
+    const b = new Bitmap(22, 54);
+    b.rect(9, 2, 4, 50, 'N2'); b.rect(2, 12, 18, 4, 'N2'); b.rect(10, 2, 1, 50, 'N4'); b.rect(3, 13, 16, 1, 'N4');
+    b.rect(6, 48, 10, 6, 'T2'); b.rect(6, 48, 10, 1, 'T4');
+    if (f) { const c = f === 1 ? 'R3' : 'R5'; b.rect(10, 3, 2, 45, c); b.rect(3, 13, 16, 2, c); b.plot(10, 14, 'R6'); b.plot(11, 13, 'R6'); }
+    b.selout();
+    return b;
+  }), { duration: 80, pivot: [11, 53] });
   s.add('bellshard', [0, 1, 2, 3, 4, 5].map((v) => {
     const b = new Bitmap(18, 18), pts = [];
     const n = 4 + (v % 3);
@@ -173,14 +189,19 @@ function fx() {
   s.add('dust', [0, 1, 2, 3].map((f) => { const b = new Bitmap(20, 14); for (let k = 0; k < 9; k++) { const a = (k / 9) * Math.PI, d = 3 + f * 2.2; b.ell(10 + Math.cos(a) * d * 1.4, 11 - Math.sin(a) * d * 0.6, 2.4 - f * 0.4, 2 - f * 0.3, f < 2 ? 'N7' : { c: 'N6', d: 8 }); } return b; }), { duration: 70, pivot: [10, 12] });
   s.add('warn', [0, 1].map((f) => { const b = new Bitmap(11, 11); b.poly([[5.5, 0], [11, 10], [0, 10]], 'R0'); b.poly([[5.5, 2], [9.3, 9], [1.7, 9]], f ? 'R4' : 'R3'); b.rect(5, 4, 1, 3, 'R6'); b.plot(5, 8, 'R6'); return b; }), { duration: 120 });
   s.add('teledot', [0, 1].map((f) => { const b = new Bitmap(3, 3); b.rect(0, 1, 3, 1, f ? 'R3' : 'R2'); b.rect(1, 0, 1, 3, f ? 'R3' : 'R2'); b.plot(1, 1, f ? 'R6' : 'R4'); return b; }), { duration: 90 });
-  // black-fog vision mask: transparent hole (r 132) with a dithered falloff to opaque near-black
-  const V = 360, vis = new Bitmap(V, V);
-  for (let y = 0; y < V; y++) for (let x = 0; x < V; x++) {
-    const d = Math.hypot(x + 0.5 - V / 2, y + 0.5 - V / 2), lv = Math.round(((d - 132) / 40) * 16);
-    if (lv >= 16) vis.plot(x, y, { c: 'N0', a: 214 });
-    else if (lv > 0) vis.plot(x, y, { c: 'N0', a: 214, d: lv });
-  }
-  s.add('vision', [vis], { duration: 1000 });
+  s.add('hitbox', [0, 1].map((f) => { const b = new Bitmap(9, 9); b.ell(4.5, 4.5, 4.5, 4.5, 'N0'); b.ell(4.5, 4.5, 3.6, 3.6, f ? 'R4' : 'R3'); b.rect(3, 3, 3, 3, 'N11'); b.rect(4, 4, 1, 1, 'B5'); return b; }), { duration: 100 });
+  // black-fog vision masks (docs/05 §8): clear inside r-24, ordered-dither falloff to opaque near-black at r.
+  // frame 0: r 150 (fog section), frame 1: r 120 (thick fog)
+  const V = 320;
+  s.add('vision', [150, 120].map((R) => {
+    const vis = new Bitmap(V, V);
+    for (let y = 0; y < V; y++) for (let x = 0; x < V; x++) {
+      const d = Math.hypot(x + 0.5 - V / 2, y + 0.5 - V / 2), lv = Math.round(((d - (R - 24)) / 24) * 16);
+      if (lv >= 16) vis.plot(x, y, { c: 'N0', a: 214 });
+      else if (lv > 0) vis.plot(x, y, { c: 'N0', a: 214, d: lv });
+    }
+    return vis;
+  }), { duration: 1000 });
   return s;
 }
 

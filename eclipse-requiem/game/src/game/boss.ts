@@ -1,8 +1,9 @@
 import { G } from '../core/app';
 import { H, W } from '../core/constants';
 import { clamp, DEG, ease, fxRng as R, TAU } from '../core/math';
+import { image, sheet } from '../gfx/assets';
 import { Ctx } from '../gfx/canvas';
-import { ART } from '../gfx/sprites';
+import { SHEET } from '../gfx/sprites';
 import { SCORE } from './defs';
 import { BellDrop, Debris, Lightning } from './hazards';
 import type { HitCircle, Target, World } from './world';
@@ -19,10 +20,11 @@ const PHASE_NAME = [
 ];
 const ANCHOR = [{ x: 500, y: 196 }, { x: 470, y: 192 }, { x: 510, y: 186 }];
 const CYCLE = [8.0, 9.0, 9.0];
-// core = (x,y); body sprite core pixel (97,119). The bell rotates around its crown (pivot); at angle 0 its mouth sits above-left of the head.
-const PIVOT = { x: 100, y: -142 };
-const MOUTH_FROM_PIVOT = { x: -117, y: 39 };
-const BELL_CROWN_PX = { x: 169, y: 51 };
+// (x, y) is the soul-lantern core = the body sprite's pivot. Parts (head, arms, bell) hang from the body's
+// slice points in sprites/boss_abaddon, the bell mouth and the hand hook come from the bell/arm slices,
+// so replacing the art moves the bullet origins with it.
+const BELL_TILTS = [-8, -4, 0, 4, 8]; // pre-rendered bell frames (degrees)
+const boss = () => sheet(SHEET.boss);
 
 type State = 'intro' | 'fight' | 'transition' | 'defeat' | 'collapse' | 'done';
 
@@ -75,24 +77,42 @@ export class Abaddon implements Target {
   get vulnerable() {
     return this.state === 'fight' && !this.invuln;
   }
+  private get bodyTag() {
+    if (this.state === 'defeat' && this.t >= 2.0) return 'body_crumble';
+    return this.phase === 0 ? 'body' : this.phase === 1 ? 'body_p2' : 'body_p3';
+  }
+  private get bellTag() {
+    return 'bell_c' + Math.min(3, this.cracks + (this.phase >= 2 && this.state !== 'defeat' ? 1 : 0));
+  }
+  private get bellFrame() {
+    const deg = (this.bellAng * 180) / Math.PI;
+    let best = 0;
+    for (let i = 1; i < BELL_TILTS.length; i++) if (Math.abs(BELL_TILTS[i] - deg) < Math.abs(BELL_TILTS[best] - deg)) best = i;
+    return best;
+  }
+  /** Bell crown hang point (from the body's `bell` slice). */
+  private get crown() {
+    const [dx, dy] = boss().point('body', 0, 'bell');
+    return { x: this.x + dx, y: this.y + dy };
+  }
   get mouth() {
-    const a = this.bellAng, c = Math.cos(a), s = Math.sin(a);
-    const mx = MOUTH_FROM_PIVOT.x * c - MOUTH_FROM_PIVOT.y * s, my = MOUTH_FROM_PIVOT.x * s + MOUTH_FROM_PIVOT.y * c;
-    return { x: this.x + PIVOT.x + mx, y: this.y + PIVOT.y + my };
+    const c = this.crown, [dx, dy] = boss().point(this.bellTag, this.bellFrame, 'mouth');
+    return { x: c.x + dx, y: c.y + dy };
   }
   get hook() {
-    if (this.armPose === 'raise') return { x: this.x - 92, y: this.y - 67 };
-    if (this.armPose === 'reach') return { x: this.x - 116, y: this.y - 13 };
-    return { x: this.x - 80, y: this.y + 55 };
+    const sh = boss(), [sx, sy] = sh.point('body', 0, 'armF'), [hx, hy] = sh.point('armF_' + this.armPose, 0, 'hook');
+    return { x: this.x + sx + hx, y: this.y + sy + hy };
   }
 
+  /** Core (weak point) x1, bell (armour) x0.5, head and robe x0.2 — sized to the sprite parts. */
   hitCircles(): HitCircle[] {
     if (this.state !== 'fight' && this.state !== 'transition') return [];
+    const c = this.crown;
     return [
-      { x: this.x - 1, y: this.y, r: 24, mul: 1 },
-      { x: this.x + 41, y: this.y - 122, r: 44, mul: 0.5 },
-      { x: this.x - 34, y: this.y - 58, r: 24, mul: 0.2 },
-      { x: this.x + 30, y: this.y + 40, r: 58, mul: 0.2 },
+      { x: this.x, y: this.y, r: 14, mul: 1 },
+      { x: c.x, y: c.y + 32, r: 30, mul: 0.5 },
+      { x: this.x - 26, y: this.y - 50, r: 12, mul: 0.2 },
+      { x: this.x + 6, y: this.y + 34, r: 42, mul: 0.2 },
     ];
   }
 
@@ -103,7 +123,10 @@ export class Abaddon implements Target {
     if (part >= 1 && this.flashCd <= 0) {
       this.flash = 0.034;
       this.flashCd = 0.1;
-    } else if (part === 0.5 && R.next() < 0.3) this.w.fx.spark(this.x + 10, this.y - 110, 2, ['#F3E6C4', '#D8B35E'], 80, { life: 0.2 });
+    } else if (part === 0.5 && R.next() < 0.3) {
+      const c = this.crown;
+      this.w.fx.hit(c.x + R.range(-16, 8), c.y + R.range(12, 50), true);
+    }
     G.audio.sfx('hit');
     const th = THRESH[this.phase];
     if (this.hp <= th) {
@@ -125,7 +148,7 @@ export class Abaddon implements Target {
     w.hitstop = 0.08;
     if (byDamage) {
       w.addScore(SCORE.phaseBonus, this.x, this.y - 60);
-      w.fx.popup(this.x, this.y - 72, 'PHASE BONUS', '#D8B35E');
+      w.fx.popup(this.x, this.y - 72, 'PHASE BONUS', '#F2D58C');
     } else w.ui.push({ type: 'timeover' });
     this.pendingCancel = true;
   }
@@ -149,11 +172,11 @@ export class Abaddon implements Target {
     w.addScore(SCORE.phaseBonus, this.x, this.y - 50);
     if (w.stats.bossHits === 0) {
       w.addScore(SCORE.noMiss);
-      w.fx.popup(this.x - 40, this.y - 90, 'NO MISS BONUS', '#D8B35E');
+      w.fx.popup(this.x - 40, this.y - 90, 'NO MISS BONUS', '#F2D58C');
     }
     if (w.stats.bossBombs === 0) {
       w.addScore(SCORE.noBomb);
-      w.fx.popup(this.x - 40, this.y - 104, 'NO BOMB BONUS', '#D8B35E');
+      w.fx.popup(this.x - 40, this.y - 104, 'NO BOMB BONUS', '#F2D58C');
     }
     G.audio.sfx('toll');
   }
@@ -219,7 +242,7 @@ export class Abaddon implements Target {
       const k = (t - 5.5) / 2.0;
       this.y = -170 + (ANCHOR[0].y + 170) * ease.outCubic(k);
       this.shadowA = 1 - k;
-      if (R.next() < 0.5) w.fx.spark(R.range(300, 640), 0, 1, ['#6E6A60', '#3A3742'], 30, { dir: Math.PI / 2, spread: 0.2, life: 1.2, grav: 80, drag: 0 });
+      if (R.next() < 0.5) w.fx.spark(R.range(300, 640), 0, 1, ['#6C605C', '#403838'], 30, { dir: Math.PI / 2, spread: 0.2, life: 1.2, grav: 80, drag: 0 });
     }
     if (t >= 7.5 && !this.landed) {
       this.landed = true;
@@ -229,6 +252,7 @@ export class Abaddon implements Target {
       G.audio.sfx('toll');
       G.audio.sfx('scream');
       this.scream = 0.8;
+      for (const dx of [-50, -20, 20, 50]) w.fx.anim(SHEET.fx, 'dust', this.x + dx, this.y + 84, { flipX: dx < 0 });
       // push the player out of the boss if overlapping
       if (w.player.x > this.x - 140) w.player.x = Math.max(16, this.x - 140);
       w.ui.push({ type: 'bossBar' });
@@ -323,7 +347,7 @@ export class Abaddon implements Target {
       this.bellAng = 0.1;
       const m = this.mouth;
       for (let i = 0; i < 13; i++) w.bullets.fire('B06', m.x, m.y, Math.PI + (-60 + i * 10) * DEG, 60, { accel: 60, speedMax: 120 });
-      w.fx.ring(m.x, m.y, 6, 220, 0.6, '#59B7C9', 1, 'cyan');
+      w.fx.ring(m.x, m.y);
       G.audio.sfx('toll', 0.5);
     }
     this.bellAng += (0 - this.bellAng) * Math.min(1, dt * 2);
@@ -333,7 +357,7 @@ export class Abaddon implements Target {
     const m = this.mouth;
     this.w.bullets.radial('B05', m.x, m.y, 20, this.ringBase + offset, 70);
     G.audio.sfx('toll', 0.55);
-    this.w.fx.ring(m.x, m.y, 4, 120, 0.5, '#9A6BFF', 1, 'violet');
+    this.w.fx.ring(m.x, m.y);
   }
 
   private tele(dur: number, scream: boolean) {
@@ -406,6 +430,7 @@ export class Abaddon implements Target {
     if (this.c(7.0)) this.lightning(3);
     // falling rubble and dust (decorative) + red lightning in the sky
     if (R.next() < dt * 1.2) w.hazards.push(new Debris(w, R.range(20, 360), 0.8, true));
+    if (R.next() < dt * 10) w.fx.spark(R.range(0, W), 0, 1, ['#544A48', '#403838', '#312B2C'], 20, { dir: Math.PI / 2, spread: 0.3, life: 2.4, grav: 30, drag: 0, size: 2 });
     this.bellAng += (Math.sin(this.pt * 3) * 0.08 - this.bellAng) * Math.min(1, dt * 3);
   }
 
@@ -423,7 +448,7 @@ export class Abaddon implements Target {
       });
     });
     G.audio.sfx('toll', 0.5);
-    this.w.fx.ring(m.x, m.y, 4, 150, 0.5, '#D94C3A', 1, 'red');
+    this.w.fx.ring(m.x, m.y, true);
   }
 
   private lightning(n: number) {
@@ -451,7 +476,9 @@ export class Abaddon implements Target {
       if (next === 1) w.bg?.setTint('#B3263B', 0.12);
       if (next === 2) {
         w.bg?.setTint('#B3263B', 0.22);
+        for (let i = 0; i < 8; i++) w.fx.anim(SHEET.fx, 'debris', this.crown.x, this.crown.y, { vx: R.range(-120, 60), vy: R.range(-160, -40), grav: 380 });
         if (w.bg) {
+          w.bg.belfryBroken = true;
           w.bg.lightningRate = 0.5;
           w.bg.belfryShake = 1;
           w.bg.dim = 0.1;
@@ -487,25 +514,31 @@ export class Abaddon implements Target {
         this.flash = 0.05;
         G.audio.sfx('crack');
         w.fx.shake(1, 0.1);
+        const c = this.crown;
+        for (let i = 0; i < 2 + n; i++) w.fx.anim(SHEET.fx, 'bellshard', c.x + R.range(-20, 20), c.y + R.range(20, 60), { vx: R.range(-80, 80), vy: R.range(-150, -50), grav: 360 });
       }
     }
     if (t >= 1.0 && t < 2.0 && R.next() < 0.4) {
       const m = this.mouth;
-      w.fx.spark(m.x + R.range(-20, 20), m.y, 1, ['#BFF4FF', '#59B7C9', '#FFFFFF'], 60, { dir: -Math.PI / 2, spread: 0.6, life: 1.4, drag: 0.5, size: 2, glow: 'cyan' });
+      w.fx.spark(m.x + R.range(-20, 20), m.y, 1, ['#E6EEF5', '#B7C6D5', '#7F93A8'], 60, { dir: -Math.PI / 2, spread: 0.6, life: 1.4, drag: 0.5, size: 2 });
     }
     if (prev < 1.0 && t >= 1.0) G.audio.sfx('sting');
     for (let i = 0; i < 6; i++) {
       const tt = 2.0 + i * 0.25;
       if (prev < tt && t >= tt) {
-        w.fx.explosion(this.x + R.range(-70, 70), this.y + R.range(-120, 60), 'm');
+        w.fx.explosion(this.x + R.range(-50, 60), this.y + R.range(-90, 60), 'm');
         G.audio.sfx('explodeM');
         w.fx.shake(2, 0.1);
       }
     }
     if (prev < 3.5 && t >= 3.5) {
-      w.fx.explosion(this.x, this.y - 40, 'l');
-      w.fx.explosion(this.x, this.y + 20, 'l');
-      w.fx.flash(1, '#FFFFFF');
+      w.fx.anim(SHEET.fx, 'burst_boss', this.x, this.y - 20);
+      w.fx.anim(SHEET.fx, 'ring_red', this.x, this.y - 20);
+      w.fx.explosion(this.x + 20, this.y - 60, 'l');
+      w.fx.explosion(this.x, this.y + 30, 'l');
+      const c = this.crown;
+      for (let i = 0; i < 12; i++) w.fx.anim(SHEET.fx, 'bellshard', c.x + R.range(-24, 24), c.y + R.range(10, 70), { vx: R.range(-160, 160), vy: R.range(-220, -40), grav: 380 });
+      w.fx.flash(1, '#ECEEF1');
       w.fx.shake(3, 0.25);
       G.audio.sfx('explodeL');
       G.audio.stopMusic(0.2);
@@ -553,95 +586,58 @@ export class Abaddon implements Target {
   }
 
   // ---------------- drawing ----------------
+  /** Parts back to front: shadow, back arm, bell (+ mouth glow), body, head, core, front arm. */
   draw(g: Ctx) {
     if (this.state === 'done') return;
-    const B = ART.boss;
+    const sh = boss(), fx = sheet(SHEET.fx);
     const x = Math.round(this.x), y = Math.round(this.y);
-    g.globalAlpha = this.fade;
-    // descending bell shadow over the top of the screen
-    if (this.shadowA > 0) {
-      g.globalAlpha = this.shadowA * 0.6;
-      g.fillStyle = '#050508';
-      g.beginPath();
-      g.ellipse(500, 30, 150, 70, 0, 0, TAU);
-      g.fill();
-      g.globalAlpha = this.fade;
+    const dither = this.fade >= 1 ? undefined : Math.round(this.fade * 16);
+    // descending bell shadow over the top of the screen (intro)
+    if (this.shadowA > 0) sh.draw(g, 'shadow', 0, 500, 30, { dither: Math.round(this.shadowA * 12) });
+    if (this.fade <= 0) return;
+    const flash = this.flash > 0;
+    const bodyTag = this.bodyTag, bt = this.state === 'defeat' && this.t >= 2.0 ? this.t - 2.0 : this.t;
+    const bi = sh.index(bodyTag, bt, bodyTag !== 'body_crumble');
+    const at = (name: string) => { const [dx, dy] = sh.point(bodyTag, bi, name); return [x + dx, y + dy]; };
+    const o = { dither };
+    const [abx, aby] = at('armB');
+    sh.draw(g, 'armB', 0, abx, aby, o);
+    const [cx, cy] = at('bell');
+    if (this.state !== 'defeat' || this.t < 3.5) sh.draw(g, this.bellTag, this.bellFrame, cx, cy, o);
+    const m = this.mouth;
+    if ((this.teleBell > 0 || this.scream > 0 || (this.wrath && this.state === 'fight')) && this.state !== 'defeat') sh.draw(g, 'bellglow', sh.index('bellglow', this.t), m.x, m.y, o);
+    sh.draw(g, bodyTag, bi, x, y, o);
+    if (bodyTag !== 'body_crumble') {
+      const [hx, hy] = at('head');
+      const headTag = this.state === 'transition' || this.state === 'defeat' || this.state === 'collapse' ? 'head_hurt' : this.scream > 0 ? 'head_scream' : 'head';
+      sh.draw(g, headTag, sh.index(headTag, this.t), hx, hy, o);
+      sh.draw(g, flash ? 'core_hit' : 'core', sh.index('core', this.t), x, y, o);
+      const [ax, ay] = at('armF');
+      sh.draw(g, 'armF_' + this.armPose, 0, ax, ay, o);
     }
-    g.drawImage(B.armBack, x + 43 - 111, y - 37 - 31);
-    // bell (rotates slightly around the yoke)
-    const bell = B.bell[Math.min(3, this.cracks + (this.phase >= 2 && this.state !== 'defeat' ? 1 : 0))];
-    g.save();
-    g.translate(x + PIVOT.x, y + PIVOT.y);
-    g.rotate(this.bellAng);
-    g.drawImage(bell, -BELL_CROWN_PX.x, -BELL_CROWN_PX.y);
-    // ghost faces inside the bell mouth (mouth axis is rotated ~72 degrees in the sprite)
-    g.translate(MOUTH_FROM_PIVOT.x, MOUTH_FROM_PIVOT.y);
-    g.rotate(1.25);
-    g.drawImage(B.faces[this.scream > 0 ? 1 : 0], -28, -16);
-    g.restore();
-    g.drawImage(B.body, x - 97, y - 119);
-    if (this.flash > 0) {
-      // white flash on the soul-lantern core only
-      g.fillStyle = '#FFFFFF';
-      g.fillRect(x - 10, y - 14, 18, 26);
-      g.fillRect(x - 6, y - 18, 10, 34);
-    }
-    g.drawImage(B.arm[this.armPose], x - 22 - 111, y - 39 - 31);
-    g.globalAlpha = 1;
+    // weak-point flash only covers the core (docs/03 §6-3); a white pulse on the whole body when a phase breaks
+    if (flash && this.state !== 'fight') sh.draw(g, bodyTag, bi, x, y, { flash: true, dither: 8 });
+    if (this.state === 'fight' && this.teleBell > 0) fx.draw(g, 'warn', Math.floor(this.t * 10) % 2, m.x, m.y + 18);
   }
 
+  /** P3: collapse dust drifting across the top band (the stage's own fog layer art, scrolled). */
   drawFront(g: Ctx) {
     if (this.phase === 2 && (this.state === 'fight' || this.state === 'transition')) {
-      // collapse dust partially obscuring the top 20% (decorative; enemy bullets are drawn above)
-      g.globalAlpha = 0.3;
-      g.fillStyle = '#3A3742';
-      for (let i = 0; i < 40; i++) {
-        const px = (i * 53 + this.t * 20 * (1 + (i % 3))) % W;
-        const py = (i * 17) % 72;
-        g.fillRect(Math.round(px), Math.round(py), 6 + (i % 4) * 3, 3);
-      }
-      g.globalAlpha = 1;
+      const img = image('stage1/fog_b');
+      const off = Math.floor((this.t * 24) % img.width);
+      for (let x = -off; x < W; x += img.width) g.drawImage(img, x, -64);
     }
   }
 
+  /** P2 swing telegraph: dotted path along the floor of the swing and the landing column. */
   drawTele(g: Ctx) {
     if (this.pathLine > 0 && this.state === 'fight') {
+      const fx = sheet(SHEET.fx), f = Math.floor(this.t * 12) % 2;
       const to = this.x > 440 ? 400 : 470;
-      g.globalAlpha = 0.5 + 0.4 * Math.sin(this.t * 30);
-      g.fillStyle = '#D94C3A';
-      const x0 = Math.min(this.x, to) - 128, x1 = Math.max(this.x, to) - 100;
-      g.fillRect(Math.round(x0), Math.round(this.y + 96), Math.round(x1 - x0), 2);
-      g.fillRect(Math.round(to - 128), Math.round(this.y - 120), 1, 220);
-      g.globalAlpha = 1;
+      const x0 = Math.min(this.x, to) - 60, x1 = Math.max(this.x, to) - 40;
+      for (let px = x0; px <= x1; px += 6) fx.draw(g, 'teledot', f, px, this.y + 80);
+      for (let py = this.y - 100; py <= this.y + 80; py += 6) fx.draw(g, 'teledot', f, to - 60, py);
     }
-  }
-
-  drawGlow(ctx: Ctx) {
-    if (this.state === 'done') return;
-    const f = this.fade;
-    // soul lantern core
-    const pulse = 0.7 + 0.3 * Math.sin(this.t * 6);
-    ctx.globalAlpha = 0.65 * pulse * f;
-    ctx.drawImage(ART.glow.cyan, this.x - 24, this.y - 24, 48, 48);
-    // eyes
-    ctx.globalAlpha = 0.6 * f;
-    ctx.drawImage(ART.glow.red, this.x - 50, this.y - 76, 22, 22);
-    ctx.drawImage(ART.glow.red, this.x - 38, this.y - 77, 22, 22);
-    // bell mouth glow when telegraphing / screaming
-    const m = this.mouth;
-    if (this.teleBell > 0 || this.scream > 0) {
-      ctx.globalAlpha = 0.85 * f;
-      const s = 90;
-      ctx.drawImage(this.phase === 1 ? ART.glow.cyan : this.phase === 2 ? ART.glow.red : ART.glow.violet, m.x - s / 2, m.y - s / 2, s, s);
-    } else {
-      ctx.globalAlpha = 0.3 * f;
-      ctx.drawImage(ART.glow.cyan, m.x - 30, m.y - 30, 60, 60);
-    }
-    if (this.wrath && this.state === 'fight') {
-      ctx.globalAlpha = 0.25 + 0.15 * Math.sin(this.t * 8);
-      ctx.drawImage(ART.glow.red, this.x - 140, this.y - 200, 280, 320);
-    }
-    ctx.globalAlpha = 1;
   }
 
   /** For HUD. */

@@ -1,4 +1,5 @@
 import { Ctx, makeCanvas } from './canvas';
+import { ditherMask } from './dither';
 
 /**
  * Asset loader. All game graphics live in `game/assets/` as image files; code only loads and draws them.
@@ -42,7 +43,11 @@ export interface DrawOpts {
   flash?: boolean;
   flipX?: boolean;
   add?: boolean;
+  /** 0..16: ordered-dither visibility (fade without translucency); 16 = solid */
+  dither?: number;
 }
+
+let scratch: [HTMLCanvasElement, Ctx] | null = null;
 
 export class Sheet {
   readonly frames: Frame[] = [];
@@ -125,6 +130,22 @@ export class Sheet {
   /** Draw a frame so that its pivot lands on (x, y). */
   draw(g: Ctx, tag: string, i: number, x: number, y: number, o: DrawOpts = {}) {
     const f = this.frame(tag, i);
+    if (o.dither !== undefined && o.dither < 16) {
+      if (o.dither <= 0) return;
+      // compose the frame on a scratch canvas, keep a dithered fraction of its pixels, then draw that
+      if (!scratch || scratch[0].width < f.w || scratch[0].height < f.h) scratch = makeCanvas(Math.max(f.w, scratch?.[0].width ?? 0), Math.max(f.h, scratch?.[0].height ?? 0));
+      const [sc, sg] = scratch;
+      sg.clearRect(0, 0, sc.width, sc.height);
+      sg.drawImage(o.flash ? this.white() : this.img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+      ditherMask(sg, f.w, f.h, o.dither);
+      const px = f.pts.pivot;
+      const dx = Math.round(x - px[0] + f.ox), dy = Math.round(y - px[1] + f.oy);
+      const prevA = g.globalAlpha;
+      if (o.alpha !== undefined) g.globalAlpha = prevA * o.alpha;
+      g.drawImage(sc, 0, 0, f.w, f.h, dx, dy, f.w, f.h);
+      g.globalAlpha = prevA;
+      return;
+    }
     const img = o.flash ? this.white() : this.img;
     const px = f.pts.pivot;
     let dx = Math.round(x - px[0] + f.ox), dy = Math.round(y - px[1] + f.oy);

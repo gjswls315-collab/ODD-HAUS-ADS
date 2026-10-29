@@ -1,7 +1,8 @@
 import { G } from '../core/app';
 import { fxRng as R } from '../core/math';
 import { Ctx } from '../gfx/canvas';
-import { ART, GlowColor } from '../gfx/sprites';
+import { sheet } from '../gfx/assets';
+import { SHEET } from '../gfx/sprites';
 import { SCORE } from './defs';
 import type { World } from './world';
 
@@ -16,8 +17,6 @@ interface Item {
   age: number;
   pulled: boolean;
 }
-
-const GLOW: Record<ItemKind, GlowColor> = { P: 'gold', H: 'green', B: 'red', S: 'violet', mote: 'violet' };
 
 export class Items {
   list: Item[] = [];
@@ -42,6 +41,7 @@ export class Items {
         it.vx = (dx / (d || 1)) * sp;
         it.vy = (dy / (d || 1)) * sp;
         if (d < 10) {
+          if (it.kind !== 'mote') this.w.fx.anim(SHEET.fx, 'pickup', it.x, it.y);
           this.collect(it);
           it.age = -1;
           continue;
@@ -73,7 +73,7 @@ export class Items {
           if (pl.level > before) {
             G.audio.sfx('powerup');
             w.fx.popup(pl.x, pl.y - 20, 'POWER UP', '#D8B35E');
-            w.fx.ring(pl.x, pl.y, 4, 120, 0.4, '#D8B35E', 1, 'gold');
+            w.fx.anim(SHEET.fx, 'ring', pl.x, pl.y);
           } else G.audio.sfx('item');
         }
         w.hudPing('power');
@@ -105,31 +105,10 @@ export class Items {
     }
   }
 
+  /** Item sprites (sprites/items): P/H/B/S spin loops, mote twinkle; a bright sparkle on pickup comes from fx. */
   draw(g: Ctx) {
-    for (const it of this.list) {
-      if (it.kind === 'mote') {
-        g.drawImage(ART.bullet.mote, Math.round(it.x) - 2, Math.round(it.y) - 2);
-        continue;
-      }
-      const frames = ART.item[it.kind];
-      const f = frames[Math.floor(it.age * 8) % frames.length];
-      if (Math.floor(it.age * 2) % 2 === 0 || it.kind === 'S') g.drawImage(f, Math.round(it.x - f.width / 2), Math.round(it.y - f.height / 2));
-      else {
-        g.globalAlpha = 0.85;
-        g.drawImage(f, Math.round(it.x - f.width / 2), Math.round(it.y - f.height / 2));
-        g.globalAlpha = 1;
-      }
-    }
-  }
-
-  drawGlow(ctx: Ctx) {
-    for (const it of this.list) {
-      const pulse = 0.5 + 0.5 * Math.sin(it.age * 6.28);
-      ctx.globalAlpha = it.kind === 'mote' ? 0.4 : 0.35 + 0.25 * pulse;
-      const s = it.kind === 'mote' ? 10 : 30;
-      ctx.drawImage(ART.glow[GLOW[it.kind]], it.x - s / 2, it.y - s / 2, s, s);
-    }
-    ctx.globalAlpha = 1;
+    const sh = sheet(SHEET.items);
+    for (const it of this.list) sh.draw(g, it.kind, sh.index(it.kind, it.age), it.x, it.y);
   }
 
   /** Scatter helper for S drops. */

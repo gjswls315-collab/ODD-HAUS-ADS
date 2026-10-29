@@ -1,7 +1,8 @@
 import { H, W } from '../core/constants';
 import { angleDiff, DEG, TAU } from '../core/math';
 import { Ctx } from '../gfx/canvas';
-import { ART } from '../gfx/sprites';
+import { sheet } from '../gfx/assets';
+import { SHEET } from '../gfx/sprites';
 import { BULLETS, BulletType } from './defs';
 
 // Enemy bullet pool + pattern helpers (docs/06 §5-2: aimed / fan / radial / wave / homing).
@@ -140,31 +141,14 @@ export class BulletPool {
     return out;
   }
 
-  draw(g: Ctx) {
+  /** Bullet sprites from sprites/bullets: one tag per type; B03 is pre-rotated in 16 directions (no runtime rotation). */
+  draw(g: Ctx, time = 0) {
+    const sh = sheet(SHEET.bullets);
     for (const b of this.list) {
       if (!b.alive || b.delay > 0) continue;
-      const spr = ART.bullet[BULLETS[b.type].spr];
-      const x = Math.round(b.x), y = Math.round(b.y);
-      if (b.type === 'B03' || b.type === 'B04' || b.type === 'B06') {
-        g.save();
-        g.translate(x, y);
-        g.rotate(b.ang);
-        g.drawImage(spr, -Math.floor(spr.width / 2), -Math.floor(spr.height / 2));
-        g.restore();
-      } else {
-        g.drawImage(spr, x - Math.floor(spr.width / 2), y - Math.floor(spr.height / 2));
-      }
+      const tag = BULLETS[b.type].spr;
+      const i = b.type === 'B03' ? Math.round((((b.ang % TAU) + TAU) % TAU) / (TAU / 16)) % 16 : sh.index(tag, time + b.age);
+      sh.draw(g, tag, i, b.x, b.y);
     }
-  }
-
-  drawGlow(ctx: Ctx) {
-    ctx.globalAlpha = 0.38;
-    for (const b of this.list) {
-      if (!b.alive || b.delay > 0) continue;
-      const d = BULLETS[b.type];
-      const s = d.gs * 1.6;
-      ctx.drawImage(ART.glow[d.glow], b.x - s / 2, b.y - s / 2, s, s);
-    }
-    ctx.globalAlpha = 1;
   }
 }

@@ -1,7 +1,8 @@
 import { G } from '../core/app';
 import { DEG, ease } from '../core/math';
 import { Ctx } from '../gfx/canvas';
-import { ART } from '../gfx/sprites';
+import { sheet } from '../gfx/assets';
+import { SHEET } from '../gfx/sprites';
 import { SCORE } from './defs';
 import { Enemy } from './enemies';
 import type { HitCircle, Target, World } from './world';
@@ -86,6 +87,7 @@ export class Graven implements Target {
     if (this.state === 'sink') {
       this.sinkY += 60 * dt;
       this.alpha = Math.max(0, 1 - this.t / 2);
+      if (Math.random() < 0.3) w.fx.anim(SHEET.fx, 'dust', this.x + (Math.random() - 0.5) * 80, this.y + 50);
       if (this.t > 2) {
         this.alive = false;
         w.midboss = null;
@@ -114,6 +116,7 @@ export class Graven implements Target {
       this.pose = 'open';
       this.poseT = 1.6;
       G.audio.sfx('crack');
+      w.fx.anim(SHEET.fx, 'dust', this.x + 28, this.y + 30);
     }
     if (this.fightT >= burstAt) {
       this.burstN++;
@@ -125,45 +128,26 @@ export class Graven implements Target {
       this.state = 'sink';
       this.t = 0;
       w.cancelBullets();
-      w.fx.popup(this.x, this.y - 50, 'ESCAPED', '#B9B3AA');
+      w.fx.popup(this.x, this.y - 50, 'ESCAPED', '#A6ACB5');
     }
   }
 
   draw(g: Ctx) {
     if (this.state === 'dead') return;
-    const idx = this.pose === 'lash' ? 1 : this.pose === 'open' ? 2 : 0;
-    const f = (this.flash > 0 ? ART.enemyFlash.graven : ART.enemy.graven)[idx];
-    g.globalAlpha = this.alpha;
-    g.drawImage(f, Math.round(this.x - 57), Math.round(this.y - 61 + this.sinkY));
-    g.globalAlpha = 1;
+    const sh = sheet(SHEET.enemies);
+    const tag = this.pose === 'lash' ? 'graven_lash' : this.pose === 'open' ? 'graven_open' : 'graven';
+    sh.draw(g, tag, sh.index(tag, this.t), this.x, this.y + this.sinkY, { flash: this.flash > 0, dither: Math.round(this.alpha * 16) });
   }
 
+  /** Chain Lash telegraph: three dotted aim lines of crimson marker dots. */
   drawTele(g: Ctx) {
     if (this.state !== 'fight') return;
     if (this.pose === 'lash' && this.poseT > 0.4) {
+      const fx = sheet(SHEET.fx);
       const hx = this.x - 42, hy = this.y - 12;
       const a = Math.atan2(this.w.player.y - hy, this.w.player.x - hx);
-      g.globalAlpha = 0.35;
-      g.strokeStyle = '#D94C3A';
-      g.lineWidth = 1;
-      for (const off of [-12, 0, 12]) {
-        g.beginPath();
-        g.moveTo(hx, hy);
-        g.lineTo(hx + Math.cos(a + off * DEG) * 120, hy + Math.sin(a + off * DEG) * 120);
-        g.stroke();
-      }
-      g.globalAlpha = 1;
+      const f = Math.floor(this.t * 12) % 2;
+      for (const off of [-12, 0, 12]) for (let d = 10; d <= 120; d += 8) fx.draw(g, 'teledot', f, hx + Math.cos(a + off * DEG) * d, hy + Math.sin(a + off * DEG) * d);
     }
-  }
-
-  drawGlow(ctx: Ctx) {
-    if (this.state === 'dead') return;
-    ctx.globalAlpha = 0.35 * this.alpha;
-    ctx.drawImage(ART.glow.cyan, this.x - 18, this.y - 50, 30, 20);
-    if (this.pose === 'open') {
-      ctx.globalAlpha = 0.6;
-      ctx.drawImage(ART.glow.cyan, this.x + 28 - 40, this.y - 14 - 50, 80, 100);
-    }
-    ctx.globalAlpha = 1;
   }
 }
