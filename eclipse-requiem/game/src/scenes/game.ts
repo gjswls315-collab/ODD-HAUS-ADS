@@ -1,10 +1,11 @@
 import { G, Scene } from '../core/app';
-import { C } from '../core/constants';
-import { clamp, TAU } from '../core/math';
-import { HeroId } from '../gfx/sprites';
-import { pixelText } from '../gfx/pixelfont';
-import { ART } from '../gfx/sprites';
-import { button, keyHints, panel, text } from '../gfx/ui';
+import { C, W } from '../core/constants';
+import { clamp } from '../core/math';
+import { image, sheet } from '../gfx/assets';
+import { PAL } from '../gfx/palette';
+import { ptext } from '../gfx/pixeltext';
+import { HeroId, SHEET } from '../gfx/sprites';
+import { button, fade, keyHints, panel, text } from '../gfx/ui';
 import { Director } from '../game/director';
 import { StageBg } from '../game/stagebg';
 import { World } from '../game/world';
@@ -194,10 +195,8 @@ export class GameScene implements Scene {
     this.hud.render();
     r.uiTransform();
     const ctx = r.ctx;
-    if (this.mode === 'play' && this.resumeT > 0) {
-      ctx.fillStyle = `rgba(5,5,8,${clamp(this.resumeT / 0.5, 0, 1) * 0.6})`;
-      ctx.fillRect(0, 0, 1920, 1080);
-    }
+    void ctx;
+    if (this.mode === 'play' && this.resumeT > 0) fade(r, clamp(this.resumeT / 0.5, 0, 1) * 0.6);
     if (this.mode === 'pause' || this.mode === 'controls' || this.mode === 'options') this.renderPause();
     if (this.mode === 'controls') this.renderControls();
     if (this.mode === 'options') this.options!.render();
@@ -206,9 +205,8 @@ export class GameScene implements Scene {
   }
 
   private renderPause() {
-    const r = G.r, ctx = r.ctx;
-    ctx.fillStyle = 'rgba(5,5,8,0.6)';
-    ctx.fillRect(0, 0, 1920, 1080);
+    const r = G.r;
+    fade(r, 0.6);
     panel(r, 720, 270, 480, 540, { style: 'tome', alpha: 0.95 });
     text(r, 'PAUSED', 960, 300, { size: 36, font: 'display', weight: 700, align: 'center', spacing: 10, color: C.gold });
     const tl = this.w.director ? this.w.director.tl : 0;
@@ -216,76 +214,53 @@ export class GameScene implements Scene {
     text(r, `STAGE 1 · ASHEN OUTSKIRTS · ${mm}:${String(ss).padStart(2, '0')}`, 960, 352, { size: 18, align: 'center', color: C.sub });
     void tl;
     this.pauseMenu.render();
-    pixelText(r, 'HI ' + String(Math.max(G.save.scores.hi, this.w.score)).padStart(9, '0'), 960, 760, 3, { align: 'center', color: C.sub });
+    text(r, 'HI ' + String(Math.max(G.save.scores.hi, this.w.score)).padStart(9, '0'), 960, 760, { size: 24, font: 'display', align: 'center', color: C.sub });
   }
 
   private renderControls() {
-    const r = G.r, ctx = r.ctx;
-    ctx.fillStyle = 'rgba(5,5,8,0.7)';
-    ctx.fillRect(0, 0, 1920, 1080);
+    const r = G.r;
+    fade(r, 0.7);
     panel(r, 560, 220, 800, 640, { style: 'tome', alpha: 0.97 });
     text(r, 'CONTROLS', 960, 250, { size: 36, font: 'display', weight: 700, align: 'center', spacing: 8, color: C.gold });
     controlsTable(r, 640, 330);
     text(r, 'ENTER / ESC 로 돌아가기', 960, 810, { size: 18, align: 'center', color: C.sub });
   }
 
+  /** Game over (docs/01 SCR-10): the field sinks into a dither, the eclipse and the fallen heroine appear, 10 s continue. */
   private renderGameOver() {
     const r = G.r, ctx = r.ctx, t = this.goT;
-    const dark = clamp((t - 0.4) / 1.2, 0, 1);
-    ctx.fillStyle = `rgba(6,6,10,${0.85 * dark})`;
-    ctx.fillRect(0, 0, 1920, 1080);
+    fade(r, clamp((t - 0.4) / 1.2, 0, 1) * 0.85);
     if (t < 1.7) return;
-    // blood moon swaying
-    const sway = Math.sin(t * (TAU / 6)) * 1.5 * (Math.PI / 180);
     ctx.save();
-    ctx.translate(960, 170);
-    ctx.rotate(sway);
-    ctx.globalAlpha = clamp((t - 1.7) / 0.6, 0, 1) * 0.85;
-    const moon = this.w.bg ? this.w.bg.a.moon : null;
-    if (moon) {
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(moon, -moon.width * 2, -moon.width * 2, moon.width * 4, moon.width * 4);
-    }
-    ctx.restore();
-    ctx.globalAlpha = 1;
-    // fallen heroine
-    const big = ART.heroBig[this.hero];
-    ctx.save();
-    ctx.globalAlpha = clamp((t - 1.8) / 0.6, 0, 1) * 0.8;
-    ctx.filter = 'grayscale(0.6) brightness(0.7)';
-    ctx.imageSmoothingEnabled = false;
-    ctx.translate(960, 900);
-    ctx.rotate(0.12);
-    ctx.drawImage(big, -big.width * 1.1, -big.height * 0.9, big.width * 2.2, big.height * 2.2);
-    ctx.restore();
-    ctx.filter = 'none';
+    r.logical();
+    const g = ctx;
+    const ka = clamp((t - 1.7) / 0.6, 0, 1);
+    // the red eclipse at 2x, swaying by whole pixels
+    const moon = image('stage1/moon');
+    g.globalAlpha = ka;
+    g.drawImage(moon, Math.round(W / 2 - moon.width + Math.sin(t * 1.05) * 2), 14, moon.width * 2, moon.height * 2);
+    // the fallen heroine (portrait, darkened by dither)
+    const port = sheet(SHEET.portraits);
+    port.draw(g, this.hero, 0, W / 2, 352, { dither: Math.round(ka * 9) });
     // ash rising
-    for (let i = 0; i < 40; i++) {
-      const x = (i * 211) % 1920, y = 1080 - (((t * 40 + i * 97) % 1100));
-      ctx.fillStyle = i % 3 ? 'rgba(185,179,170,0.35)' : 'rgba(179,38,59,0.35)';
-      ctx.fillRect(x, y, 3, 3);
-    }
-    const a = clamp((t - 2.0) / 0.8, 0, 1);
-    ctx.globalAlpha = a;
-    text(r, 'REQUIEM', 860, 360, { size: 72, font: 'display', weight: 700, align: 'right', spacing: 6, color: C.blood, glow: 'rgba(179,38,59,0.7)', glowBlur: 18 });
-    text(r, 'INTERRUPTED', 1060, 360, { size: 72, font: 'display', weight: 700, align: 'left', spacing: 6, color: C.blood, glow: 'rgba(179,38,59,0.7)', glowBlur: 18 });
-    ctx.fillStyle = C.blood;
-    ctx.fillRect(957, 330, 6, 150);
-    ctx.fillRect(930, 370, 60, 6);
-    ctx.globalAlpha = 1;
+    const fx = sheet(SHEET.fx);
+    for (let i = 0; i < 30; i++) fx.draw(g, 'ash', i % 3, (i * 71) % W, 360 - ((t * 14 + i * 33) % 370));
+    g.globalAlpha = clamp((t - 2.0) / 0.8, 0, 1);
+    ptext(g, 'REQUIEM INTERRUPTED', W / 2, 108, { font: 'S', scale: 3, color: PAL.R3, align: 'center', outline: PAL.N0 });
+    g.globalAlpha = 1;
     if (t >= 2.5) {
-      text(r, 'Continue?', 900, 520, { size: 30, font: 'display', weight: 600, align: 'right', color: C.ivory });
-      const punch = 1 + 0.15 * Math.max(0, 1 - this.countT / 0.18);
-      ctx.save();
-      ctx.translate(1000, 540);
-      ctx.scale(punch, punch);
-      text(r, String(Math.max(0, this.count)).padStart(2, '0'), 0, 0, { size: 72, font: 'display', weight: 700, align: 'center', baseline: 'middle', color: this.count <= 3 ? C.warn : C.ivory });
-      ctx.restore();
-      button(r, 720, 610, 180, 48, 'YES', this.goSel === 0 ? 'focus' : 'idle', 1, { size: 21 });
-      button(r, 1020, 610, 180, 48, 'NO', this.goSel === 1 ? 'focus' : 'idle', 1, { size: 21 });
-      text(r, '컨티뉴하면 점수가 0으로 초기화됩니다', 960, 680, { size: 18, align: 'center', color: C.sub });
+      ptext(g, 'CONTINUE?', W / 2 - 24, 168, { font: 'S', scale: 2, color: PAL.B4, align: 'right', outline: PAL.N0 });
+      const n = String(Math.max(0, this.count)).padStart(2, '0');
+      ptext(g, n, W / 2 + 6, 160, { font: 'S', scale: this.countT < 0.12 ? 5 : 4, color: this.count <= 3 ? PAL.R4 : PAL.B5, outline: PAL.N0 });
+      ptext(g, '컨티뉴하면 점수가 0으로 초기화됩니다', W / 2, 228, { font: 'G9', color: PAL.N8, align: 'center', outline: PAL.N0 });
       const sc = String(this.w.score).padStart(9, '0');
-      text(r, `Score ${sc}   /   Stage 1   /   Character : ${this.w.ch.name[0] + this.w.ch.name.slice(1).toLowerCase()}`, 960, 1000, { size: 21, font: 'display', align: 'center', color: C.sub });
+      ptext(g, 'SCORE ' + sc + '   STAGE 1   ' + this.w.ch.name, W / 2, 336, { font: 'S', color: PAL.N8, align: 'center', outline: PAL.N0 });
+    }
+    ctx.restore();
+    if (t >= 2.5) {
+      r.uiTransform();
+      button(r, 720, 612, 180, 48, 'YES', this.goSel === 0 ? 'focus' : 'idle', this.goT, { size: 21 });
+      button(r, 1020, 612, 180, 48, 'NO', this.goSel === 1 ? 'focus' : 'idle', this.goT, { size: 21 });
     }
   }
 }

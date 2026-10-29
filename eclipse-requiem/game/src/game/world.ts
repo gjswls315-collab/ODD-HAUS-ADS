@@ -4,7 +4,7 @@ import { fxRng as R, TAU } from '../core/math';
 import { sheet } from '../gfx/assets';
 import { Ctx } from '../gfx/canvas';
 import { Renderer } from '../gfx/renderer';
-import { ditherFill } from '../gfx/dither';
+import { shade } from '../gfx/dither';
 import { HeroId, SHEET } from '../gfx/sprites';
 import { BulletPool } from './bullets';
 import { CHARS, CharDef, SCORE } from './defs';
@@ -310,7 +310,7 @@ export class World {
     const a = this.bombAge, p = this.player;
     const fx = sheet(SHEET.heroFx(this.bombKind));
     const fade = Math.min(1, this.bombT / 0.4, a / 0.15);
-    ditherFill(g, 0, 0, W, H, Math.round(6 * fade), '#07080B');
+    shade(g, 0, 0, W, H, 0.38 * fade);
     if (this.bombKind === 'seraphine') {
       // GOLDEN SANCTUM: light pillars sweeping the screen + expanding halo
       for (let i = 0; i < 6; i++) {

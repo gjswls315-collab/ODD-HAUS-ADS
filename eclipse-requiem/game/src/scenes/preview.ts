@@ -1,10 +1,13 @@
 import { G, Scene } from '../core/app';
-import { C } from '../core/constants';
-import { clamp, TAU } from '../core/math';
-import { HeroId } from '../gfx/sprites';
-import { rgba } from '../gfx/canvas';
-import { ART } from '../gfx/sprites';
-import { button, keyHints, panel, text } from '../gfx/ui';
+import { C, W } from '../core/constants';
+import { clamp } from '../core/math';
+import { image, sheet } from '../gfx/assets';
+import { Ctx } from '../gfx/canvas';
+import { shade } from '../gfx/dither';
+import { PAL } from '../gfx/palette';
+import { PFont, ptext } from '../gfx/pixeltext';
+import { HeroId, SHEET } from '../gfx/sprites';
+import { button, fade, keyHints, panel, text } from '../gfx/ui';
 import { ENEMIES } from '../game/defs';
 import { uiMouse } from '../ui/menu';
 import { MenuBackdrop } from './backdrops';
@@ -70,161 +73,124 @@ export class PreviewScene implements Scene {
     }
   }
 
+  private t2(g: Ctx, str: string, x: number, y: number, color: string, font: PFont = 'S', o: { align?: 'left' | 'center' | 'right'; scale?: number } = {}) {
+    return ptext(g, str, x, y, { font, color, align: o.align, scale: o.scale, outline: PAL.N0 });
+  }
+
+  private box(g: Ctx, x: number, y: number, w: number, h: number, accent: string) {
+    g.fillStyle = PAL.N1;
+    g.fillRect(x, y, w, h);
+    g.fillStyle = PAL.N4;
+    g.fillRect(x, y + h - 1, w, 1);
+    g.fillRect(x, y, 1, h);
+    g.fillRect(x + w - 1, y, 1, h);
+    g.fillStyle = accent;
+    g.fillRect(x, y, w, 1);
+  }
+
   render() {
-    const r = G.r, ctx = r.ctx;
-    this.bg.draw(r.wctx, { tint: '#000000', tintA: 0.35 });
-    r.presentWorld();
-    ctx.save();
-    r.clipView();
-    r.worldTransform();
-    ctx.globalCompositeOperation = 'lighter';
-    this.bg.drawGlow(ctx, ART.glow.red);
-    ctx.restore();
-    r.uiTransform();
+    const r = G.r, g = r.wctx;
+    this.bg.draw(g);
+    shade(g, 0, 0, W, 360, this.howto ? 0.6 : 0.35);
     if (this.howto) {
+      r.presentWorld();
+      r.uiTransform();
       this.renderHowTo();
       return;
     }
-    // bottom gradient for text
-    const grd = ctx.createLinearGradient(0, 600, 0, 1080);
-    grd.addColorStop(0, 'rgba(5,5,8,0)');
-    grd.addColorStop(1, 'rgba(5,5,8,0.9)');
-    ctx.fillStyle = grd;
-    ctx.fillRect(0, 600, 1920, 480);
-    // title engraving
     const eng = clamp(this.t / 0.8, 0, 1);
-    text(r, 'STAGE 1', 960, 60, { size: 24, font: 'display', weight: 700, align: 'center', spacing: 12, color: C.gold, alpha: eng });
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(0, 0, 360 + 1200 * eng, 300);
-    ctx.clip();
-    text(r, 'ASHEN OUTSKIRTS', 960, 96, { size: 72, font: 'display', weight: 700, align: 'center', spacing: 8, color: C.ivory, glow: 'rgba(216,179,94,0.6)', glowBlur: 16 });
-    ctx.restore();
-    text(r, '재의 변두리', 960, 186, { size: 30, font: 'serif', weight: 600, align: 'center', spacing: 10, color: C.sub, alpha: eng });
-    text(r, '잿빛 장지와 매달린 종탑의 골짜기', 960, 236, { size: 24, font: 'serif', align: 'center', color: C.ivory, alpha: eng });
-    // enemy types
-    panel(r, 56, 300, 900, 200, { style: 'menu', alpha: 0.85 });
-    text(r, 'ENEMY TYPES', 80, 316, { size: 18, font: 'display', weight: 700, spacing: 4, color: C.gold });
-    (['bat', 'candle', 'skeleton', 'cleric', 'sentinel'] as const).forEach((k, i) => {
-      const a = clamp((this.t - 0.5 - i * 0.08) / 0.2, 0, 1);
-      const x = 96 + i * 170, y = 352;
-      ctx.globalAlpha = a;
-      ctx.fillStyle = 'rgba(11,11,15,0.8)';
-      ctx.fillRect(x, y, 96, 96);
-      ctx.strokeStyle = C.frame;
-      ctx.lineWidth = 3;
-      ctx.strokeRect(x + 1.5, y + 1.5, 93, 93);
-      const seen = G.save.flags.seen[k];
-      const spr = ART.enemy[k][0];
-      const sc = Math.min(2, Math.floor(84 / Math.max(spr.width, spr.height) * 3) / 3) * 1.5;
-      ctx.imageSmoothingEnabled = false;
-      if (!seen) ctx.filter = 'brightness(0)';
-      const dw = spr.width * sc, dh = spr.height * sc;
-      ctx.drawImage(spr, x + 48 - dw / 2, y + 48 - dh / 2, dw, dh);
-      ctx.filter = 'none';
-      text(r, seen ? ENEMIES[k].nameKr : '???', x + 48, y + 108, { size: 18, align: 'center', color: C.ivory });
-      ctx.globalAlpha = 1;
-    });
-    // hazards
-    panel(r, 56, 530, 900, 220, { style: 'menu', alpha: 0.85, accent: C.blood });
-    text(r, 'HAZARD', 80, 546, { size: 18, font: 'display', weight: 700, spacing: 4, color: C.warn });
-    const hz: [string, string][] = [['검은 안개', '시야가 좁아진다'], ['낙뢰 십자가', '붉은 예고선 1초 뒤 낙뢰'], ['붕괴 파편', '위에서 떨어진다 · 파괴 가능']];
-    hz.forEach(([n, d], i) => {
-      const x = 96 + i * 290, y = 584;
-      ctx.fillStyle = 'rgba(11,11,15,0.85)';
-      ctx.fillRect(x, y, 240, 90);
-      ctx.strokeStyle = C.blood;
-      ctx.lineWidth = 2;
-      ctx.strokeRect(x + 1, y + 1, 238, 88);
-      this.hazardIcon(i, x + 120, y + 45);
-      text(r, n, x, y + 100, { size: 21, weight: 700, color: C.ivory });
-      text(r, d, x, y + 128, { size: 18, color: C.sub });
-    });
-    // boss silhouette
-    const sa = clamp((this.t - 0.8) / 0.6, 0, 1);
-    ctx.save();
-    ctx.globalAlpha = sa;
-    ctx.imageSmoothingEnabled = false;
-    ctx.filter = 'brightness(0)';
-    ctx.drawImage(ART.boss.bell[0], 1290, 250, 360, 300);
-    ctx.drawImage(ART.boss.body, 1260, 330, 400, 440);
-    ctx.filter = 'none';
-    ctx.fillStyle = C.warn;
-    ctx.fillRect(1371, 434, 6, 6);
-    ctx.fillRect(1395, 432, 6, 6);
-    ctx.restore();
-    text(r, 'BOSS', 1540, 790, { size: 21, font: 'display', weight: 700, align: 'center', spacing: 6, color: C.warn, alpha: sa });
-    text(r, 'BELLKEEPER ABADDON', 1540, 820, { size: 30, font: 'display', weight: 700, align: 'center', spacing: 3, color: C.ivory, alpha: sa });
-    text(r, '침묵의 종지기', 1540, 862, { size: 24, font: 'serif', align: 'center', color: C.sub, alpha: sa });
-    // begin button with rune loading ring
-    const ready = this.loaded >= 1 && this.t >= 2.0;
-    const bx = 1440, by = 960;
-    button(r, bx, by, 420, 66, 'BEGIN REQUIEM', ready ? 'focus' : 'disabled', this.t, { size: 28, accent: C.blood });
-    ctx.fillStyle = ready ? C.blood : 'rgba(179,38,59,0.25)';
-    if (ready) {
-      ctx.globalAlpha = 0.25 + 0.1 * Math.sin(this.t * 4);
-      ctx.fillRect(bx, by, 420, 66);
-      ctx.globalAlpha = 1;
-    }
-    for (let i = 0; i < 12; i++) {
-      const lit = i / 12 < this.loaded;
-      ctx.fillStyle = lit ? C.gold : 'rgba(90,74,46,0.6)';
-      const px = bx + 18 + i * 35;
-      ctx.fillRect(px, by - 10, 8, 4);
-    }
-    if (this.beginT >= 0) {
-      const k = clamp(this.beginT / 0.4, 0, 1);
-      ctx.strokeStyle = rgba(C.blood, 1 - k);
-      ctx.lineWidth = 12;
-      ctx.beginPath();
-      ctx.arc(960, 540, 60 + k * 1200, 0, TAU);
-      ctx.stroke();
-    }
-    keyHints(r, 56, 1004, [['ENTER', 'BEGIN'], ['ESC', 'CHANGE CHARACTER']]);
-  }
+    // title engraving: revealed left to right
+    this.t2(g, 'STAGE 1', W / 2, 14, PAL.G3, 'S', { align: 'center' });
+    g.save();
+    g.beginPath();
+    g.rect(0, 0, 120 + 400 * eng, 60);
+    g.clip();
+    this.t2(g, 'ASHEN OUTSKIRTS', W / 2, 26, PAL.B5, 'S', { align: 'center', scale: 3 });
+    g.restore();
+    this.t2(g, '재의 변두리 — 잿빛 장지와 매달린 종탑의 골짜기', W / 2, 54, PAL.N8, 'G9', { align: 'center' });
 
-  private hazardIcon(i: number, x: number, y: number) {
-    const ctx = G.r.ctx;
-    if (i === 0) {
-      for (let k = 0; k < 4; k++) {
-        ctx.fillStyle = `rgba(42,39,51,${0.5 + k * 0.1})`;
-        ctx.beginPath();
-        ctx.ellipse(x - 50 + k * 30, y + 10 - (k % 2) * 10, 50, 18, 0, 0, TAU);
-        ctx.fill();
-      }
-      ctx.fillStyle = C.cyan;
-      ctx.fillRect(x - 3, y - 6, 4, 4);
-      ctx.fillRect(x + 6, y - 6, 4, 4);
-    } else if (i === 1) {
-      ctx.fillStyle = '#09090C';
-      ctx.fillRect(x - 5, y - 30, 10, 60);
-      ctx.fillRect(x - 22, y - 14, 44, 10);
-      ctx.fillStyle = C.warn;
-      ctx.globalAlpha = 0.5 + 0.5 * Math.sin(this.t * 12);
-      ctx.fillRect(x + 40, y - 40, 3, 80);
-      ctx.globalAlpha = 1;
-    } else {
-      ctx.fillStyle = '#3A3742';
-      for (let k = 0; k < 3; k++) {
-        const yy = y - 26 + ((this.t * 40 + k * 26) % 60);
-        ctx.beginPath();
-        ctx.moveTo(x - 40 + k * 36, yy);
-        ctx.lineTo(x - 30 + k * 36, yy - 12);
-        ctx.lineTo(x - 18 + k * 36, yy + 4);
-        ctx.fill();
-      }
+    // enemy roster (unseen ones as silhouettes)
+    const en = sheet(SHEET.enemies);
+    this.box(g, 12, 76, 304, 112, PAL.N5);
+    this.t2(g, 'ENEMY TYPES', 20, 82, PAL.G3);
+    (['bat', 'candle', 'skeleton', 'cleric', 'sentinel'] as const).forEach((k, i) => {
+      if (this.t < 0.5 + i * 0.08) return;
+      const x = 18 + i * 59, y = 94;
+      g.fillStyle = PAL.N0;
+      g.fillRect(x, y, 56, 70);
+      const seen = G.save.flags.seen[k];
+      g.save();
+      g.beginPath();
+      g.rect(x, y, 56, 70);
+      g.clip();
+      en.draw(g, k, en.index(k, this.t), x + 28, y + 36, { shadow: !seen });
+      g.restore();
+      this.t2(g, seen ? ENEMIES[k].nameKr : '???', x + 28, y + 74, seen ? PAL.B4 : PAL.N6, 'G9', { align: 'center' });
+    });
+
+    // hazards
+    const fx = sheet(SHEET.fx);
+    this.box(g, 12, 196, 304, 92, PAL.R2);
+    this.t2(g, 'HAZARD', 20, 202, PAL.R4);
+    const hz: [string, string][] = [['검은 안개', '시야가 좁아진다'], ['낙뢰 십자가', '예고선 1초 뒤 낙뢰'], ['붕괴 파편', '낙하 · 파괴 가능']];
+    hz.forEach(([n, d], i) => {
+      const x = 18 + i * 99, y = 214;
+      g.fillStyle = PAL.N0;
+      g.fillRect(x, y, 94, 40);
+      g.save();
+      g.beginPath();
+      g.rect(x, y, 94, 40);
+      g.clip();
+      if (i === 0) g.drawImage(image('stage1/fog_a'), x - 40, y - 50);
+      else if (i === 1) {
+        const f = Math.floor(this.t * 6) % 2;
+        fx.draw(g, 'gravecross', 1 + f, x + 30, y + 46);
+        for (let yy = y + 2; yy < y + 40; yy += 6) fx.draw(g, 'teledot', f, x + 66, yy);
+      } else fx.draw(g, 'rubble', Math.floor(this.t * 8), x + 47, y + ((this.t * 30) % 60) - 10);
+      g.restore();
+      this.t2(g, n, x, y + 42, PAL.B4, 'G9');
+      this.t2(g, d, x, y + 54, PAL.N7, 'G9');
+    });
+
+    // boss: the real sprite parts as a silhouette, soul lantern lit
+    const sa = clamp((this.t - 0.8) / 0.6, 0, 1);
+    if (sa > 0) {
+      const bs = sheet(SHEET.boss), bx = 470, by = 196;
+      const pt = (n: string) => bs.point('body', 0, n);
+      const o = { shadow: true, dither: Math.round(sa * 16) };
+      bs.draw(g, 'armB', 0, bx + pt('armB')[0], by + pt('armB')[1], o);
+      bs.draw(g, 'bell_c0', 2, bx + pt('bell')[0], by + pt('bell')[1], o);
+      bs.draw(g, 'body', 0, bx, by, o);
+      bs.draw(g, 'head', 0, bx + pt('head')[0], by + pt('head')[1], o);
+      bs.draw(g, 'armF_down', 0, bx + pt('armF')[0], by + pt('armF')[1], o);
+      bs.draw(g, 'core', bs.index('core', this.t), bx, by, { dither: Math.round(sa * 16) });
+      g.save();
+      g.globalAlpha = sa;
+      this.t2(g, 'BOSS', 470, 290, PAL.R4, 'S', { align: 'center' });
+      this.t2(g, 'BELLKEEPER ABADDON', 470, 300, PAL.B5, 'S', { align: 'center', scale: 2 });
+      this.t2(g, '침묵의 종지기', 470, 318, PAL.N8, 'G11', { align: 'center' });
+      g.restore();
     }
+    // loading pips above the button
+    const hud = sheet(SHEET.hud);
+    for (let i = 0; i < 12; i++) hud.draw(g, 'pip', i / 12 < this.loaded ? 1 : 0, 486 + i * 11, 314);
+    r.presentWorld();
+    r.uiTransform();
+    const ready = this.loaded >= 1 && this.t >= 2.0;
+    button(r, 1440, 960, 420, 66, 'BEGIN REQUIEM', ready ? 'focus' : 'disabled', this.t, { size: 28 });
+    if (this.beginT >= 0) fade(r, clamp(this.beginT / 0.4, 0, 1));
+    r.uiTransform();
+    keyHints(r, 48, 1038, [['ENTER', 'BEGIN'], ['ESC', 'CHANGE CHARACTER']]);
   }
 
   private renderHowTo() {
     const r = G.r;
     panel(r, 560, 120, 800, 840, { style: 'tome', alpha: 0.96 });
-    text(r, 'HOW TO PLAY', 960, 150, { size: 36, font: 'display', weight: 700, align: 'center', spacing: 8, color: C.gold });
+    text(r, 'HOW TO PLAY', 960, 150, { size: 48, font: 'display', weight: 700, align: 'center', color: C.gold });
     text(r, '처음 한 번만 표시됩니다', 960, 200, { size: 18, align: 'center', color: C.sub });
     controlsTable(r, 640, 250);
     const tips = ['적탄은 불투명한 구슬 · 내 탄은 반투명 빛줄기', '히트박스는 몸 중앙의 작은 점 하나', '탄을 스치면(GRAZE) 점수 +10'];
     tips.forEach((t, i) => text(r, '·  ' + t, 660, 720 + i * 34, { size: 21, color: C.ivory }));
-    const a = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(this.t * 5));
-    text(r, 'ENTER — 계속', 960, 900, { size: 24, font: 'display', weight: 700, align: 'center', spacing: 4, color: C.ivory, alpha: a });
+    if (Math.floor(this.t * 2) % 2 === 0) text(r, 'ENTER — 계속', 960, 900, { size: 30, weight: 700, align: 'center', color: C.ivory });
   }
 }

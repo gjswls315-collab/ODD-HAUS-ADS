@@ -28,6 +28,16 @@ export function ditherFill(g: CanvasRenderingContext2D, x: number, y: number, w:
   g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
 }
 
+/** Flat translucent darkening/tint (for dims under menus and stage escalation; dithers read as noise full-screen). */
+export function shade(g: CanvasRenderingContext2D, x: number, y: number, w: number, h: number, a: number, color = '#07080B') {
+  if (a <= 0) return;
+  const prev = g.globalAlpha;
+  g.globalAlpha = prev * Math.min(1, a);
+  g.fillStyle = color;
+  g.fillRect(Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+  g.globalAlpha = prev;
+}
+
 /** Keep only a dithered fraction of what is already drawn in `g` (for dissolve-in of a whole layer). */
 export function ditherMask(g: CanvasRenderingContext2D, w: number, h: number, level: number) {
   const prev = g.globalCompositeOperation;

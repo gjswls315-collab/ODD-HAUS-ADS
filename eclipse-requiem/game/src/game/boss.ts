@@ -109,10 +109,11 @@ export class Abaddon implements Target {
     if (this.state !== 'fight' && this.state !== 'transition') return [];
     const c = this.crown;
     return [
-      { x: this.x, y: this.y, r: 14, mul: 1 },
+      // the robe circle sits below the ribcage so shots aimed at the core are not absorbed by the hem first
+      { x: this.x, y: this.y, r: 16, mul: 1 },
       { x: c.x, y: c.y + 32, r: 30, mul: 0.5 },
       { x: this.x - 26, y: this.y - 50, r: 12, mul: 0.2 },
-      { x: this.x + 6, y: this.y + 34, r: 42, mul: 0.2 },
+      { x: this.x + 8, y: this.y + 46, r: 38, mul: 0.2 },
     ];
   }
 

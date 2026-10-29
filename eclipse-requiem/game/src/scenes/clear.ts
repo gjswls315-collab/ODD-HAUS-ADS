@@ -2,9 +2,12 @@ import { G, Scene } from '../core/app';
 import { C } from '../core/constants';
 import { clamp, ease, fxRng as R } from '../core/math';
 import { HeroId } from '../gfx/sprites';
-import { rgba } from '../gfx/canvas';
-import { ART } from '../gfx/sprites';
-import { button, cross, keyHints, panel, text } from '../gfx/ui';
+import { sheet } from '../gfx/assets';
+import { shade } from '../gfx/dither';
+import { PAL } from '../gfx/palette';
+import { ptext } from '../gfx/pixeltext';
+import { SHEET } from '../gfx/sprites';
+import { button, fade, keyHints, panel, text } from '../gfx/ui';
 import type { World } from '../game/world';
 import { uiMouse } from '../ui/menu';
 import { MenuBackdrop } from './backdrops';
@@ -59,7 +62,7 @@ export class ClearScene implements Scene {
 
   constructor(private hero: HeroId, w: World, private failed = false) {
     this.res = computeResult(w);
-    for (let i = 0; i < 100; i++) this.particles.push({ x: R.range(0, 1920), y: R.range(0, 1080), v: R.range(20, 60), ph: R.range(0, 6) });
+    for (let i = 0; i < 40; i++) this.particles.push({ x: R.range(0, 640), y: R.range(0, 360), v: R.range(7, 20), ph: R.range(0, 6) });
     // records
     const sc = G.save.scores;
     if (this.res.continues === 0 && this.res.score > sc.hi) {
@@ -94,7 +97,7 @@ export class ClearScene implements Scene {
     this.bg.update(dt);
     for (const p of this.particles) {
       p.y -= p.v * dt;
-      if (p.y < -10) p.y = 1090;
+      if (p.y < -10) p.y = 370;
     }
     const inp = G.input;
     const nRows = this.rows().length;
@@ -150,90 +153,59 @@ export class ClearScene implements Scene {
   }
 
   render() {
-    const r = G.r, ctx = r.ctx;
-    this.bg.draw(r.wctx, { tint: '#000000', tintA: 0.55 });
+    const r = G.r, g = r.wctx;
+    this.bg.draw(g);
+    shade(g, 0, 0, 640, 360, 0.55);
+    // rising souls (cleared) or embers (failed)
+    const fx = sheet(this.failed ? SHEET.fx : SHEET.items);
+    for (const p of this.particles) fx.draw(g, this.failed ? 'ash' : 'mote', Math.floor(this.t * 4 + p.ph) % 2, p.x + Math.round(Math.sin(this.t + p.ph) * 3), p.y);
     if (!this.failed && this.stage !== 'tbc') {
-      const key = ART.heroKey[this.hero];
       const k = ease.outCubic(clamp(this.t / 0.4, 0, 1));
-      r.wctx.drawImage(key, Math.round(-40 + 60 * k), Math.round(180 - key.height / 2 + Math.sin(this.t * 1.5) * 2));
+      sheet(SHEET.portraits).draw(g, this.hero, 0, Math.round(-20 + 170 * k), 340);
     }
     r.presentWorld();
     r.uiTransform();
-    // purification particles (gold, rising)
-    ctx.save();
-    ctx.globalCompositeOperation = 'lighter';
-    for (const p of this.particles) {
-      ctx.fillStyle = this.failed ? 'rgba(179,38,59,0.35)' : 'rgba(216,179,94,0.5)';
-      ctx.fillRect(p.x + Math.sin(this.t + p.ph) * 10, p.y, 3, 3);
-    }
-    ctx.restore();
     if (this.stage === 'tbc') {
       this.renderTbc();
       return;
     }
-    panel(r, 900, 120, 960, 860, { style: 'tome', alpha: 0.9, accent: this.failed ? C.blood : C.gold });
-    text(r, this.failed ? 'REQUIEM INTERRUPTED' : 'REQUIEM CLEARED', 1380, 160, { size: 48, font: 'display', weight: 700, align: 'center', spacing: 6, color: this.failed ? C.blood : C.gold, glow: 'rgba(0,0,0,0.8)', glowBlur: 10 });
-    text(r, this.failed ? 'CHRONICLE OF THE REQUIEM · STAGE 1' : 'STAGE 1 · ASHEN OUTSKIRTS', 1380, 222, { size: 21, font: 'display', align: 'center', spacing: 4, color: C.sub });
+    panel(r, 900, 120, 960, 860, { style: 'tome', alpha: 0.9 });
+    text(r, this.failed ? 'REQUIEM INTERRUPTED' : 'REQUIEM CLEARED', 1380, 156, { size: 48, font: 'display', weight: 700, align: 'center', color: this.failed ? PAL.R3 : PAL.G3 });
+    text(r, this.failed ? 'CHRONICLE OF THE REQUIEM · STAGE 1' : 'STAGE 1 · ASHEN OUTSKIRTS', 1380, 222, { size: 24, font: 'display', align: 'center', color: C.sub });
     const rows = this.rows();
+    const ctx = r.ctx;
     rows.forEach(([label, val, hi], i) => {
       const at = 0.6 + i * 0.25;
-      const a = clamp((this.t - at) / 0.2, 0, 1);
-      if (a <= 0) return;
+      if (this.t < at) return;
       const y = 286 + i * 62;
-      ctx.globalAlpha = a;
-      ctx.fillStyle = rgba(C.charcoal, 0.6);
-      ctx.fillRect(960, y - 6, 840, 52);
-      text(r, label, 990, y + 20, { size: 21, font: 'display', weight: 700, baseline: 'middle', spacing: 3, color: C.sub });
-      text(r, val, 1770, y + 20, { size: 30, font: 'display', weight: 700, baseline: 'middle', align: 'right', color: hi ? C.gold : C.ivory });
-      ctx.globalAlpha = 1;
+      ctx.fillStyle = PAL.N2;
+      ctx.fillRect(960, y - 6, 840, 51);
+      text(r, label, 990, y + 20, { size: 24, font: 'display', baseline: 'middle', color: C.sub });
+      text(r, val, 1770, y + 20, { size: 48, font: 'display', baseline: 'middle', align: 'right', color: hi ? PAL.G3 : PAL.B5 });
     });
-    if (this.res.continues > 0) text(r, `CONTINUE x${this.res.continues} — 최고 점수 미등록`, 990, 676, { size: 18, color: C.warn });
-    if (this.newHi && this.t > 2) text(r, 'NEW HI-SCORE', 990, 676, { size: 21, font: 'display', weight: 700, color: C.gold });
-    // rank stamp
+    if (this.res.continues > 0) text(r, `CONTINUE x${this.res.continues} — 최고 점수 미등록`, 990, 676, { size: 24, color: PAL.R4 });
+    if (this.newHi && this.t > 2) text(r, 'NEW HI-SCORE', 990, 676, { size: 24, font: 'display', color: PAL.U1 });
+    // rank stamp: 5x7 letters, stamped down from a larger integer scale
     if (this.stampT >= 0 && !this.failed) {
       const k = clamp(this.stampT / 0.18, 0, 1);
-      const sc = 1.6 - 0.6 * ease.outBack(k);
+      const sc = 15 + Math.round((1 - k) * 3) * 3;
       const rank = this.res.rank;
-      ctx.save();
-      ctx.translate(1660, 790);
-      ctx.scale(0.85, 0.85);
-      ctx.scale(sc, sc);
-      if (rank === 'S' || rank === 'EX') {
-        ctx.save();
-        ctx.rotate(this.t * 0.17);
-        ctx.strokeStyle = rank === 'EX' ? C.cyan : C.gold;
-        ctx.lineWidth = 3;
-        ctx.beginPath();
-        ctx.arc(0, 0, 110, 0, Math.PI * 2);
-        ctx.stroke();
-        ctx.restore();
-        ctx.fillStyle = C.gold;
-        cross(ctx, 0, -120, 18);
-        for (const s of [-1, 1]) {
-          ctx.beginPath();
-          ctx.moveTo(s * 70, -40);
-          ctx.quadraticCurveTo(s * 150, -90, s * 160, 10);
-          ctx.quadraticCurveTo(s * 120, -20, s * 80, 0);
-          ctx.fill();
-        }
-      }
-      const col = rank === 'C' ? '#B9B3AA' : rank === 'B' ? C.cyan : C.gold;
-      text(r, rank, 0, 6, { size: 160, font: 'display', weight: 900, align: 'center', baseline: 'middle', color: col, glow: rank === 'EX' ? C.cyan : 'rgba(0,0,0,0.9)', glowBlur: 20 });
-      text(r, 'RANK', 0, 96, { size: 21, font: 'display', weight: 700, align: 'center', spacing: 6, color: C.sub });
-      ctx.restore();
+      const col = rank === 'C' ? PAL.N8 : rank === 'B' ? PAL.A3 : rank === 'EX' ? PAL.M2 : PAL.U1;
+      ptext(ctx, rank, 1650, 790, { font: 'S', scale: sc, color: col, align: 'center', valign: 'middle', outline: PAL.N0 });
+      text(r, 'RANK', 1650, 870, { size: 24, font: 'display', align: 'center', color: C.sub });
     }
     if (this.stage === 'menu') {
       const labels = this.failed ? ['RETRY', 'TITLE'] : ['CONTINUE', 'TITLE'];
       labels.forEach((l, i) => button(r, 980 + i * 300, 900, 260, 54, l, i === this.sel ? 'focus' : 'idle', this.t, { size: 24 }));
-    } else text(r, 'ENTER — 결과 건너뛰기', 1380, 920, { size: 18, align: 'center', color: C.sub });
-    if (!this.failed) text(r, 'NEXT : STAGE 2 — BLACK BELFRY', 450, 1000, { size: 24, font: 'display', weight: 700, align: 'center', spacing: 3, color: C.sub, alpha: clamp((this.t - 2) / 0.6, 0, 0.9) });
+    } else text(r, 'ENTER — 결과 건너뛰기', 1380, 920, { size: 24, align: 'center', color: C.sub });
+    if (!this.failed && this.t > 2) text(r, 'NEXT : STAGE 2 — BLACK BELFRY', 450, 1000, { size: 24, font: 'display', align: 'center', color: C.sub });
     keyHints(r, 56, 1040, []);
   }
 
   private renderTbc() {
-    const r = G.r, ctx = r.ctx;
-    ctx.fillStyle = 'rgba(5,5,8,0.7)';
-    ctx.fillRect(0, 0, 1920, 1080);
+    const r = G.r;
+    fade(r, 0.7);
+    r.uiTransform();
     const a = clamp(this.t / 0.8, 0, 1);
     text(r, 'STAGE 2', 960, 360, { size: 30, font: 'display', weight: 700, align: 'center', spacing: 12, color: C.gold, alpha: a });
     text(r, 'BLACK BELFRY', 960, 410, { size: 72, font: 'display', weight: 700, align: 'center', spacing: 8, color: C.ivory, alpha: a });

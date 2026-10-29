@@ -4,18 +4,15 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Eclipse Requiem</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-  :root { --bg: #0B0B0F; --fg: #E9E1D3; --muted: #B9B3AA; --gold: #D8B35E; }
-  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #0B0B0F; --fg: #E9E1D3; } }
-  :root[data-theme="dark"] { --bg: #0B0B0F; --fg: #E9E1D3; }
+  :root { --bg: #07080B; --fg: #D9CDB6; --muted: #838B97; --line: #3A404B; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --bg: #07080B; --fg: #D9CDB6; } }
+  :root[data-theme="dark"] { --bg: #07080B; --fg: #D9CDB6; }
   html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: var(--bg); color: var(--fg); }
-  body { font-family: "Noto Sans KR", system-ui, sans-serif; }
+  body { font-family: system-ui, sans-serif; }
   canvas#game { display: block; position: fixed; inset: 0; outline: none; touch-action: none; }
-  #boot { position: fixed; inset: 0; display: grid; place-items: center; font: 600 16px "Cinzel", serif; letter-spacing: 0.3em; color: var(--muted); }
-  #nokbd { display: none; position: fixed; left: 16px; right: 16px; bottom: 16px; padding: 12px 16px; border: 1px solid var(--gold); background: rgba(17,18,23,.92); color: var(--fg); font-size: 14px; line-height: 1.5; text-align: center; }
+  #boot { position: fixed; inset: 0; display: grid; place-items: center; font: 600 14px monospace; letter-spacing: 0.3em; color: var(--muted); }
+  #nokbd { display: none; position: fixed; left: 16px; right: 16px; bottom: 16px; padding: 12px 16px; border: 1px solid var(--line); background: #0E1015; color: var(--fg); font-size: 14px; line-height: 1.5; text-align: center; }
   @media (hover: none) and (pointer: coarse) { #nokbd { display: block; } }
 </style>
 </head>

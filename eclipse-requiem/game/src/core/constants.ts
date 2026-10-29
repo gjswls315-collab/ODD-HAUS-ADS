@@ -28,7 +28,7 @@ export const C = {
   itemB: '#B3263B',
   itemS: '#9D86E0',
   goldLight: '#F3E6C4',
-  letterbox: '#0B0B0F',
+  letterbox: '#07080B',
 } as const;
 
 export const T = {

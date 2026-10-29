@@ -1,9 +1,10 @@
 import { G, Scene } from '../core/app';
 import { C } from '../core/constants';
 import { clamp } from '../core/math';
-import { pixelText } from '../gfx/pixelfont';
-import { ART } from '../gfx/sprites';
-import { keyHints, panel, text } from '../gfx/ui';
+import { sheet } from '../gfx/assets';
+import { PAL } from '../gfx/palette';
+import { SHEET } from '../gfx/sprites';
+import { fade, keyHints, panel, text } from '../gfx/ui';
 import { drawLogo } from '../ui/logo';
 import { MenuList } from '../ui/menu';
 import { OptionsPanel } from '../ui/options';
@@ -92,56 +93,41 @@ export class TitleScene implements Scene {
     const r = G.r;
     const g = r.wctx;
     this.bg.draw(g);
-    // key art: Seraphine, bottom-left foreground, slow bob
-    const key = ART.heroKey.seraphine;
+    // Seraphine in flight over the cemetery (the in-game sprite, not a separate key art)
+    const hero = sheet(SHEET.hero('seraphine'));
     const bob = Math.round(Math.sin(this.t * 1.6) * 2);
-    g.drawImage(key, 2, 78 + bob);
+    hero.draw(g, 'fly', hero.index('fly', this.t), 132, 214 + bob);
+    const logoA = clamp(this.t / 0.8, 0, 1);
+    drawLogo(g, 370, 26, this.t, logoA);
     r.presentWorld();
-    // glow pass
-    const ctx = r.ctx;
-    ctx.save();
-    r.clipView();
-    r.worldTransform();
-    ctx.globalCompositeOperation = 'lighter';
-    this.bg.drawGlow(ctx, ART.glow.red);
-    ctx.globalAlpha = 0.45;
-    ctx.drawImage(ART.glow.gold, 150, 120 + bob, 120, 70);
-    ctx.globalAlpha = 0.3;
-    ctx.drawImage(ART.glow.gold, 60, 60 + bob, 120, 60);
-    ctx.restore();
 
     r.uiTransform();
-    const logoA = clamp(this.t / 0.8, 0, 1);
-    drawLogo(1110, 96, 96, this.t, logoA);
     if (this.mode === 'attract') {
-      const a = 0.4 + 0.6 * (0.5 + 0.5 * Math.sin(this.t * (Math.PI * 2 / 1.2)));
-      text(r, '[ PRESS ANY KEY ]', 1110, 1014, { size: 24, font: 'display', weight: 600, align: 'center', spacing: 6, color: C.ivory, alpha: a * logoA });
+      if (Math.floor(this.t * 2) % 2 === 0 || this.t < 0.8) text(r, 'PRESS ANY KEY', 1110, 1008, { size: 24, font: 'display', align: 'center', color: PAL.B4, alpha: logoA });
     } else {
-      // menu items fade in top to bottom (50 ms apart)
       const k = clamp(this.menuT / 0.3, 0, 1);
       this.menu.render(k);
-      keyHints(r, 820, 990, [['↑↓', 'SELECT'], ['ENTER', 'CONFIRM']]);
+      keyHints(r, 840, 990, [['↑↓', 'SELECT'], ['ENTER', 'CONFIRM']]);
     }
-    text(r, VERSION, 56, 1026, { size: 18, color: C.sub, alpha: 0.8 });
-    text(r, '© ECLIPSE REQUIEM', 1864, 1026, { size: 18, align: 'right', color: C.sub, alpha: 0.8 });
-    if (G.save.scores.hi > 0) pixelText(r, 'HI ' + String(G.save.scores.hi).padStart(9, '0'), 1864, 30, 3, { align: 'right', color: C.sub });
+    text(r, VERSION, 48, 1032, { size: 18, color: PAL.N7 });
+    if (G.save.scores.hi > 0) text(r, 'HI ' + String(G.save.scores.hi).padStart(9, '0'), 1872, 24, { size: 24, font: 'display', align: 'right', color: PAL.N8 });
     if (this.mode === 'options') this.options!.render();
     if (this.mode === 'credits') this.renderCredits();
   }
 
   private renderCredits() {
-    const r = G.r, ctx = r.ctx;
-    ctx.fillStyle = 'rgba(5,5,8,0.75)';
-    ctx.fillRect(0, 0, 1920, 1080);
+    const r = G.r;
+    fade(r, 0.75);
+    r.uiTransform();
     panel(r, 460, 120, 1000, 840, { style: 'tome', alpha: 0.95 });
     text(r, 'CREDITS', 960, 160, { size: 36, font: 'display', weight: 700, align: 'center', spacing: 8, color: C.gold });
     const lines: [string, string][] = [
       ['ECLIPSE REQUIEM — 일식의 진혼곡', 'Stage 1 vertical slice'],
       ['GAME & VISUAL DESIGN', 'docs/ 00–07 (시각 기획 · UI · Stage 1 사양서)'],
-      ['ART', '코드로 생성한 절차적 픽셀아트 (교체용 임시 아트)'],
+      ['ART', '스크립트로 제작한 임시 픽셀아트 에셋 (tools/art → assets/, 교체용)'],
       ['MUSIC & SOUND', 'WebAudio 실시간 합성 (오르간 · 합창 · 종)'],
       ['ENGINE', 'HTML5 Canvas 2D · TypeScript · 60 Hz fixed step'],
-      ['FONTS', 'Cinzel · Noto Serif KR · Noto Sans KR (SIL Open Font License)'],
+      ['FONTS', 'Galmuri by Lee Minseo (SIL OFL 1.1) · 5x7 bitmap font'],
       ['INSPIRED BY', '클래식 횡스크롤 아케이드 슈팅의 장르 문법'],
     ];
     lines.forEach(([a, b], i) => {

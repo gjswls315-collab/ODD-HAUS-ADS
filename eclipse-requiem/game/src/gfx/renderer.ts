@@ -4,7 +4,8 @@ import { Ctx, makeCanvas } from './canvas';
 /**
  * Two-layer renderer (docs/06 §4-1):
  *  - world: 640x360 pixel-art canvas, blitted with nearest-neighbour at an integer scale when possible
- *  - screen: full-resolution backing canvas where glow and UI (1920x1080 design space) are drawn crisply
+ *  - screen: full-resolution backing canvas; the pixel UI is drawn on it in the same 640x360 logical grid
+ *    (`logical()`), or in 1920x1080 design units (`uiTransform()`, 3 design px = 1 logical px)
  */
 export class Renderer {
   readonly canvas: HTMLCanvasElement;
@@ -85,6 +86,12 @@ export class Renderer {
   worldTransform() {
     const sx = Math.round(this.shakeX) * this.k, sy = Math.round(this.shakeY) * this.k;
     this.ctx.setTransform(this.k, 0, 0, this.k, this.vx + sx, this.vy + sy);
+  }
+
+  /** Transform for drawing in 640x360 logical coordinates on the screen canvas (pixel UI, no shake). */
+  logical() {
+    this.ctx.setTransform(this.k, 0, 0, this.k, this.vx, this.vy);
+    this.ctx.imageSmoothingEnabled = false;
   }
 
   /** Transform for drawing in 1920x1080 UI design coordinates. */

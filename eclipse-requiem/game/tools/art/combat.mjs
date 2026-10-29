@@ -147,7 +147,7 @@ function fx() {
     const b = new Bitmap(28, 28), pts = [], rr = rng(70 + v);
     for (let k = 0; k < 7; k++) { const a = (k / 7) * Math.PI * 2 + v * 0.5 + rr.range(-0.25, 0.25), d = rr.range(9, 12.5); pts.push([14 + Math.cos(a) * d, 14 + Math.sin(a) * d]); }
     b.poly(pts, 'T2'); b.poly(pts.map(([x, y]) => [x * 0.78 + 2.4, y * 0.78 + 1.6]), 'T3'); b.poly(pts.map(([x, y]) => [x * 0.45 + 5.5, y * 0.45 + 4.5]), 'T4');
-    b.line(pts[2][0], pts[2][1], 14, 14, 'T1'); b.plot(10, 8, 'T6'); b.plot(11, 8, 'T5'); b.selout(); b.rim('T7', ['top']);
+    b.line(pts[2][0], pts[2][1], 14, 14, 'T1'); b.plot(10, 8, 'T6'); b.plot(11, 8, 'T5'); b.selout(); b.rim('T7', 't');
     return b;
   }), { duration: 70 });
   // iron grave cross that conducts the red lightning (stage gimmick): dark, then charged

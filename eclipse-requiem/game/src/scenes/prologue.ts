@@ -1,14 +1,16 @@
 import { G, Scene } from '../core/app';
-import { C, W } from '../core/constants';
-import { clamp, fxRng as R, TAU } from '../core/math';
+import { H, W } from '../core/constants';
+import { clamp, fxRng as R } from '../core/math';
+import { image, sheet } from '../gfx/assets';
 import { Ctx } from '../gfx/canvas';
-import { makeBelfry, makeFar, makeMoon, makeSky } from '../gfx/art/backdrop';
-import { ART } from '../gfx/sprites';
-import { text } from '../gfx/ui';
+import { ditherFill } from '../gfx/dither';
+import { PAL } from '../gfx/palette';
+import { ptext } from '../gfx/pixeltext';
+import { HEROES, SHEET } from '../gfx/sprites';
 import { SelectScene } from './select';
 import { TitleScene } from './title';
 
-// Story prologue: 4 illustrated cuts + text box (docs/01 SCR-03).
+// Story prologue: 4 cuts composed from the stage and character assets + a text box (docs/01 SCR-03).
 
 const CUTS = [
   { chapter: 'I. 피를 머금은 달', line: '그날, 달은 피를 머금었다.' },
@@ -21,12 +23,11 @@ export class PrologueScene implements Scene {
   private cut = 0;
   private t = 0;
   private skipHold = 0;
-  private A = { sky: makeSky(9), moon: makeMoon(56, 4), far: makeFar(55), belfry: makeBelfry() };
   private souls: { x: number; y: number; v: number; ph: number }[] = [];
   private fadeT = 0;
 
   constructor(private next: 'select' | 'title') {
-    for (let i = 0; i < 60; i++) this.souls.push({ x: R.range(0, W), y: R.range(200, 380), v: R.range(14, 30), ph: R.range(0, 6) });
+    for (let i = 0; i < 40; i++) this.souls.push({ x: R.range(0, W), y: R.range(120, 340), v: R.range(14, 30), ph: R.range(0, 6) });
   }
 
   enter() {
@@ -73,102 +74,67 @@ export class PrologueScene implements Scene {
       s.y -= s.v * dt;
       s.x += Math.sin(this.t * 2 + s.ph) * 6 * dt + (320 - s.x) * 0.05 * dt;
       if (s.y < 40) {
-        s.y = R.range(320, 380);
+        s.y = R.range(280, 340);
         s.x = R.range(0, W);
       }
     }
   }
 
   private drawCut(g: Ctx) {
-    const A = this.A, t = this.t;
-    g.drawImage(A.sky, 0, 0);
+    const t = this.t;
+    const sky = image('stage1/sky'), moon = image('stage1/moon'), far = image('stage1/far');
+    g.drawImage(sky, 0, 0);
     if (this.cut === 0) {
-      const rise = Math.round(200 - 50 * clamp(t / 6, 0, 1));
-      g.drawImage(A.moon, W / 2 - A.moon.width / 2, rise - A.moon.height / 2);
-      g.drawImage(A.far, -200, 170);
-      g.drawImage(A.far, 1080 - 1280 - 200 + 1280, 170);
+      // the eclipse rises over the city
+      const rise = Math.round(150 - 60 * clamp(t / 6, 0, 1));
+      g.drawImage(moon, W / 2 - moon.width / 2, rise);
+      g.drawImage(far, -200, 170);
     } else if (this.cut === 1) {
-      g.drawImage(A.moon, 480, 30);
-      g.drawImage(A.belfry, 170, 40);
-      // the bell inside the arch swings slower and slower, then stops
-      const swing = Math.sin(t * 3) * 0.4 * Math.max(0, 1 - t / 3);
-      g.save();
-      g.translate(320, 128);
-      g.rotate(swing);
-      g.fillStyle = '#2A2318';
-      g.beginPath();
-      g.moveTo(-22, 46);
-      g.quadraticCurveTo(-20, 6, 0, 4);
-      g.quadraticCurveTo(20, 6, 22, 46);
-      g.closePath();
-      g.fill();
-      g.fillStyle = '#4A3A22';
-      g.fillRect(-22, 44, 44, 3);
-      g.restore();
+      // the belfry: its bell (boss bell sprite, pre-tilted frames) swings slower and stops
+      g.drawImage(moon, 470, 24);
+      g.drawImage(image('stage1/belfry'), 204, 46);
+      const swing = Math.sin(t * 3) * Math.max(0, 1 - t / 3);
+      const boss = sheet(SHEET.boss);
+      boss.draw(g, 'bell_c0', Math.round(2 + swing * 2), 320, 110);
+      g.drawImage(far, -500, 230);
     } else if (this.cut === 2) {
-      g.drawImage(A.moon, W / 2 - A.moon.width / 2, 40);
-      g.drawImage(A.far, -400, 200);
-      for (const s of this.souls) {
-        g.fillStyle = Math.sin(t * 4 + s.ph) > 0 ? '#BFF4FF' : '#59B7C9';
-        g.fillRect(Math.round(s.x), Math.round(s.y), 2, 2);
-      }
+      g.drawImage(moon, W / 2 - moon.width / 2, 30);
+      g.drawImage(far, -400, 200);
+      const items = sheet(SHEET.items);
+      for (const s of this.souls) items.draw(g, 'mote', Math.floor(t * 4 + s.ph) % 2, s.x, s.y);
     } else {
-      g.drawImage(A.moon, W / 2 - A.moon.width / 2, 70);
-      g.drawImage(A.far, -600, 220);
-      const ids = ['seraphine', 'noctis', 'morgana'] as const;
-      ids.forEach((id, i) => {
-        const c = ART.heroCard[id];
-        const x = Math.round(-130 + clamp(t / 5, 0, 1) * 300 + i * 120 - i * 40);
-        const y = Math.round(150 + i * 40 - Math.sin(t + i) * 3);
-        g.drawImage(c, x, y);
+      g.drawImage(moon, W / 2 - moon.width / 2, 40);
+      g.drawImage(far, -600, 220);
+      HEROES.forEach((id, i) => {
+        const hs = sheet(SHEET.hero(id));
+        const x = Math.round(-60 + clamp(t / 5, 0, 1) * 300 + i * 70);
+        const y = Math.round(150 + i * 36 - Math.sin(t + i) * 2);
+        hs.draw(g, 'fly', hs.index('fly', t + i * 0.13), x, y);
       });
     }
   }
 
   render() {
-    const r = G.r;
-    this.drawCut(r.wctx);
-    r.presentWorld();
-    const ctx = r.ctx;
-    ctx.save();
-    r.clipView();
-    r.worldTransform();
-    ctx.globalCompositeOperation = 'lighter';
-    ctx.globalAlpha = 0.5;
-    const mx = this.cut === 1 ? 480 + 62 : W / 2, my = this.cut === 0 ? 200 - 50 * clamp(this.t / 6, 0, 1) : this.cut === 1 ? 92 : this.cut === 2 ? 102 : 132;
-    ctx.drawImage(ART.glow.red, mx - 120, my - 120, 240, 240);
-    if (this.cut === 2) {
-      ctx.globalAlpha = 0.4;
-      for (const s of this.souls) ctx.drawImage(ART.glow.cyan, s.x - 6, s.y - 6, 12, 12);
-    }
-    ctx.restore();
-
-    r.uiTransform();
-    if (this.fadeT > 0) {
-      ctx.fillStyle = `rgba(5,5,8,${this.fadeT / 0.6})`;
-      ctx.fillRect(0, 0, 1920, 1080);
-    }
+    const r = G.r, g = r.wctx;
+    this.drawCut(g);
+    if (this.fadeT > 0) ditherFill(g, 0, 0, W, H, Math.round((this.fadeT / 0.6) * 16), PAL.N0);
     const c = CUTS[this.cut];
-    text(r, c.chapter, 56, 48, { size: 21, font: 'serif', weight: 600, spacing: 4, color: C.gold });
-    ctx.fillStyle = 'rgba(17,18,23,0.8)';
-    ctx.fillRect(0, 828, 1920, 204);
-    ctx.fillStyle = C.gold;
-    ctx.fillRect(0, 828, 1920, 1);
-    text(r, c.line.slice(0, this.typed), 960, 890, { size: 30, font: 'serif', weight: 600, align: 'center', color: C.ivory });
-    if (this.typed >= c.line.length) text(r, '▼', 1830, 990 + Math.round(Math.sin(this.t * 8) * 4), { size: 18, color: C.gold });
-    text(r, 'Next ▶  ENTER', 1700, 990, { size: 21, align: 'right', color: C.sub });
-    text(r, 'Skip: ESC 1초 길게', 1700, 1020, { size: 18, align: 'right', color: C.sub });
+    ptext(g, c.chapter, 18, 14, { font: 'G11', color: PAL.G3, outline: PAL.N0 });
+    g.fillStyle = PAL.N1;
+    g.fillRect(0, 276, W, 68);
+    g.fillStyle = PAL.N4;
+    g.fillRect(0, 276, W, 1);
+    ptext(g, c.line.slice(0, this.typed), W / 2, 294, { font: 'G11', color: PAL.B5, align: 'center' });
+    if (this.typed >= c.line.length && Math.floor(this.t * 3) % 2 === 0) sheet(SHEET.hud).draw(g, 'cursor', 0, 610, 330);
+    ptext(g, 'ENTER 다음 · ESC 1초 길게 건너뛰기', W - 34, 326, { font: 'G9', color: PAL.N7, align: 'right' });
     if (this.skipHold > 0) {
-      ctx.strokeStyle = C.gold;
-      ctx.lineWidth = 3;
-      ctx.beginPath();
-      ctx.arc(1750, 1026, 12, -Math.PI / 2, -Math.PI / 2 + TAU * clamp(this.skipHold, 0, 1));
-      ctx.stroke();
+      g.fillStyle = PAL.G2;
+      g.fillRect(W - 140, 340, Math.round(106 * clamp(this.skipHold, 0, 1)), 1);
     }
-    // progress dots
     for (let i = 0; i < CUTS.length; i++) {
-      ctx.fillStyle = i === this.cut ? C.gold : C.empty;
-      ctx.fillRect(900 + i * 36, 1000, 20, 4);
+      g.fillStyle = i === this.cut ? PAL.G2 : PAL.N3;
+      g.fillRect(W / 2 - 30 + i * 16, 330, 8, 2);
     }
+    r.presentWorld();
   }
 }

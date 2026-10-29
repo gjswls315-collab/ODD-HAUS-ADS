@@ -45,6 +45,8 @@ export interface DrawOpts {
   add?: boolean;
   /** 0..16: ordered-dither visibility (fade without translucency); 16 = solid */
   dither?: number;
+  /** draw as a flat near-black silhouette (unrevealed entries, shadows) */
+  shadow?: boolean;
 }
 
 let scratch: [HTMLCanvasElement, Ctx] | null = null;
@@ -53,6 +55,7 @@ export class Sheet {
   readonly frames: Frame[] = [];
   readonly tags = new Map<string, Tag>();
   private whiteImg: HTMLCanvasElement | null = null;
+  private shadowImg: HTMLCanvasElement | null = null;
   constructor(readonly key: string, readonly img: CanvasImageSource & { width: number; height: number }, json: AseJson | null, readonly missing = false) {
     if (!json) {
       this.frames.push({ x: 0, y: 0, w: img.width, h: img.height, ox: 0, oy: 0, dur: 0.1, pts: { pivot: [Math.floor(img.width / 2), Math.floor(img.height / 2)] } });
@@ -136,7 +139,7 @@ export class Sheet {
       if (!scratch || scratch[0].width < f.w || scratch[0].height < f.h) scratch = makeCanvas(Math.max(f.w, scratch?.[0].width ?? 0), Math.max(f.h, scratch?.[0].height ?? 0));
       const [sc, sg] = scratch;
       sg.clearRect(0, 0, sc.width, sc.height);
-      sg.drawImage(o.flash ? this.white() : this.img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
+      sg.drawImage(o.flash ? this.white() : o.shadow ? this.shadow() : this.img, f.x, f.y, f.w, f.h, 0, 0, f.w, f.h);
       ditherMask(sg, f.w, f.h, o.dither);
       const px = f.pts.pivot;
       const dx = Math.round(x - px[0] + f.ox), dy = Math.round(y - px[1] + f.oy);
@@ -146,7 +149,7 @@ export class Sheet {
       g.globalAlpha = prevA;
       return;
     }
-    const img = o.flash ? this.white() : this.img;
+    const img = o.flash ? this.white() : o.shadow ? this.shadow() : this.img;
     const px = f.pts.pivot;
     let dx = Math.round(x - px[0] + f.ox), dy = Math.round(y - px[1] + f.oy);
     const prevA = g.globalAlpha, prevC = g.globalCompositeOperation;
@@ -163,17 +166,21 @@ export class Sheet {
     g.globalAlpha = prevA;
     g.globalCompositeOperation = prevC;
   }
-  /** White silhouette of the whole sheet, derived once (hit flash). */
+  /** Bone-white silhouette of the whole sheet, derived once (hit flash). */
   white() {
-    if (!this.whiteImg) {
-      const [c, g] = makeCanvas(this.img.width, this.img.height);
-      g.drawImage(this.img, 0, 0);
-      g.globalCompositeOperation = 'source-in';
-      g.fillStyle = '#F2EBDD';
-      g.fillRect(0, 0, c.width, c.height);
-      this.whiteImg = c;
-    }
-    return this.whiteImg;
+    return (this.whiteImg ??= this.silhouette('#F2EBDD'));
+  }
+  /** Near-black silhouette (palette N0). */
+  shadow() {
+    return (this.shadowImg ??= this.silhouette('#07080B'));
+  }
+  private silhouette(color: string) {
+    const [c, g] = makeCanvas(this.img.width, this.img.height);
+    g.drawImage(this.img, 0, 0);
+    g.globalCompositeOperation = 'source-in';
+    g.fillStyle = color;
+    g.fillRect(0, 0, c.width, c.height);
+    return c;
   }
 }
 
@@ -205,6 +212,9 @@ export function data<T>(key: string): T | null {
 }
 export function fontUrl(name: string) {
   return URLS[ROOT + 'fonts/' + name + '.woff2'];
+}
+export function loadedSheets() {
+  return [...sheets.entries()].filter(([, s]) => !s.missing).map(([k]) => k).sort();
 }
 export function missingAssets() {
   return [...missingLog];

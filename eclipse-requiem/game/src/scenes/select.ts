@@ -1,9 +1,13 @@
 import { G, Scene } from '../core/app';
-import { C, H, W } from '../core/constants';
-import { clamp, ease, TAU } from '../core/math';
-import { Ctx, makeCanvas, rgba } from '../gfx/canvas';
-import { ART } from '../gfx/sprites';
-import { keyHints, panel, sigil, text } from '../gfx/ui';
+import { H, W } from '../core/constants';
+import { clamp, ease } from '../core/math';
+import { sheet } from '../gfx/assets';
+import { Ctx, makeCanvas } from '../gfx/canvas';
+import { shade } from '../gfx/dither';
+import { PAL } from '../gfx/palette';
+import { PFont, ptext } from '../gfx/pixeltext';
+import { SHEET } from '../gfx/sprites';
+import { keyHints } from '../gfx/ui';
 import { CHARS } from '../game/defs';
 import type { HitCircle, Target } from '../game/world';
 import { World } from '../game/world';
@@ -14,34 +18,21 @@ import { TitleScene } from './title';
 
 // Character select (docs/01 SCR-04, wireframe WF-2). The shot preview runs the real weapon code.
 
-/** Training dummy for the shot preview: infinite HP, shows hit sparks. */
+/** Training target for the shot preview (a grave cross from the stage set): infinite HP, shows hit sparks. */
 class Dummy implements Target {
   alive = true;
   isBoss = false;
-  x = 250;
+  x = 160;
   y = 180;
   constructor(private w: World) {}
   hitCircles(): HitCircle[] {
     return [{ x: this.x, y: this.y, r: 14, mul: 1 }];
   }
   takeDamage() {
-    this.w.fx.spark(this.x - 8, this.y, 1, ['#FFFFFF', this.w.ch.color], 50, { life: 0.2 });
+    if (Math.random() < 0.4) this.w.fx.hit(this.x - 8 + Math.random() * 6, this.y - 8 + Math.random() * 16);
   }
   draw(g: Ctx) {
-    const x = this.x, y = this.y;
-    g.fillStyle = '#3A2E22';
-    g.fillRect(x - 1, y - 18, 3, 40);
-    g.fillRect(x - 12, y - 10, 25, 3);
-    g.fillStyle = '#8A7A5A';
-    g.beginPath();
-    g.arc(x, y, 9, 0, TAU);
-    g.fill();
-    g.fillStyle = '#B3263B';
-    g.beginPath();
-    g.arc(x, y, 5, 0, TAU);
-    g.fill();
-    g.fillStyle = '#E9E1D3';
-    g.fillRect(x - 1, y - 1, 2, 2);
+    sheet(SHEET.fx).draw(g, 'gravecross', 0, this.x, this.y + 27);
   }
 }
 
@@ -117,9 +108,9 @@ export class SelectScene implements Scene {
     }
     if (inp.clicked) {
       const m = uiMouse();
-      if (m.x < 620 && m.y < 700) this.change(-1);
-      else if (m.x > 1300 && m.y < 700) this.change(1);
-      else if (m.x >= 660 && m.x <= 1260 && m.y < 760) this.confirm();
+      if (m.x < 720 && m.y < 620) this.change(-1);
+      else if (m.x > 1200 && m.y < 620) this.change(1);
+      else if (m.x >= 720 && m.x <= 1200 && m.y < 620) this.confirm();
     }
     if (inp.confirm) this.confirm();
     if (inp.back && !G.scenes.busy) {
@@ -163,132 +154,112 @@ export class SelectScene implements Scene {
     G.audio.muted = false;
   }
 
+  private t2(g: Ctx, str: string, x: number, y: number, color: string, font: PFont = 'S', o: { align?: 'left' | 'center' | 'right'; scale?: number } = {}) {
+    return ptext(g, str, x, y, { font, color, align: o.align, scale: o.scale, outline: PAL.N0 });
+  }
+
   render() {
     const r = G.r, g = r.wctx, ch = CHARS[this.idx];
-    this.bg.draw(g, { tint: ch.color, tintA: 0.08 });
-    // side cards and hero in pixel space
-    const sideIdx = [(this.idx + 2) % 3, (this.idx + 1) % 3];
+    this.bg.draw(g);
+    shade(g, 0, 0, W, H, 0.5);
     const k = ease.outCubic(this.switchT);
     const conf = this.confirmT >= 0 ? clamp(this.confirmT / 0.8, 0, 1) : 0;
-    g.save();
-    g.globalAlpha = 0.55;
-    g.filter = 'saturate(0.6) brightness(0.55)';
-    g.drawImage(ART.heroCard[CHARS[sideIdx[0]].id], 150 - 61, 140 - 61);
-    g.drawImage(ART.heroCard[CHARS[sideIdx[1]].id], 490 - 61, 140 - 61);
-    g.restore();
-    g.filter = 'none';
-    const hero = ART.heroKey[ch.id];
-    const off = Math.round((1 - k) * 40 * this.dir);
-    g.drawImage(hero, Math.round(320 - hero.width / 2 + off), Math.round(150 - hero.height / 2 + Math.sin(this.t * 1.6) * 2));
-    r.presentWorld();
-    const ctx = r.ctx;
-    ctx.save();
-    r.clipView();
-    r.worldTransform();
-    ctx.globalCompositeOperation = 'lighter';
-    this.bg.drawGlow(ctx, ART.glow.red);
-    ctx.globalAlpha = 0.35 + 0.15 * Math.sin(this.t * 2);
-    ctx.drawImage(ART.glow[ch.glow], 320 - 120, 150 - 110, 240, 220);
-    if (conf > 0) {
-      ctx.globalAlpha = (1 - conf) * 1.2;
-      ctx.drawImage(ART.glow.white, 320 - 200, 150 - 200, 400, 400);
-    }
-    ctx.restore();
+    this.t2(g, 'CHOOSE YOUR REQUIEM', W / 2, 8, PAL.B5, 'S', { align: 'center', scale: 2 });
+    this.t2(g, '당신의 진혼곡을 선택하라', W / 2, 26, PAL.N8, 'G9', { align: 'center' });
 
-    r.uiTransform();
-    // sigil behind hero
-    ctx.save();
-    ctx.globalAlpha = 0.25 + conf * 0.5;
-    sigil(ctx, ch.sigil, 960, 440, 240 * (1 + conf * 0.6), ch.color, this.t * 0.1);
-    ctx.restore();
-    text(r, 'CHOOSE YOUR REQUIEM', 960, 40, { size: 48, font: 'display', weight: 700, align: 'center', spacing: 12, color: C.ivory, glow: 'rgba(0,0,0,0.9)', glowBlur: 10 });
-    text(r, '당신의 진혼곡을 선택하라', 960, 104, { size: 30, font: 'serif', align: 'center', spacing: 6, color: rgba(C.ivory, 0.8) });
-    // side card frames
-    for (const [i, cx] of [[0, 300], [1, 1320]] as [number, number][]) {
-      const c = CHARS[sideIdx[i]];
-      ctx.strokeStyle = '#8A8F99';
-      ctx.lineWidth = 3;
-      ctx.globalAlpha = 0.6;
-      ctx.strokeRect(cx + 1.5, 211.5, 297, 417);
-      ctx.globalAlpha = 1;
-      text(r, c.name, cx + 150, 640, { size: 24, font: 'display', weight: 700, align: 'center', spacing: 4, color: C.sub });
-      text(r, c.nameKr, cx + 150, 672, { size: 18, font: 'serif', align: 'center', color: C.sub });
-    }
-    // hero frame
-    ctx.strokeStyle = ch.color;
-    ctx.lineWidth = 3;
-    ctx.shadowColor = rgba(ch.color, 0.6);
-    ctx.shadowBlur = 20 * r.s;
-    ctx.strokeRect(661.5, 141.5, 597, 597);
-    ctx.shadowBlur = 0;
-    // arrows
-    const pl = 1 + (this.dir < 0 ? 0.3 * (1 - this.switchT) : 0), pr = 1 + (this.dir > 0 ? 0.3 * (1 - this.switchT) : 0);
-    text(r, '◀', 240, 420, { size: 36 * pl, align: 'center', baseline: 'middle', color: C.gold });
-    text(r, '▶', 1680, 420, { size: 36 * pr, align: 'center', baseline: 'middle', color: C.gold });
+    // portraits: the selected one in front and lit, the others pushed back with a dither
+    const port = sheet(SHEET.portraits), hud = sheet(SHEET.hud);
+    const slots = [-1, 0, 1].map((d) => (this.idx + d + CHARS.length) % CHARS.length);
+    slots.forEach((ci, si) => {
+      const c = CHARS[ci], sel = si === 1;
+      const x = 320 + (si - 1) * 150 + Math.round((1 - k) * 30 * this.dir) * (sel ? 1 : 0);
+      const y = 196 + (sel ? Math.round(Math.sin(this.t * 1.6) * 1) : 6);
+      port.draw(g, c.id, 0, x, y, { flash: sel && conf > 0 && conf < 0.2 });
+      if (!sel) port.draw(g, c.id, 0, x, y, { shadow: true, alpha: 0.62 });
+      this.t2(g, c.name, x, 202, sel ? c.color : PAL.N6, 'S', { align: 'center' });
+    });
+    const cf = Math.floor(this.t * 3) % 2;
+    hud.draw(g, 'cursor', cf, 236, 120, { flipX: true });
+    hud.draw(g, 'cursor', cf, 404, 120);
 
-    // info panel
-    panel(r, 56, 760, 560, 230, { style: 'menu', alpha: 0.88, accent: ch.color });
-    text(r, ch.name, 80, 776, { size: 48, font: 'display', weight: 700, spacing: 4, color: ch.color });
-    text(r, `${ch.nameKr}  ·  ${ch.titleKr}`, 82, 834, { size: 21, font: 'serif', weight: 600, color: C.ivory });
-    const info: [string, string][] = [['Role', `${ch.roleKr} · ${ch.role}`], ['Basic', ch.basic], ['Charge', ch.charge], ['Bomb', `${ch.bomb} · ${ch.bombEn}`]];
+    // info (left)
+    const y0 = 216;
+    this.panel(g, 8, y0, 210, 124, ch.color);
+    this.t2(g, ch.name, 16, y0 + 6, ch.color, 'S', { scale: 2 });
+    this.t2(g, ch.nameKr + ' · ' + ch.titleKr, 16, y0 + 22, PAL.B4, 'G9');
+    const info: [string, string][] = [['ROLE', ch.roleKr + ' · ' + ch.role], ['SHOT', ch.basic], ['CHARGE', ch.charge], ['BOMB', ch.bomb]];
     info.forEach(([a, b], i) => {
-      text(r, a, 82, 872 + i * 28, { size: 18, font: 'display', weight: 700, color: C.gold });
-      text(r, b, 180, 870 + i * 28, { size: 21, color: C.ivory, maxWidth: 420 });
+      this.t2(g, a, 16, y0 + 42 + i * 14, PAL.N7);
+      this.t2(g, b, 62, y0 + 40 + i * 14, PAL.B4, 'G9');
     });
-    // preview panel
-    panel(r, 650, 760, 620, 230, { style: 'menu', alpha: 0.88, accent: ch.color });
+    this.t2(g, ch.bombEn, 62, y0 + 98, PAL.N7);
+
+    // live weapon preview (centre): the real player/shot code firing at a target, at game scale
+    this.panel(g, 224, y0, 196, 124, ch.color);
     TABS.forEach((tb, i) => {
-      const x = 690 + i * 120;
-      ctx.fillStyle = i === this.tab ? rgba(ch.color, 0.35) : 'rgba(0,0,0,0)';
-      ctx.fillRect(x - 10, 774, 108, 30);
-      text(r, tb, x + 44, 789, { size: 18, font: 'display', weight: 700, align: 'center', baseline: 'middle', color: i === this.tab ? C.ivory : C.sub });
-    });
-    text(r, '↓ 탭 전환 · 3초 자동', 1250, 789, { size: 18, align: 'right', baseline: 'middle', color: C.sub });
-    this.pw.drawWorld(this.prevBg());
-    ctx.imageSmoothingEnabled = false;
-    // crop 300x75 logical around the preview lane, shown at 2 UI px per pixel (600x150)
-    ctx.fillStyle = '#08080C';
-    ctx.fillRect(660, 820, 600, 150);
-    ctx.drawImage(this.pc, 0, 142, 300, 75, 660, 820, 600, 150);
-    ctx.strokeStyle = rgba(ch.color, 0.6);
-    ctx.lineWidth = 2;
-    ctx.strokeRect(660, 820, 600, 150);
-    // stats panel
-    panel(r, 1300, 760, 564, 230, { style: 'menu', alpha: 0.88, accent: ch.color });
-    const names = ['HP', 'SPEED', 'POWER', 'RANGE'];
-    names.forEach((n, i) => {
-      const y = 784 + i * 32;
-      text(r, n, 1330, y, { size: 18, font: 'display', weight: 700, color: C.sub });
-      const val = ch.stats[i];
-      for (let s = 0; s < 10; s++) {
-        const lit = s < val && this.statT > s * 0.03;
-        ctx.fillStyle = lit ? ch.color : C.empty;
-        ctx.fillRect(1440 + s * 21, y + 3, 18, 12);
+      const x = 236 + i * 58;
+      const on = i === this.tab;
+      this.t2(g, tb, x, y0 + 6, on ? PAL.B5 : PAL.N6);
+      if (on) {
+        g.fillStyle = ch.color;
+        g.fillRect(x, y0 + 15, tb.length * 6 - 1, 1);
       }
     });
-    text(r, 'DIFFICULTY', 1330, 916, { size: 18, font: 'display', weight: 700, color: C.sub });
-    text(r, '★'.repeat(ch.difficulty) + '☆'.repeat(3 - ch.difficulty) + '  ' + ch.difficultyLabel, 1460, 914, { size: 21, color: C.gold });
-    text(r, ch.tip, 1330, 950, { size: 21, color: C.ivory, maxWidth: 520 });
+    this.pw.drawWorld(this.prevBg());
+    g.drawImage(this.pc, 0, 134, 192, 98, 226, y0 + 22, 192, 98);
+    this.t2(g, '↓', 410, y0 + 6, PAL.N6);
+
+    // stats (right)
+    this.panel(g, 426, y0, 206, 124, ch.color);
+    const pipF = ch.id === 'seraphine' ? 1 : ch.id === 'noctis' ? 2 : 3;
+    ['HP', 'SPEED', 'POWER', 'RANGE'].forEach((n, i) => {
+      const y = y0 + 8 + i * 13;
+      this.t2(g, n, 434, y, PAL.N7);
+      for (let s = 0; s < 10; s++) hud.draw(g, 'pip', s < ch.stats[i] && this.statT > s * 0.03 ? pipF : 0, 478 + s * 7, y + 3);
+    });
+    this.t2(g, 'DIFFICULTY', 434, y0 + 62, PAL.N7);
+    for (let i = 0; i < 3; i++) hud.draw(g, 'skull', 0, 502 + i * 11, y0 + 65, { alpha: i < ch.difficulty ? 1 : 0.25 });
+    this.t2(g, ch.difficultyLabel, 540, y0 + 60, PAL.B4, 'G9');
+    this.t2(g, ch.tip, 434, y0 + 80, PAL.B4, 'G9');
+    this.t2(g, '"' + ch.line + '"', 434, y0 + 96, PAL.N8, 'G9');
+
     if (this.detail) {
-      panel(r, 1300, 540, 564, 200, { style: 'tome', alpha: 0.95, accent: ch.color });
+      this.panel(g, 426, 40, 206, 74, ch.color);
       const det = [
-        `이동속도 ${ch.speed} px/s (집중 60%, 차지 중 85%)`,
+        `이동속도 ${ch.speed} px/s (집중 60%)`,
         `HP ${ch.hp}칸 · 폭탄 무적 ${ch.bombInvuln}초`,
-        `차지 1단 0.6초 = 50 / 2단 1.2초 = 120 (× 파워 배율)`,
+        `차지 0.6초 = 50 / 1.2초 = 120`,
         `기본 공격 간격 ${ch.fireInterval}초 · DPS ${Math.round(ch.dpsMul * 100)}%`,
       ];
-      det.forEach((d, i) => text(r, d, 1330, 568 + i * 40, { size: 21, color: C.ivory }));
+      det.forEach((d, i) => this.t2(g, d, 434, 46 + i * 16, PAL.B4, 'G9'));
     }
-    if (conf > 0) text(r, `"${ch.line}"`, 960, 700, { size: 30, font: 'serif', weight: 600, align: 'center', color: C.ivory, alpha: clamp(conf * 3, 0, 1), glow: 'rgba(0,0,0,1)', glowBlur: 10 });
-    keyHints(r, 56, 1004, [['←/→', 'SELECT'], ['ENTER', 'CONFIRM'], ['ESC', 'BACK'], ['TAB', 'DETAIL']]);
+    if (conf > 0) {
+      shade(g, 0, 150, W, 30, clamp(conf * 3, 0, 1) * 0.7);
+      ptext(g, '"' + ch.line + '"', W / 2, 158, { font: 'G11', color: PAL.B5, align: 'center', alpha: clamp(conf * 3, 0, 1) });
+    }
+    r.presentWorld();
+    r.uiTransform();
+    keyHints(r, 24, 1038, [['←→', 'SELECT'], ['ENTER', 'CONFIRM'], ['ESC', 'BACK'], ['TAB', 'DETAIL']]);
+  }
+
+  private panel(g: Ctx, x: number, y: number, w: number, h: number, accent: string) {
+    g.fillStyle = PAL.N1;
+    g.fillRect(x, y, w, h);
+    g.fillStyle = PAL.N4;
+    g.fillRect(x, y, w, 1);
+    g.fillRect(x, y + h - 1, w, 1);
+    g.fillRect(x, y, 1, h);
+    g.fillRect(x + w - 1, y, 1, h);
+    g.fillStyle = accent;
+    g.fillRect(x, y, w, 1);
   }
 
   private prevBg() {
     const g = this.pg;
-    g.fillStyle = '#0D0C12';
+    g.fillStyle = PAL.N1;
     g.fillRect(0, 0, W, H);
-    g.fillStyle = '#16141D';
-    for (let x = 0; x < 300; x += 20) g.fillRect(x, 214, 10, 1);
+    g.fillStyle = PAL.N2;
+    for (let x = 0; x < 200; x += 8) g.fillRect(x, 222, 4, 1);
     return g;
   }
 }

@@ -1,27 +1,18 @@
 import { G } from './core/app';
 import { STEP } from './core/constants';
-import { buildArt } from './gfx/sprites';
+import { loadAssets, missingAssets } from './gfx/assets';
+import { loadFonts } from './gfx/pixeltext';
 import { IntroScene } from './scenes/intro';
 import { ArtSheetScene } from './scenes/artsheet';
 import { GameScene } from './scenes/game';
 import { HeroId } from './gfx/sprites';
 
-async function loadFonts() {
-  if (!document.fonts) return;
-  const faces = ['600 24px Cinzel', '700 24px Cinzel', '400 24px "Noto Serif KR"', '600 24px "Noto Serif KR"', '400 24px "Noto Sans KR"', '700 24px "Noto Sans KR"'];
-  const sample = 'ECLIPSE 일식의 진혼곡 가나다';
-  try {
-    await Promise.race([Promise.all(faces.map((f) => document.fonts.load(f, sample))), new Promise((r) => setTimeout(r, 2500))]);
-  } catch {
-    /* fall back to system fonts */
-  }
-}
-
 async function boot() {
   const canvas = document.getElementById('game') as HTMLCanvasElement;
   G.init(canvas);
-  await loadFonts();
-  buildArt();
+  // all graphics are image files under game/assets (see assets/README.md)
+  await Promise.all([loadAssets(), loadFonts()]);
+  if (missingAssets().length) console.warn('[assets] missing at boot', missingAssets());
   document.getElementById('boot')?.remove();
   canvas.focus();
 

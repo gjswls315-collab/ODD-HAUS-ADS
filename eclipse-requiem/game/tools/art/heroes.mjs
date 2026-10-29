@@ -116,8 +116,8 @@ function morgana({ phase = 0, tilt = 0, state = 'fly' }) {
   const sw = Math.sin((phase / 4) * Math.PI * 2), sw2 = Math.cos((phase / 4) * Math.PI * 2);
   const lid = state === 'cast' ? 1 : state === 'charge' ? 0.3 : 0;
   // veil trailing (behind)
-  R.poly([[-6, -15], [-14, -13 + sw], [-22, -9 + sw * 1.6], [-25, -3 + sw * 2], [-18, -5], [-10, -9], [-4, -11]], 'N2');
-  R.line([-6, -15], [-22, -9 + sw * 1.6], 'N4');
+  R.poly([[-6, -15], [-14, -13 + sw], [-22, -9 + sw * 1.6], [-25, -3 + sw * 2], [-18, -5], [-10, -9], [-4, -11]], 'N3');
+  R.line([-6, -15], [-22, -9 + sw * 1.6], 'N5');
   // chains under the coffin
   for (const [cx, k] of [[-14, 1], [10, -1]]) { for (let i = 0; i < 4; i++) R.dot(cx + i * 0.6 * sw * k, 9 + i * 2, 'N6'); }
   // coffin
@@ -129,14 +129,14 @@ function morgana({ phase = 0, tilt = 0, state = 'fly' }) {
   R.poly([[-15, 0], [-13, 0], [-13, 8], [-15, 8]], 'N6'); R.poly([[4, -1], [6, -1], [6, 8], [4, 8]], 'N6');
   R.dot(19, 4, 'N8');
   // dress draped over the coffin side
-  R.poly([[-14, -2], [-3, -3], [-1, 1], [-6, 5], [-16, 5]], 'N1'); R.line([-13, -2], [-4, -3], 'N3');
+  R.poly([[-14, -2], [-3, -3], [-1, 1], [-6, 5], [-16, 5]], 'N2'); R.line([-13, -2], [-4, -3], 'N4');
   // torso and head (lit from below by the lantern)
-  R.poly([[-11, -12], [-4, -13], [-2, -3], [-12, -2]], 'N2');
-  R.ell(-6, -15, 3.2, 3.2, 'N1'); R.poly([[-5, -16], [-2, -16], [-2, -12], [-5, -12]], 'B4'); R.dot(-3, -15, 'N2'); R.dot(-3, -12, 'V2');
-  R.poly([[-9, -17], [-3, -18], [-1, -16], [-7, -15]], 'N1'); // veil crown
+  R.poly([[-11, -12], [-4, -13], [-2, -3], [-12, -2]], 'N3');
+  R.ell(-6, -15, 3.2, 3.2, 'N2'); R.poly([[-5, -16], [-2, -16], [-2, -12], [-5, -12]], 'B4'); R.dot(-3, -15, 'N2'); R.dot(-3, -12, 'V2');
+  R.poly([[-9, -17], [-3, -18], [-1, -16], [-7, -15]], 'N2'); // veil crown
   // arm and staff toward the lantern
   const st = state === 'cast' ? -10 : 0;
-  R.poly([[-4, -9], [3, -8], [3, -6], [-4, -6]], 'N2'); R.dot(4, -7, 'B3');
+  R.poly([[-4, -9], [3, -8], [3, -6], [-4, -6]], 'N3'); R.dot(4, -7, 'B3');
   const tipX = 22, tipY = -15 + st;
   R.line([2, -5], [tipX, tipY], 'N6'); R.dot(tipX, tipY, 'N7');
   // lantern swinging on a short chain
@@ -149,6 +149,10 @@ function morgana({ phase = 0, tilt = 0, state = 'fly' }) {
   const s1 = [-2 + sw2 * 6, -20 + sw * 2], s2 = [-28 + sw * 3, -4 + sw2 * 2];
   R.dot(s1[0], s1[1], 'V3'); R.dot(s1[0] + 1, s1[1], 'V4'); R.dot(s1[0] - 1, s1[1] + 1, 'V1');
   R.dot(s2[0], s2[1], 'V2'); R.dot(s2[0] + 1, s2[1], 'V3');
+  // pearl rim (eclipse corona) on the top edges and lantern-green on the right of the dark robe, so the
+  // silhouette reads against the night sky
+  R.b.rim('M0', 't', (x, y, p) => p[0] + p[1] + p[2] < 200);
+  R.b.rim('V1', 'r', (x, y, p) => p[0] + p[1] + p[2] < 200);
   return R.b.selout();
 }
 

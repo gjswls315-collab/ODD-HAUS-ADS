@@ -2,7 +2,7 @@ import { H, W } from '../core/constants';
 import { fxRng as R } from '../core/math';
 import { data, image, sheet } from '../gfx/assets';
 import { Ctx, makeCanvas } from '../gfx/canvas';
-import { ditherFill, ditherMask } from '../gfx/dither';
+import { ditherMask, shade } from '../gfx/dither';
 
 // Stage parallax built from image layers (assets/stage1/*.png, layout in assets/stage1/stage.json).
 // Back layers are drawn behind actors, fog and foreground in front of them; enemy bullets always go on top.
@@ -174,16 +174,20 @@ export class StageBg {
   drawBack(g: Ctx) {
     for (const l of this.def.back) this.drawLayer(g, l);
     const dark = Math.min(0.7, (this._section === 'C' ? 0.25 : 0) + this.dim + this.userDim + this.tintA);
-    if (dark > 0.01) ditherFill(g, 0, 0, W, H, dark * 16, '#07080B');
+    if (dark > 0.01) shade(g, 0, 0, W, H, dark);
   }
 
-  drawFront(g: Ctx) {
+  drawFog(g: Ctx) {
     const f = this.def.fog;
     if (this.fogLevel > 0.02) {
       g.globalAlpha = Math.min(1, this.fogLevel);
       for (const b of f.bands) loop(g, image(f.images[b.image % f.images.length]), this.dist * b.factor + this.time * b.drift, b.y);
       g.globalAlpha = 1;
     }
+  }
+
+  drawFront(g: Ctx) {
+    this.drawFog(g);
     for (const l of this.def.front) this.drawLayer(g, l);
   }
 }
