@@ -1,0 +1,31 @@
+{
+  "_comment": "Stage 1 ASHEN OUTSKIRTS parallax layout. Coordinates are 640x360 logical pixels. factor = scroll speed relative to the play layer (1.0). tiles: image per section (A Ashen Cemetery, B Broken Causeway, C Veil of Black Fog, R rest, D Silenced Belfry). mode 'queue' swaps tiles as they scroll in from the right; 'fade' dither-dissolves the whole layer over 'fadeTime' seconds.",
+  "back": [
+    { "id": "sky", "image": "stage1/sky", "x": 0, "y": 0, "factor": 0 },
+    { "id": "clouds", "image": "stage1/clouds", "y": 16, "factor": 0.05, "drift": 3 },
+    { "id": "moon", "image": "stage1/moon", "x": 438, "y": 18, "factor": 0 },
+    { "id": "bolt" },
+    { "id": "far", "image": "stage1/far", "y": 152, "factor": 0.12 },
+    { "id": "landmark" },
+    { "id": "mid", "y": 160, "factor": 0.32, "mode": "fade", "fadeTime": 2.5,
+      "tiles": { "A": "stage1/mid_cemetery", "B": "stage1/mid_ravine", "C": "stage1/mid_cemetery", "R": "stage1/mid_ruins", "D": "stage1/mid_ruins" } },
+    { "id": "near", "y": 146, "factor": 0.62, "mode": "queue",
+      "tiles": { "A": "stage1/near_wall", "B": "stage1/near_bridge", "C": "stage1/near_wall", "R": "stage1/near_ruins", "D": "stage1/near_ruins" } },
+    { "id": "ground", "y": 316, "factor": 1.0, "mode": "queue",
+      "tiles": { "A": "stage1/ground_graves", "B": "stage1/ground_bridge", "C": "stage1/ground_graves", "R": "stage1/ground_rubble", "D": "stage1/ground_rubble" } }
+  ],
+  "fog": {
+    "images": ["stage1/fog_a", "stage1/fog_b"],
+    "bands": [
+      { "y": 196, "factor": 0.7, "drift": 4, "image": 1 },
+      { "y": 236, "factor": 0.9, "drift": 7, "image": 0 },
+      { "y": 268, "factor": 1.1, "drift": 11, "image": 1 }
+    ]
+  },
+  "front": [
+    { "id": "fore_top", "image": "stage1/fore_top", "y": 0, "factor": 1.4 },
+    { "id": "fore_bottom", "image": "stage1/fore_bottom", "y": 326, "factor": 1.4 }
+  ],
+  "landmark": { "image": "stage1/belfry", "broken": "stage1/belfry_broken", "y": 42, "restX": 300 },
+  "bolt": { "sheet": "stage1/bolt", "y": 10 }
+}

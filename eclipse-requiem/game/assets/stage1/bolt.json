@@ -1,0 +1,223 @@
+{
+ "frames": [
+  {
+   "filename": "white 0",
+   "frame": {
+    "x": 0,
+    "y": 0,
+    "w": 40,
+    "h": 170
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 40,
+    "h": 170
+   },
+   "sourceSize": {
+    "w": 40,
+    "h": 170
+   },
+   "duration": 40
+  },
+  {
+   "filename": "white 1",
+   "frame": {
+    "x": 41,
+    "y": 0,
+    "w": 40,
+    "h": 170
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 40,
+    "h": 170
+   },
+   "sourceSize": {
+    "w": 40,
+    "h": 170
+   },
+   "duration": 40
+  },
+  {
+   "filename": "white 2",
+   "frame": {
+    "x": 82,
+    "y": 0,
+    "w": 40,
+    "h": 170
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 40,
+    "h": 170
+   },
+   "sourceSize": {
+    "w": 40,
+    "h": 170
+   },
+   "duration": 40
+  },
+  {
+   "filename": "red 0",
+   "frame": {
+    "x": 123,
+    "y": 0,
+    "w": 40,
+    "h": 170
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 40,
+    "h": 170
+   },
+   "sourceSize": {
+    "w": 40,
+    "h": 170
+   },
+   "duration": 40
+  },
+  {
+   "filename": "red 1",
+   "frame": {
+    "x": 164,
+    "y": 0,
+    "w": 40,
+    "h": 170
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 40,
+    "h": 170
+   },
+   "sourceSize": {
+    "w": 40,
+    "h": 170
+   },
+   "duration": 40
+  },
+  {
+   "filename": "red 2",
+   "frame": {
+    "x": 205,
+    "y": 0,
+    "w": 40,
+    "h": 170
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 40,
+    "h": 170
+   },
+   "sourceSize": {
+    "w": 40,
+    "h": 170
+   },
+   "duration": 40
+  }
+ ],
+ "meta": {
+  "app": "eclipse-requiem tools/art (placeholder art, replace with final Aseprite export)",
+  "version": "1",
+  "image": "bolt.png",
+  "format": "RGBA8888",
+  "size": {
+   "w": 245,
+   "h": 170
+  },
+  "scale": "1",
+  "frameTags": [
+   {
+    "name": "white",
+    "from": 0,
+    "to": 2,
+    "direction": "forward"
+   },
+   {
+    "name": "red",
+    "from": 3,
+    "to": 5,
+    "direction": "forward"
+   }
+  ],
+  "slices": [
+   {
+    "name": "pivot",
+    "color": "#0000ffff",
+    "keys": [
+     {
+      "frame": 0,
+      "bounds": {
+       "x": 20,
+       "y": 0,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 1,
+      "bounds": {
+       "x": 20,
+       "y": 0,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 2,
+      "bounds": {
+       "x": 20,
+       "y": 0,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 3,
+      "bounds": {
+       "x": 20,
+       "y": 0,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 4,
+      "bounds": {
+       "x": 20,
+       "y": 0,
+       "w": 1,
+       "h": 1
+      }
+     },
+     {
+      "frame": 5,
+      "bounds": {
+       "x": 20,
+       "y": 0,
+       "w": 1,
+       "h": 1
+      }
+     }
+    ]
+   }
+  ]
+ }
+}
