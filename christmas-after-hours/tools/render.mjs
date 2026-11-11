@@ -50,7 +50,6 @@ const film = await page.evaluate(() => ({ ready: window.__film.ready, error: win
 if (!film.ready) { console.error('film failed to start:\n' + film.error); await browser.close(); server.close(); process.exit(1); }
 console.log(`ready in ${((Date.now() - t0) / 1000).toFixed(1)}s · character artwork: ${film.character ? 'loaded' : 'MISSING'} · ${film.shots.length} set-ups`);
 
-const canvas = page.locator('#film');
 async function still(t, file, type = 'jpeg') {
   await page.evaluate((tt) => window.__film.renderAt(tt), t);
   const data = await page.evaluate(([ty]) => document.getElementById('film').toDataURL(`image/${ty}`, 0.93), [type]);
@@ -107,5 +106,4 @@ if (cmd === 'check') {
 } else {
   console.log(`unknown command: ${cmd}`); code = 1;
 }
-void canvas;
 await browser.close(); server.close(); process.exit(code);

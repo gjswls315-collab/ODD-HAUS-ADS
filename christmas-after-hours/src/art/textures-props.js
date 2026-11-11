@@ -570,4 +570,3 @@ export function makePropTextures(ch) {
   T.endCard.generateMipmaps = false; T.endCard.minFilter = 1006; // LinearFilter
   return T;
 }
-export const _keep = [hatch];

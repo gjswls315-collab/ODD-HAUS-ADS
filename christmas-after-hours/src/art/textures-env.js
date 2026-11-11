@@ -1,7 +1,7 @@
 // Painted surfaces for the street and the shop shell. All drawn in code with the ink toolkit.
 import { PAL } from '../config.js';
-import { rng, lerp } from '../core/util.js';
-import { paint, canvas, toTexture, wash, ink, inkRect, inkCircle, hatch, text, wordmark, rgba, mix, FONT } from '../core/paint.js';
+import { rng } from '../core/util.js';
+import { canvas, toTexture, wash, ink, inkRect, inkCircle, hatch, text, wordmark, rgba, mix, FONT } from '../core/paint.js';
 
 const INK = PAL.black;
 
@@ -442,5 +442,3 @@ export function makeEnvTextures() {
 }
 
 export { woodCanvas, brickCanvas };
-// keep imports used by other modules tree-shake friendly
-export const _unused = [paint, lerp];

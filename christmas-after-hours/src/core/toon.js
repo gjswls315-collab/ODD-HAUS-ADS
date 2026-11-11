@@ -122,7 +122,7 @@ void main() {
   vec3 col = albedo * (amb + light);
 
   if (uSnow > 0.5) {
-    float sp = step(0.992, h31(floor(vW * 140.0) + floor(uTime * 6.0) * 0.0));
+    float sp = step(0.992, h31(floor(vW * 140.0)));
     col += sp * (light + amb) * 0.5;
   }
 
