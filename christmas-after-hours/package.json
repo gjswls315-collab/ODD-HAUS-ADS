@@ -10,7 +10,8 @@
     "preview": "vite preview --port 4173 --strictPort",
     "stills": "node tools/render.mjs stills",
     "render": "node tools/render.mjs video",
-    "check": "node tools/render.mjs check"
+    "check": "node tools/render.mjs check",
+    "test:ui": "node tools/ui-test.mjs"
   },
   "dependencies": {
     "three": "0.187.0"

@@ -92,7 +92,7 @@ async function boot() {
 
   // ---- transport
   const sound = new Sound();
-  const state = { t: 0, playing: false, wall: 0, base: 0, ended: false, recording: null };
+  const state = { t: 0, playing: false, wall: 0, base: 0, ended: false, recording: null, ticket: 0 };
   const now = () => performance.now() / 1000;
 
   function updateUi(look) {
@@ -103,21 +103,26 @@ async function boot() {
   }
   async function play(from = state.t) {
     if (from >= DURATION - 0.02) from = 0;
-    state.t = from; state.base = from; state.ended = false; state.playing = true;
-    state.wall = now() + LEAD;
+    // picture waits for the score to be scheduled, then both start from the same instant
+    const ticket = ++state.ticket;
+    state.playing = false; state.t = from; state.ended = false;
     ui.veil.classList.add('out');
+    updateUi(draw(from));
     const ok = await sound.play(from);
+    if (ticket !== state.ticket) return;                       // superseded by a newer play / seek / pause
+    state.base = from; state.wall = now() + LEAD; state.playing = true;
     if (ok === false) ui.hint.textContent = 'Sound is blocked until you interact with the page — click anywhere.';
-    else if (ok) { state.base = from; state.wall = now() + LEAD; ui.hint.textContent = character.present ? '' : 'Original character artwork not found — add public/assets/oddhaus-character.png'; }
+    else ui.hint.textContent = character.present ? '' : 'Original character artwork not found — add public/assets/oddhaus-character.png';
   }
   function pause() {
-    if (!state.playing) return;
+    state.ticket++;
+    if (!state.playing) { sound.stop(); return; }
     state.playing = false; sound.stop(); updateUi();
   }
   function seek(t) {
     const was = state.playing;
     state.t = clamp(t, 0, DURATION); state.ended = state.t >= DURATION;
-    if (was) play(state.t); else { sound.stop(); updateUi(draw(state.t)); }
+    if (was) play(state.t); else { state.ticket++; sound.stop(); updateUi(draw(state.t)); }
   }
   const toggle = () => (state.playing ? pause() : play());
 
@@ -210,6 +215,8 @@ async function boot() {
     info: () => ({ calls: renderer.info.render.calls, tris: renderer.info.render.triangles, lights: world.lights.length, size: [post.w, post.h] }),
     async wavBase64() { const b = await renderWav(); const buf = new Uint8Array(await b.arrayBuffer()); let s = ''; for (let i = 0; i < buf.length; i += 0x8000) s += String.fromCharCode.apply(null, buf.subarray(i, i + 0x8000)); return btoa(s); },
     play, pause, seek, state,
+    clock: () => (state.playing ? clamp(state.base + Math.max(0, now() - state.wall), 0, DURATION) : state.t),
+    audio: () => ({ state: sound.ctx ? sound.ctx.state : 'none', scheduled: !!sound.session, muted: sound.muted }),
   };
 }
 

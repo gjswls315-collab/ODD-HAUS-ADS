@@ -1,4 +1,24 @@
-# ODD HAUS — 50s brand film
+# ODD HAUS — brand films
+
+## Christmas After Hours (current)
+
+[`christmas-after-hours/`](christmas-after-hours/) — a 40-second interactive cinematic brand film for
+Christmas 2026, rendered live in the browser with Three.js and scored with the Web Audio API. It is built
+around the original black-and-white ODD HAUS character drawing, which appears only as flat print
+(poster, garment, record sleeve, end card) and is never animated. Start with
+[`christmas-after-hours/README.md`](christmas-after-hours/README.md); a rendered copy is at
+`christmas-after-hours/renders/odd-haus-christmas-after-hours.mp4`.
+
+```bash
+cd christmas-after-hours && npm install && npm run dev
+```
+
+## Earlier work (not used by the Christmas film)
+
+The folders below belong to an earlier, separate 50-second concept with different 3D characters.
+Nothing in `christmas-after-hours/` depends on them.
+
+### 50s film concept
 
 > NOTHING IS USELESS. EVERYONE NEEDS A HOME.
 

@@ -16,7 +16,7 @@ export function makeTimeline(world) {
   // p: camera position, l: look-at, fov in degrees. focus: 'look' or [from, to] metres. ap: aperture.
   const SHOTS = [
     // ---- 00:00 THE WINTER STREET
-    { t: 0, name: 'street / wide', sec: 'THE WINTER STREET', a: { p: [-13.6, 1.55, 4.7], l: [-3.0, 2.7, 1.4], fov: 36 }, b: { p: [-11.6, 1.55, 4.5], l: [-2.4, 2.7, 1.2], fov: 36 }, ap: 0.35, shake: 1.0 },
+    { t: 0, name: 'street / wide', sec: 'THE WINTER STREET', a: { p: [-13.8, 1.55, 5.4], l: [1.5, 2.7, 3.7], fov: 36 }, b: { p: [-11.9, 1.55, 5.2], l: [2.0, 2.7, 3.5], fov: 36 }, ap: 0.35, shake: 1.0 },
     { t: 8 * E, name: 'street / lamp', a: { p: [-8.7, 2.25, 3.9], l: [-6.2, 3.85, 1.85], fov: 27 }, b: { p: [-8.4, 2.3, 3.75], l: [-6.2, 3.95, 1.85], fov: 27 }, ap: 1.1, shake: 0.8 },
     { t: 11 * E, name: 'street / sign', a: { p: [-5.6, 1.6, 3.5], l: [-1.9, 3.25, 0.2], fov: 30 }, b: { p: [-4.3, 1.6, 3.7], l: [-0.9, 3.3, 0.2], fov: 30 }, ap: 0.6, shake: 1.0 },
     // ---- 00:05 THE STORE

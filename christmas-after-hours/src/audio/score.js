@@ -11,9 +11,9 @@ const mtof = (m) => 440 * Math.pow(2, (m - 69) / 12);
 // brick and glass; inside it opens up; the door shuts at 33.67.
 const MIX = {
   wallHz: [[0, 300], [5, 360], [8.6, 560], [9.94, 820], [10.0, 15000], [33.6, 15000], [33.74, 430], [37.2, 380], [37.36, 2400], [40, 900]],
-  music: [[0, 0.5], [5, 0.62], [9.94, 0.8], [10.0, 0.92], [33.6, 0.92], [33.74, 0.62], [37.25, 0.44], [37.36, 0.72], [39.0, 0.5], [39.9, 0.0]],
-  wind: [[0, 0], [0.7, 0.5], [5, 0.42], [9.94, 0.3], [10.0, 0.03], [33.6, 0.03], [33.76, 0.4], [37.0, 0.46], [38.6, 0.2], [39.9, 0]],
-  city: [[0, 0], [0.8, 0.34], [9.94, 0.26], [10.0, 0.022], [33.6, 0.022], [33.76, 0.3], [37.3, 0.3], [39.0, 0.1], [39.9, 0]],
+  music: [[0, 0.8], [5, 1.0], [9.94, 1.25], [10.0, 0.92], [33.6, 0.92], [33.74, 0.85], [37.25, 0.6], [37.36, 0.8], [39.0, 0.55], [39.9, 0.0]],
+  wind: [[0, 0], [0.7, 0.8], [5, 0.7], [9.94, 0.5], [10.0, 0.05], [33.6, 0.05], [33.76, 0.66], [37.0, 0.74], [38.6, 0.32], [39.9, 0]],
+  city: [[0, 0], [0.8, 0.55], [9.94, 0.42], [10.0, 0.035], [33.6, 0.035], [33.76, 0.5], [37.3, 0.5], [39.0, 0.16], [39.9, 0]],
   crackle: [[0, 0.5], [9.94, 0.6], [10.0, 0.42], [33.6, 0.42], [33.74, 0.6], [37.36, 0.5], [39.9, 0.25]],
   room: [[0, 0], [9.94, 0], [10.0, 1], [33.6, 1], [33.74, 0], [40, 0]],
 };
@@ -86,7 +86,10 @@ export function buildScore(ctx, out, offset = 0, lead = 0.08) {
   // ---- buses
   const session = G(1); session.connect(out);
   const comp = ctx.createDynamicsCompressor(); comp.threshold.value = -16; comp.ratio.value = 3; comp.attack.value = 0.008; comp.release.value = 0.22;
-  const master = G(0.95); master.connect(comp); comp.connect(session);
+  // gentle glue compression, then a soft clipper as a safety ceiling: nothing can hit 0 dBFS
+  const ceiling = ctx.createWaveShaper(); ceiling.curve = satCurve(1.15); ceiling.oversample = '2x';
+  const trim = G(0.86);
+  const master = G(0.5); master.connect(comp); comp.connect(ceiling); ceiling.connect(trim); trim.connect(session);
   const wall = F('lowpass', 15000, 0.5); const wall2 = F('lowpass', 15000, 0.5);
   const musicGain = G(0.9);
   wall.connect(wall2); wall2.connect(musicGain); musicGain.connect(master);
@@ -117,7 +120,7 @@ export function buildScore(ctx, out, offset = 0, lead = 0.08) {
   const kick = ({ t, v }) => {
     const o = ctx.createOscillator(), g = G(0); o.type = 'sine';
     const T = at(t); o.frequency.setValueAtTime(128, T); o.frequency.exponentialRampToValueAtTime(46, T + 0.1);
-    envAD(g.gain, t, 0.95 * v, 0.003, 0.3); o.connect(g); g.connect(drums); o.start(T); o.stop(T + 0.4); live.push(o);
+    envAD(g.gain, t, 0.8 * v, 0.003, 0.3); o.connect(g); g.connect(drums); o.start(T); o.stop(T + 0.4); live.push(o);
     const c = G(0), hp = F('lowpass', 2200); envAD(c.gain, t, 0.22 * v, 0.001, 0.02); burst(t, 0.03, hp); hp.connect(c); c.connect(drums);
   };
   const snare = ({ t, v }) => {
@@ -149,7 +152,7 @@ export function buildScore(ctx, out, offset = 0, lead = 0.08) {
   };
   const bass = ({ t, n, dur, v }) => {
     const f = mtof(n), T = at(t), end = T + dur;
-    const g = G(0); g.gain.setValueAtTime(0.0001, T); g.gain.linearRampToValueAtTime(0.5 * v, T + 0.012); g.gain.exponentialRampToValueAtTime(0.3 * v, T + 0.2); g.gain.setValueAtTime(0.3 * v, end); g.gain.exponentialRampToValueAtTime(0.0001, end + 0.09);
+    const g = G(0); g.gain.setValueAtTime(0.0001, T); g.gain.linearRampToValueAtTime(0.3 * v, T + 0.012); g.gain.exponentialRampToValueAtTime(0.19 * v, T + 0.2); g.gain.setValueAtTime(0.19 * v, end); g.gain.exponentialRampToValueAtTime(0.0001, end + 0.09);
     const o = ctx.createOscillator(); o.type = 'sine'; o.frequency.setValueAtTime(f * 1.04, T); o.frequency.exponentialRampToValueAtTime(f, T + 0.04);
     const o2 = ctx.createOscillator(); o2.type = 'sawtooth'; o2.frequency.value = f; const lp = F('lowpass', 380, 1.2), g2 = G(0.28);
     o.connect(g); o2.connect(lp); lp.connect(g2); g2.connect(g); g.connect(music);
