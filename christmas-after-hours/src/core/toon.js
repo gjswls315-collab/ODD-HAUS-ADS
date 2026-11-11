@@ -12,8 +12,8 @@ export const shared = {
   uTime: { value: 0 },
   uLightPos: { value: Array.from({ length: NL }, () => new THREE.Vector4(0, -100, 0, 0)) }, // w: 0 street, 1 interior
   uLightCol: { value: Array.from({ length: NL }, () => new THREE.Vector4(0, 0, 0, 1)) },    // rgb * intensity, a: range
-  uAmbExt: { value: new THREE.Color('#27384f') },
-  uAmbInt: { value: new THREE.Color('#4a3524') },
+  uAmbExt: { value: new THREE.Color('#33476a') },
+  uAmbInt: { value: new THREE.Color('#2c2118') },
   uSpill: { value: new THREE.Color('#D79A57') },   // window glow colour * store level
   uFogCol: { value: new THREE.Color('#1b2a3d') },
   uFogDen: { value: new THREE.Vector2(0.03, 0.006) }, // street, interior
@@ -38,9 +38,13 @@ void main() {
     p += normal * w * uSway * k;
     p.x += sin(uTime * 0.8 + uSwayPhase) * uSway * 0.35 * k;
   #endif
-  vec4 wp = modelMatrix * vec4(p, 1.0);
+  mat4 mm = modelMatrix;
+  #ifdef USE_INSTANCING
+    mm = modelMatrix * instanceMatrix;
+  #endif
+  vec4 wp = mm * vec4(p, 1.0);
   vW = wp.xyz;
-  vN = normalize(mat3(modelMatrix) * normal);
+  vN = normalize(mat3(mm) * normal);
   gl_Position = projectionMatrix * viewMatrix * wp;
 }`;
 
@@ -127,6 +131,8 @@ void main() {
   // fog: thick, low and cold in the street; a faint warm haze inside
   float dist = length(cameraPosition - vW);
   float camIn = step(cameraPosition.z, 0.06);
+  // looking into the shop from the street: only the stretch of the ray outside the glass is in the cold air
+  if (camIn < 0.5 && interior > 0.5) dist *= clamp(cameraPosition.z / max(cameraPosition.z - vW.z, 1e-3), 0.0, 1.0);
   float den = mix(uFogDen.x, uFogDen.y, interior * camIn);
   float hgt = mix(exp(-max(vW.y, 0.0) * 0.10) * 0.55 + 0.45, 1.0, interior);
   float swirl = 0.82 + 0.36 * vnoise(vec3(vW.x * 0.22 + uTime * 0.05, vW.y * 0.3, vW.z * 0.22));

@@ -85,7 +85,7 @@ export function wash(g, x, y, w, h, color, { seed = 1, blot = 0.1, speck = 0.12,
 }
 
 // A hand-inked line through `pts` ([[x,y],...]): wobble, pressure, and the odd dry gap.
-export function ink(g, pts, { width = 2, color = '#171717', wobble = 1, seed = 1, alpha = 1, dry = 0.06, passes = 1 } = {}) {
+export function ink(g, pts, { width = 2, color = '#171717', wobble = 1, seed = 1, alpha = 1, dry = 0.06, passes = 1, step = 9 } = {}) {
   const r = rng(seed * 7919 + pts.length);
   g.save();
   g.lineCap = 'round'; g.lineJoin = 'round';
@@ -93,7 +93,7 @@ export function ink(g, pts, { width = 2, color = '#171717', wobble = 1, seed = 1
     for (let i = 0; i < pts.length - 1; i++) {
       const [x0, y0] = pts[i], [x1, y1] = pts[i + 1];
       const len = Math.hypot(x1 - x0, y1 - y0);
-      const n = Math.max(1, Math.round(len / 9));
+      const n = Math.max(1, Math.round(len / step));
       let px = x0 + (r() - 0.5) * wobble, py = y0 + (r() - 0.5) * wobble;
       for (let k = 1; k <= n; k++) {
         const t = k / n;

@@ -19,11 +19,11 @@ const base = import.meta.env.BASE_URL;
 // (poster, garment print, record sleeve, window card, end card). Nothing in it is animated.
 export const CHARACTER = {
   // first file that loads wins
-  candidates: ['oddhaus-character.png', 'oddhaus-character.webp', 'oddhaus-character.jpg', 'oddhaus-character.jpeg']
+  candidates: ['oddhaus-character.webp', 'oddhaus-character.png', 'oddhaus-character.jpg', 'oddhaus-character.jpeg']
     .map((f) => `${base}assets/${f}`),
   // Position of the cigarette tip inside the image (0..1, origin top-left). The smoke layer
   // starts here. Open the film with ?pick to click the tip and get the numbers.
-  cigTip: { u: 0.2, v: 0.56 },
+  cigTip: { u: 0.214, v: 0.327 },
   // 'auto'  : keep the image alpha if it has one, otherwise key the white paper out (ink stays)
   // 'alpha' : trust the file's alpha channel      'luma' : always key by brightness
   key: 'auto',

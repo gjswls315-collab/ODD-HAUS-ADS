@@ -1,4 +1,7 @@
 node_modules/
 dist/
-renders/frames/
-renders/*.wav
+renders/*
+!renders/.gitkeep
+!renders/odd-haus-christmas-after-hours.mp4
+!renders/stills/
+renders/stills/_*

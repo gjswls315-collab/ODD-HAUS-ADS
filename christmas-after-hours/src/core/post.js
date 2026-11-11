@@ -139,7 +139,7 @@ void main() {
   float l = dot(col, vec3(0.299, 0.587, 0.114));
   col = mix(vec3(l), col, 0.86);
   col += vec3(0.012, 0.022, 0.045) * (1.0 - smoothstep(0.0, 0.5, l));
-  col = mix(col, col * vec3(1.06, 1.0, 0.86), smoothstep(0.35, 1.0, l));
+  col = mix(col, col * vec3(1.03, 1.0, 0.92), smoothstep(0.35, 1.0, l));
   col = pow(col, vec3(1.0 / 2.2));
   col = col * 0.955 + 0.03; // lifted, faded blacks; highlights never quite reach paper white
 
