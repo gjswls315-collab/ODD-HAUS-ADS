@@ -1,0 +1,4 @@
+node_modules/
+dist/
+renders/frames/
+renders/*.wav

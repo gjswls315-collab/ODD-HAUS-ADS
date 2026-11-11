@@ -1,0 +1,22 @@
+{
+  "name": "odd-haus-christmas-after-hours",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
+  "description": "ODD HAUS - CHRISTMAS AFTER HOURS. 40s interactive cinematic brand film (Three.js + Web Audio).",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173 --strictPort",
+    "stills": "node tools/render.mjs stills",
+    "render": "node tools/render.mjs video",
+    "check": "node tools/render.mjs check"
+  },
+  "dependencies": {
+    "three": "0.187.0"
+  },
+  "devDependencies": {
+    "playwright": "^1.56.1",
+    "vite": "^8.3.7"
+  }
+}
