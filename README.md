@@ -10,6 +10,7 @@ procedurally modelled, rigged characters inside a modelled house, filmed with mo
 | [`film3d/`](film3d/) | The 3D production: characters, house, lighting, cameras, shots, headless renderer. Start with [`film3d/README.md`](film3d/README.md). |
 | `film3d/renders/review2/` | Review build 2: lineup stills, before/after, walk tests, test shots A, B, C (MP4). |
 | `film3d/renders/review1/` | Review build 1 (superseded characters). |
+| [`dinos-exhibition/`](dinos-exhibition/) | NC Dinos 15th Anniversary 전시 3D 시뮬레이터 (React + R3F). 별도 프로젝트 — [`dinos-exhibition/README.md`](dinos-exhibition/README.md) 참고. |
 | `reference/` | Key visual and storyboard board — **reference only** (mood, scale, character design). Never used as footage. |
 | `legacy/v1-concept/` | Superseded first-pass concept documents. |
 
