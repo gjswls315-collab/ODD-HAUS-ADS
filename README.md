@@ -12,6 +12,7 @@ procedurally modelled, rigged characters inside a modelled house, filmed with mo
 | `film3d/renders/review1/` | Review build 1 (superseded characters). |
 | `reference/` | Key visual and storyboard board — **reference only** (mood, scale, character design). Never used as footage. |
 | `legacy/v1-concept/` | Superseded first-pass concept documents. |
+| [`jdv-store/`](jdv-store/) | **JEON DE VERO (JDV Records & Goods)**: walkable first-person 3D store with a terrace, crate digging, a playable turntable, inspectable merch and five hidden Mini Vero mascots. Start with [`jdv-store/README.md`](jdv-store/README.md). |
 
 ## Status
 

@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<!--PAGE-HEAD-->
+<title>JEON DE VERO Shop Walk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Archivo:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: full-bleed 3D canvas; a printed-matter title card on the left; HUD pinned to corners. */
+:root {
+  --navy: #1f2b45;
+  --navy-deep: #121a2c;
+  --cream: #f1e5cc;
+  --paper: #efe3c8;
+  --red: #a6382a;
+  --brass: #c39a4c;
+  --ink: #1f2b45;
+  --glass: rgba(16, 22, 38, 0.72);
+  --line: rgba(241, 229, 204, 0.16);
+  --f-display: "Archivo Black", "Arial Black", Impact, sans-serif;
+  --f-text: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; margin: 0; overflow: hidden; background: var(--navy-deep); color: var(--cream); font: 15px/1.5 var(--f-text); }
+#c { position: fixed; inset: 0; width: 100%; height: 100%; display: block; outline: none; touch-action: none; }
+[hidden] { display: none !important; }
+kbd { display: inline-grid; place-items: center; min-width: 1.9em; height: 1.9em; padding: 0 0.45em; border-radius: 6px; font: 600 0.78rem/1 var(--f-mono); color: var(--navy); background: var(--cream); box-shadow: inset 0 -2px 0 rgba(31, 43, 69, 0.28); }
+button { font: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible { outline: 2px solid var(--brass); outline-offset: 3px; }
+
+/* ---------- title card ---------- */
+#title { position: fixed; inset: 0; display: flex; align-items: center; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px)); background: linear-gradient(90deg, rgba(14, 18, 30, 0.55) 0%, rgba(14, 18, 30, 0.15) 46%, rgba(14, 18, 30, 0) 70%); }
+.card { width: min(470px, 100%); max-height: 100%; overflow: auto; margin-left: clamp(0px, 4vw, 64px); background: var(--paper); color: var(--ink); border-radius: 4px; padding: 28px 30px 24px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.45), 0 2px 0 rgba(255, 255, 255, 0.5) inset; position: relative; display: grid; gap: 16px; }
+.card::after { content: ""; position: absolute; inset: 0; pointer-events: none; border-radius: 4px; background: repeating-linear-gradient(0deg, rgba(31, 43, 69, 0.018) 0 2px, transparent 2px 4px); }
+.eyebrow { font: 600 0.72rem/1 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--red); margin: 0; }
+#logo { width: 100%; height: auto; display: block; margin: 2px 0 0; }
+.card p.lede { margin: 0; font-size: 1rem; line-height: 1.55; color: #2a3550; max-width: 60ch; }
+.keys { display: grid; grid-template-columns: auto 1fr auto 1fr; gap: 9px 12px; align-items: center; margin: 0; padding: 14px 0; border-top: 1px solid rgba(31, 43, 69, 0.14); border-bottom: 1px solid rgba(31, 43, 69, 0.14); font-size: 0.86rem; }
+.keys dt { justify-self: start; }
+.keys dd { margin: 0; color: #3a4560; }
+.keys kbd { color: var(--cream); background: var(--navy); box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.35); }
+.go { display: grid; gap: 10px; }
+#enter { appearance: none; border: 0; border-radius: 3px; padding: 15px 18px; background: var(--navy); color: var(--cream); font: 1rem/1 var(--f-display); letter-spacing: 0.02em; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; }
+#enter:hover:not(:disabled) { background: var(--red); }
+#enter:disabled { opacity: 0.55; cursor: progress; }
+.load { height: 3px; background: rgba(31, 43, 69, 0.12); overflow: hidden; border-radius: 2px; }
+#load-bar { height: 100%; background: var(--red); transform-origin: left; transform: scaleX(0.02); transition: transform 0.4s; }
+.fine { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; font: 500 0.7rem/1.4 var(--f-mono); color: #5d6578; letter-spacing: 0.02em; margin: 0; }
+#title.ready #load-text { color: var(--red); }
+.touch-note { display: none; }
+body.touch .touch-note { display: block; }
+body.touch .keys { display: none; }
+
+/* ---------- HUD ---------- */
+#hud { position: fixed; inset: 0; pointer-events: none; }
+#zone { position: absolute; top: calc(18px + env(safe-area-inset-top, 0px)); left: max(20px, env(safe-area-inset-left, 0px)); display: grid; gap: 4px; opacity: 0.62; transition: opacity 0.6s; }
+#zone.flash { animation: zone 3.2s ease; }
+@keyframes zone { 0% { opacity: 0; transform: translateY(-4px); } 12% { opacity: 1; transform: none; } 70% { opacity: 1; } 100% { opacity: 0.62; } }
+#zone small { font: 600 0.66rem/1 var(--f-mono); letter-spacing: 0.18em; color: var(--brass); }
+#zone-name { font: 1.15rem/1.1 var(--f-display); text-shadow: 0 1px 12px rgba(0, 0, 0, 0.45); }
+#tracker { position: absolute; top: calc(18px + env(safe-area-inset-top, 0px)); right: max(20px, env(safe-area-inset-right, 0px)); display: flex; align-items: center; gap: 12px; padding: 9px 12px 9px 14px; border-radius: 999px; background: var(--glass); border: 1px solid var(--line); backdrop-filter: blur(8px); }
+#tracker .lbl { font: 600 0.66rem/1 var(--f-mono); letter-spacing: 0.14em; color: rgba(241, 229, 204, 0.75); }
+#slots { display: flex; gap: 6px; }
+#slots i { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid rgba(241, 229, 204, 0.45); background: var(--sw, transparent); transition: background 0.4s, transform 0.4s, border-color 0.4s; }
+#slots i.got { border-color: var(--cream); transform: scale(1.12); }
+#count { font: 600 0.82rem/1 var(--f-mono); font-variant-numeric: tabular-nums; }
+#cross { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border-radius: 50%; background: rgba(241, 229, 204, 0.85); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35); transition: transform 0.15s, background 0.15s; }
+#cross.on { transform: scale(1.8); background: var(--cream); box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.3), 0 0 0 5px rgba(241, 229, 204, 0.18); }
+#prompt { position: absolute; left: 50%; top: calc(50% + 46px); transform: translate(-50%, 6px); display: flex; align-items: center; gap: 10px; padding: 7px 14px 7px 8px; border-radius: 999px; background: var(--glass); border: 1px solid var(--line); backdrop-filter: blur(8px); opacity: 0; transition: opacity 0.18s, transform 0.18s; white-space: nowrap; }
+#prompt.on { opacity: 1; transform: translate(-50%, 0); }
+#prompt-verb { font-weight: 700; }
+#prompt-name { color: rgba(241, 229, 204, 0.7); font-size: 0.86rem; }
+#prompt-name::before { content: "·"; margin-right: 8px; color: rgba(241, 229, 204, 0.4); }
+#caption { position: absolute; left: max(20px, env(safe-area-inset-left, 0px)); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 14px; align-items: center; max-width: min(460px, calc(100vw - 40px)); padding: 10px 16px 10px 10px; border-radius: 6px; background: var(--glass); border: 1px solid var(--line); backdrop-filter: blur(10px); opacity: 0; transform: translateY(8px); transition: opacity 0.3s, transform 0.3s; }
+#caption.on { opacity: 1; transform: none; }
+#cap-thumb { width: 64px; height: 64px; border-radius: 2px; flex: none; box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4); }
+#caption > div { min-width: 0; display: grid; gap: 3px; }
+#cap-kicker { font: 600 0.64rem/1 var(--f-mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--brass); }
+#cap-title { font: 1rem/1.2 var(--f-display); }
+#cap-meta { font-size: 0.82rem; color: rgba(241, 229, 204, 0.72); }
+#toast { position: absolute; left: 50%; top: calc(70px + env(safe-area-inset-top, 0px)); transform: translate(-50%, -8px); display: flex; align-items: center; gap: 12px; padding: 10px 18px 10px 12px; border-radius: 999px; background: var(--paper); color: var(--ink); box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35); opacity: 0; transition: opacity 0.35s, transform 0.35s; font-size: 0.9rem; max-width: calc(100vw - 32px); }
+#toast.on { opacity: 1; transform: translate(-50%, 0); }
+#toast .sw { width: 18px; height: 18px; border-radius: 50%; flex: none; border: 2px solid var(--navy); }
+#toast em { font-style: normal; color: #4a5570; }
+#hint { position: absolute; right: max(20px, env(safe-area-inset-right, 0px)); bottom: calc(22px + env(safe-area-inset-bottom, 0px)); display: flex; gap: 14px; flex-wrap: wrap; justify-content: flex-end; font: 500 0.72rem/1 var(--f-mono); color: rgba(241, 229, 204, 0.72); transition: opacity 1.5s; }
+#hint span { display: inline-flex; align-items: center; gap: 6px; }
+#hint kbd { height: 1.7em; min-width: 1.7em; font-size: 0.68rem; background: rgba(241, 229, 204, 0.88); }
+#hint.fade { opacity: 0.25; }
+body.drag-mode #hint .drag { display: inline-flex; }
+#hint .drag { display: none; }
+#hud.inspecting #cross, #hud.inspecting #prompt, #hud.inspecting #caption { opacity: 0; }
+.touch-btn { display: none; }
+body.touch .touch-btn { display: grid; place-items: center; position: absolute; bottom: calc(26px + env(safe-area-inset-bottom, 0px)); width: 58px; height: 58px; border-radius: 50%; border: 1px solid var(--line); background: var(--glass); color: var(--cream); font: 1rem/1 var(--f-display); pointer-events: auto; }
+body.touch #touch-e { right: max(24px, env(safe-area-inset-right, 0px)); }
+body.touch #touch-m { right: calc(max(24px, env(safe-area-inset-right, 0px)) + 70px); font-size: 0.8rem; }
+body.touch #hint { display: none; }
+
+/* ---------- inspect ---------- */
+#inspect-card { position: fixed; right: max(24px, env(safe-area-inset-right, 0px)); top: 50%; transform: translate(12px, -50%); width: min(360px, calc(100vw - 48px)); padding: 24px 24px 20px; border-radius: 4px; background: var(--paper); color: var(--ink); box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); opacity: 0; transition: opacity 0.3s, transform 0.3s; display: grid; gap: 12px; }
+#inspect-card.on { opacity: 1; transform: translate(0, -50%); }
+#ins-kind { font: 600 0.68rem/1.2 var(--f-mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--red); margin: 0; }
+#ins-title { font: 1.45rem/1.12 var(--f-display); margin: 0; text-wrap: balance; }
+#ins-text { margin: 0; color: #2f3a55; }
+#ins-list { margin: 0; padding: 12px 0 0; list-style: none; border-top: 1px solid rgba(31, 43, 69, 0.15); display: grid; gap: 6px; font: 500 0.78rem/1.3 var(--f-mono); color: #3a4560; }
+#ins-list li::before { content: "—"; color: var(--brass); margin-right: 8px; }
+.ins-foot { display: flex; gap: 14px; align-items: center; font: 500 0.74rem/1 var(--f-mono); color: #5d6578; flex-wrap: wrap; }
+.ins-foot kbd { color: var(--cream); background: var(--navy); }
+@media (max-width: 760px) {
+  #inspect-card { top: auto; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); right: max(16px, env(safe-area-inset-right, 0px)); transform: translateY(12px); width: calc(100vw - 32px); }
+  #inspect-card.on { transform: none; }
+  #ins-text { font-size: 0.88rem; }
+}
+
+/* ---------- map / pause / done ---------- */
+.overlay { position: fixed; inset: 0; display: grid; place-items: center; padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: max(16px, env(safe-area-inset-top, 0px)) max(16px, env(safe-area-inset-bottom, 0px)); background: rgba(10, 14, 26, 0.55); backdrop-filter: blur(3px); }
+.sheet { background: var(--paper); color: var(--ink); border-radius: 4px; box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5); padding: 22px 24px; display: grid; gap: 14px; max-height: 100%; overflow: auto; }
+#map .sheet { width: min(560px, 100%); }
+.sheet header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.sheet h2 { font: 1.3rem/1.1 var(--f-display); margin: 0; }
+.sheet .meta { font: 500 0.72rem/1.3 var(--f-mono); color: #5d6578; }
+#map-canvas { width: 100%; aspect-ratio: 9.8 / 14.2; max-height: 68vh; background: #f6eedb; border: 1px solid rgba(31, 43, 69, 0.15); border-radius: 2px; }
+.sheet .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.btn { appearance: none; border: 0; border-radius: 3px; padding: 12px 16px; background: var(--navy); color: var(--cream); font: 0.95rem/1 var(--f-display); }
+.btn:hover { background: var(--red); }
+.btn.ghost { background: transparent; color: var(--ink); border: 1.5px solid rgba(31, 43, 69, 0.3); font: 600 0.85rem/1 var(--f-text); }
+.btn.ghost:hover { background: rgba(31, 43, 69, 0.06); }
+#pause .sheet { width: min(420px, 100%); }
+#pause .keys { padding: 12px 0; }
+#done { position: fixed; left: 50%; top: calc(120px + env(safe-area-inset-top, 0px)); transform: translate(-50%, -10px); width: min(440px, calc(100vw - 32px)); text-align: center; opacity: 0; transition: opacity 0.8s, transform 0.8s; pointer-events: none; }
+#done.on { opacity: 1; transform: translate(-50%, 0); }
+#done .sheet { gap: 8px; }
+#done p { margin: 0; color: #2f3a55; }
+@media (max-width: 520px) {
+  .card { padding: 22px 20px 18px; margin-left: 0; }
+  .keys { grid-template-columns: auto 1fr; }
+  #tracker .lbl { display: none; }
+  #title { align-items: flex-end; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+<!--PAGE-HEAD-END-->
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<!--PAGE-BODY-->
+<canvas id="c" tabindex="0" aria-label="3D view of the JEON DE VERO shop"></canvas>
+
+<section id="title" aria-labelledby="title-h">
+  <div class="card">
+    <p class="eyebrow" id="title-h">JDV Records &amp; Goods · Walk the shop</p>
+    <img id="logo" alt="Jeon de Vero — Records &amp; Goods" width="1665" height="930">
+    <p class="lede">Dig through the crates, put a record on the turntable, try on the merch with your eyes, and step out through the glass doors onto the terrace. Five pocket-size mascots are hiding somewhere between the records and the coffee bar.</p>
+    <dl class="keys">
+      <dt><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd></dt><dd>Walk</dd>
+      <dt><kbd>Mouse</kbd></dt><dd>Look around</dd>
+      <dt><kbd>Shift</kbd></dt><dd>Walk faster</dd>
+      <dt><kbd>E</kbd></dt><dd>Interact</dd>
+      <dt><kbd>M</kbd></dt><dd>Floor plan</dd>
+      <dt><kbd>Esc</kbd></dt><dd>Release mouse</dd>
+    </dl>
+    <p class="lede touch-note">Touch: drag on the left to walk, drag on the right to look, tap <b>E</b> to interact.</p>
+    <div class="go">
+      <button id="enter" disabled><span>Enter the shop</span><span aria-hidden="true">→</span></button>
+      <div class="load"><div id="load-bar"></div></div>
+      <p class="fine"><span id="load-text">Loading</span><span>Best with headphones</span></p>
+    </div>
+  </div>
+</section>
+
+<div id="hud" hidden>
+  <div id="zone"><small>JEON DE VERO</small><span id="zone-name"></span></div>
+  <div id="tracker" aria-label="Mini mascots found"><span class="lbl">MINI VEROS</span><span id="slots"><i></i><i></i><i></i><i></i><i></i></span><span id="count">0/5</span></div>
+  <div id="cross"></div>
+  <div id="prompt"><kbd>E</kbd><span id="prompt-verb"></span><span id="prompt-name"></span></div>
+  <div id="caption" role="status"><canvas id="cap-thumb" width="128" height="128" hidden></canvas><div><span id="cap-kicker"></span><span id="cap-title"></span><span id="cap-meta"></span></div></div>
+  <div id="toast" role="status"></div>
+  <div id="hint"><span class="drag">Drag to look</span><span><kbd>E</kbd>Interact</span><span><kbd>M</kbd>Floor plan</span><span><kbd>Esc</kbd>Pause</span></div>
+  <button class="touch-btn" id="touch-m" aria-label="Floor plan">MAP</button>
+  <button class="touch-btn" id="touch-e" aria-label="Interact">E</button>
+</div>
+
+<aside id="inspect-card" hidden>
+  <p id="ins-kind"></p>
+  <h2 id="ins-title"></h2>
+  <p id="ins-text"></p>
+  <ul id="ins-list"></ul>
+  <div class="ins-foot"><span><kbd>E</kbd> Put it back</span><span>Move the mouse to turn it</span></div>
+</aside>
+
+<section id="map" class="overlay" hidden>
+  <div class="sheet">
+    <header><h2>Floor plan</h2><span class="meta">One room, one terrace · 7 × 8 m shop</span></header>
+    <canvas id="map-canvas" aria-label="Floor plan of the shop with your position"></canvas>
+    <div class="row"><button class="btn ghost" id="map-close">Close</button><span class="meta"><kbd>M</kbd> to close</span></div>
+  </div>
+</section>
+
+<section id="pause" class="overlay" hidden>
+  <div class="sheet">
+    <header><h2>Paused</h2><span class="meta">Mini Veros found: <b id="pause-count">0 of 5</b></span></header>
+    <dl class="keys">
+      <dt><kbd>WASD</kbd></dt><dd>Walk</dd>
+      <dt><kbd>Shift</kbd></dt><dd>Faster</dd>
+      <dt><kbd>E</kbd></dt><dd>Interact</dd>
+      <dt><kbd>M</kbd></dt><dd>Floor plan</dd>
+    </dl>
+    <div class="row"><button class="btn" id="resume">Back to the shop</button><button class="btn ghost" id="sound" aria-pressed="true">Sound on</button></div>
+  </div>
+</section>
+
+<div id="done" hidden><div class="sheet"><p class="eyebrow">All five found</p><h2 style="font:1.3rem/1.15 var(--f-display);margin:0">Every Mini Vero is back on the shelf.</h2><p>Thanks for stopping by JEON DE VERO. Stay for another record.</p></div></div>
+<!--PAGE-BODY-END-->
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
