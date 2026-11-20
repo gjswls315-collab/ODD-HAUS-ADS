@@ -3,8 +3,9 @@ import json, pathlib
 from PIL import Image, ImageDraw
 HERE = pathlib.Path(__file__).resolve().parents[1]
 H = json.loads((HERE / "timeline.json").read_text())["hits"]
-keys = {"double take": H["doubleTake"] - 0.2, "getaway": H["getaway"] - 0.1, "hop+wobble": H["plinthHop"], "settle": H["settle"] - 0.6,
-        "plinth hop": H["hop"] - 0.3, "needle drop": H["nudge"] - 0.1, "turn+cap": H["turnToUs"] - 0.1, "burn": H["burn"] - 0.1}
+keys = {"ollie": H["ollie"] - 0.3, "skid+catch": H["skid"] - 0.1, "sip": H["sip"][0] - 0.2, "peek": H["peekPose"][0] + 0.4,
+        "double take": H["doubleTake"] - 0.2, "needle drop": H["nudge"] - 0.1, "toy look": H["looks"][2][0] - 0.5, "ring+salute": H["ring"][1] - 0.2,
+        "burn": H["burn"] - 0.1}
 rows = []
 for name, t0 in keys.items():
     ims = []

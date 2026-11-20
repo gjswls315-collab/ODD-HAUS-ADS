@@ -1,4 +1,4 @@
-"""Photoplay score + projector for "The Early Shift".
+"""Photoplay score + projector for "The Early Shift" (v2).
 
 Everything is synthesised (numpy only): a period upright piano (inharmonic partials, two slightly
 detuned strings, felt hammer, two-stage decay, dampers) plays a cue sheet built from ../timeline.json,
@@ -6,7 +6,7 @@ so every gag hit lands on its frame. The projector in the booth is the only othe
 
     python3 score/score.py            -> out/mix.wav (48 kHz stereo) and out/cues.txt
 """
-import json, pathlib, wave
+import json, math, pathlib, wave
 import numpy as np
 
 HERE = pathlib.Path(__file__).resolve().parents[1]
@@ -107,27 +107,133 @@ def n(s):
     return 12 * (octv + 1) + NN[name]
 
 # ---------------------------------------------------------------------------
-# A · Misterioso (question card, the figure by the silent turntable), 72 bpm, D minor
-bA = 60 / 72
-for k in range(int(2.9 / 0.125)):                                    # low tremolo under the card
-    tt = H["musicIn"] + k * 0.125
-    v = 0.18 + 0.14 * np.sin(np.pi * k / 23)
-    add(tt, n("D2") if k % 2 == 0 else n("A2"), v, 0.14, 0.05)
-for tt, s_, d in [(1.6, "A4", 0.4), (2.0, "F4", 0.4), (2.4, "E4", 0.4), (2.8, "D4", 0.7), (3.5, "F4", 0.5)]:
-    add(tt, n(s_), 0.42, d)                                          # the theme, minor and hushed
-chord(3.92, [n("E2"), n("B2"), n("D3"), n("G#3")], 0.4, 0.9, roll=0.05)   # the question hangs
-cue("A in", H["musicIn"])
-for k, s_ in enumerate(["D2", "Eb2", "E2", "F2"]):                    # sneaking bass, chromatic creep
-    add(4.25 + k * bA, n(s_), 0.5, 0.18, 0.04)
-    add(4.25 + k * bA + bA / 2, n(s_) + 12, 0.28, 0.12, 0.04)
-grace(H["s1Look"], n("A5"), n("Bb5"), 0.45, 0.25); cue("look", H["s1Look"])
-add(H["s1Turn"], n("D5"), 0.45, 0.1); add(H["s1Turn"] + 0.09, n("F5"), 0.5, 0.18); cue("turn", H["s1Turn"])
-add(H["s1Shrug"][0] + 0.05, n("C6"), 0.45, 0.15); add(H["s1Shrug"][0] + 0.55, n("C3"), 0.5, 0.35); cue("shrug: plink … plonk", H["s1Shrug"][0])
-for k, s_ in enumerate(["E4", "F4", "G#4"]):                           # pickup into the Hurry (J-cut over the shot change)
-    add(H["hurryPickup"] + k * (60 / 144 / 3), n(s_), 0.55, 0.12)
+# the brand's motif: "Jeon de Ve-ro", four syllables, the last one held. It opens the film, tags the
+# peek card and crowns the finale.
+def jdv_motif(t0, beat, notes, chord_notes, vel=0.6, octave=True, roll=0.03):
+    for (off, d), m in zip([(0, 0.5), (0.5, 0.25), (0.75, 0.25), (1.0, 1.75)], notes):
+        add(t0 + off * beat, m, vel, d * beat * 0.95)
+        if octave:
+            add(t0 + off * beat, m - 12, vel * 0.7, d * beat * 0.95)
+    chord(t0 + beat, chord_notes, vel * 0.85, 1.75 * beat, roll=roll)
+
+def gliss(t0, t1, m0, m1, vel, white=True):
+    """A piano glissando from m0 to m1 (white keys), spread evenly over [t0, t1]."""
+    step = 1 if m1 > m0 else -1
+    keys = [m for m in range(m0, m1 + step, step) if not white or (m % 12) in (0, 2, 4, 5, 7, 9, 11)]
+    for j, m in enumerate(keys):
+        add(t0 + (t1 - t0) * j / max(1, len(keys) - 1), m, vel * (0.8 + 0.2 * j / len(keys)), 0.07, 0.03)
+
+def trill(t0, t1, m_a, m_b, vel0, vel1, rate=0.07):
+    t, k = t0, 0
+    while t < t1:
+        u = (t - t0) / max(1e-6, t1 - t0)
+        add(t, m_a if k % 2 == 0 else m_b, vel0 + (vel1 - vel0) * u, rate * 0.9, 0.03)
+        t += rate; k += 1
 
 # ---------------------------------------------------------------------------
-# B · Hurry (digging, the disc gets away), 144 bpm stride, A minor
+# A · Maestoso under the title card (the oval mark): the motif in F, grandly, then a turn to C
+chord(0.4, [n("F1"), n("F2"), n("C3"), n("A3"), n("C4"), n("F4")], 0.55, 1.0, roll=0.035)
+cue("A maestoso: title", H["musicIn"])
+jdv_motif(0.95, 0.55, [n("C5"), n("F5"), n("G5"), n("A5")], [n("F2"), n("A3"), n("C4"), n("F4")], 0.62)
+for k, s_ in enumerate(["Bb4", "A4", "G4"]):
+    add(2.55 + k * 0.16, n(s_), 0.5, 0.15)
+chord(3.0, [n("G1"), n("G2"), n("B3"), n("D4"), n("F4")], 0.55, 0.4, roll=0.03)
+for k, s_ in enumerate(["G4", "B4", "D5", "F5"]):                     # run-up into the rag
+    add(3.36 + k * 0.105, n(s_), 0.42 + k * 0.05, 0.1)
+
+# ---------------------------------------------------------------------------
+# K · Skate rag (the terrace, the ollie, in through the doors; the skid and the catch), C major, 132 bpm
+bK = 60 / 132
+prog_rag = [("C2", "G1", ["E3", "G3", "C4"]), ("C2", "G1", ["E3", "G3", "C4"]), ("G1", "D2", ["F3", "B3", "D4"]), ("C2", "G1", ["E3", "G3", "C4"]),
+            ("F1", "C2", ["F3", "A3", "C4"]), ("C2", "G1", ["E3", "G3", "C4"]), ("G1", "D2", ["F3", "B3", "D4"]), ("C2", "G1", ["E3", "G3", "C4"])]
+def rag_bar(bt, bi, vel=0.5, mel=(), mel_vel=0.58, until=1e9, beats=range(4)):
+    b1, b3, ch = prog_rag[bi % len(prog_rag)]
+    for k in beats:
+        tt = bt + k * bK
+        if tt >= until - 0.02:
+            break
+        if k % 2 == 0:
+            m = n(b1 if k == 0 else b3)
+            add(tt, m, vel, bK * 0.8, 0.06); add(tt, m + 12, vel * 0.65, bK * 0.8, 0.06)
+        else:
+            chord(tt, [n(x) for x in ch], vel * 0.62, bK * 0.5, damp=0.05)
+    for off, s_, d in mel:
+        if bt + off * bK < until - 0.02:
+            add(bt + off * bK, n(s_), mel_vel, d * bK * 0.9)
+K0 = 3.8
+kb = lambda i: K0 + i * 4 * bK
+rag_bar(kb(0), 0, 0.48, [(0.5, "E5", .5), (1, "G5", .5), (1.5, "E5", .5), (2, "C6", .75), (2.75, "A5", .25), (3, "G5", .5), (3.5, "E5", .5)])
+rag_bar(kb(1), 1, 0.5, [(0, "G5", .5), (0.5, "A5", .5), (1, "G5", .5), (1.5, "E5", .5), (2, "D5", .5), (2.5, "E5", .5), (3, "C5", .75), (3.75, "D#5", .25)])
+for pt in H["pushes"]:                                                 # each push of the back foot: a low thump
+    add(pt, n("C1"), 0.62, 0.14, 0.05); add(pt, n("C2"), 0.7, 0.14, 0.05); cue("push", pt)
+rag_bar(kb(2), 2, 0.5, [(0, "E5", .25), (0.25, "F5", .25), (0.5, "G5", .5), (1, "B5", .5), (1.5, "D6", .5)], until=H["ollie"])
+gliss(H["ollie"], H["land"] - 0.05, n("G5"), n("G7"), 0.5); cue("ollie (glissando)", H["ollie"])
+chord(H["land"], [n("C2"), n("C3"), n("E4"), n("G4"), n("C5")], 0.82, 0.3, damp=0.05)
+add(H["land"] + 0.09, n("G1"), 0.6, 0.35); cue("land (crash + boing)", H["land"])
+rag_bar(kb(3), 3, 0.48, [(2, "E5", .5), (2.5, "G5", .5), (3, "C6", .5), (3.5, "G5", .5)], beats=[0, 2, 3])
+gliss(H["carve"], H["carve"] + 0.42, n("C7"), n("C5"), 0.42); cue("carve (swoop)", H["carve"])
+add(10.0, n("E7"), 0.3, 0.5); add(10.24, n("C7"), 0.28, 0.6); cue("shop door bell", 10.0)
+rag_bar(kb(4), 4, 0.5, [(0, "A5", .5), (0.5, "C6", .5), (1, "F6", .75), (1.75, "E6", .25), (2, "D6", .5), (2.5, "C6", .5)], until=H["skid"])
+trill(H["skid"], H["skid"] + 0.32, n("F6"), n("F#6"), 0.5, 0.3, 0.035); add(H["skid"], n("B6"), 0.35, 0.3)
+add(H["skid"] + 0.34, n("C3"), 0.55, 0.12, 0.04); cue("skid (screech, then stop-time)", H["skid"])
+add(H["kickTail"], n("C7"), 0.5, 0.06, 0.03); add(H["kickTail"], n("C2"), 0.55, 0.06, 0.03); cue("kick the tail (pop)", H["kickTail"])
+chord(H["catch"], [n("C4"), n("E4"), n("G4"), n("C5"), n("E5")], 0.72, 0.22, damp=0.05); cue("catch (ta!)", H["catch"])
+for k, s_ in enumerate(["G5", "E5", "C5"]):                            # the puff: a lazy sigh
+    add(H["puff"] + k * 0.15, n(s_), 0.3 - k * 0.05, 0.16)
+cue("puff", H["puff"])
+rag_bar(kb(6), 6, 0.46, [(0, "G5", .5), (0.5, "E5", .5), (1, "D5", .5), (1.5, "C5", .5), (2, "B4", .5), (2.5, "D5", .5)], until=16.0)
+cue("walk off (strut)", H["walkOff"][0])
+
+# ---------------------------------------------------------------------------
+# L · Coffee blues (espresso, the sip, the logo pose), F, 84 bpm, swung
+bL = 60 / 84
+L0 = 16.0
+def sw(beat):                                                          # swung eighths: 2/3 + 1/3
+    return math.floor(beat) + (2 / 3 if beat % 1 >= 0.5 else 0)
+blues = [("F1", "C2", ["A3", "Eb4", "F4"]), ("Bb1", "F2", ["Ab3", "D4", "F4"]), ("F1", "C2", ["A3", "Eb4", "F4"])]
+for bi, (b1, b3, ch) in enumerate(blues):
+    for k in range(4):
+        tt = L0 + (bi * 4 + k) * bL
+        if tt >= 24.4 - 0.05:
+            break
+        if bi == 2 and k >= 2:                                         # last half bar: C7, the turnaround
+            b1, b3, ch = "C2", "G1", ["Bb3", "E4", "G4"]
+        if k % 2 == 0:
+            m = n(b1 if k == 0 else b3); add(tt, m, 0.42, bL * 0.85, 0.08); add(tt, m + 12, 0.25, bL * 0.85, 0.08)
+        else:
+            chord(tt, [n(x) for x in ch], 0.3, bL * 0.45, damp=0.06)
+lb = lambda beat: L0 + sw(beat) * bL
+for b_, s_, d in [(1.0, "C5", .3), (1.5, "Eb5", .2), (2.0, "E5", 1.5)]:  # the reach: a blue-note pickup
+    add(lb(b_), n(s_), 0.5, d * bL)
+cue("reach", H["reach"])
+trill(H["steam"][0], H["steam"][1], n("C7"), n("D7"), 0.1, 0.22, 0.06); cue("steam (high trill)", H["steam"][0])
+chord(H["mugUp"], [n("Bb3"), n("D4"), n("Ab4"), n("F5")], 0.55, 0.5, roll=0.02); cue("mug up", H["mugUp"])
+grace(H["turnFront"], n("E5"), n("F5"), 0.45, 0.4); cue("turn to us (grace)", H["turnFront"])
+for k, s_ in enumerate(["C5", "C#5", "D5", "D#5", "E5", "F5"]):        # the sip: a slow slurp upward
+    add(H["sip"][0] + k * (H["sip"][1] - H["sip"][0]) / 6, n(s_), 0.24 + 0.05 * k, 0.13)
+cue("sip (slide)", H["sip"][0])
+for k, s_ in enumerate(["Ab5", "G5", "F5", "Eb5", "C5"]):              # exhale: the blue sigh down
+    add(H["exhale"] + k * 0.15, n(s_), 0.45 - 0.05 * k, 0.17)
+cue("exhale (sigh)", H["exhale"])
+p0, p1 = H["peekPose"]
+for k, (a, b) in enumerate([("A4", "C5"), ("G4", "Bb4"), ("F4", "A4"), ("E4", "G4")]):   # sinking behind the bar, on tiptoe
+    tt = p0 + k * (p1 - p0) / 4
+    chord(tt, [n(a), n(b)], 0.36 - 0.04 * k, 0.12, damp=0.03)
+grace(p1, n("E6"), n("F6"), 0.5, 0.25); cue("peek (plink)", p1)
+i0, i1 = H["irisPeek"]
+trill(i0 + 0.15, i1 - 0.1, n("A3"), n("Eb4"), 0.14, 0.26, 0.09)
+for k, s_ in enumerate(["C5", "E5", "G5", "Bb5"]):
+    add(i1 - 0.48 + k * 0.1, n(s_), 0.3 + 0.05 * k, 0.1)
+
+# ---------------------------------------------------------------------------
+# P · the peek card: the motif as a tag, in F
+jdv_motif(24.45, 0.42, [n("C5"), n("F5"), n("G5"), n("A5")], [n("F2"), n("F3"), n("A3"), n("C4"), n("F4")], 0.66)
+cue("P peek card: the motif (ta-da)", 24.45)
+for k, s_ in enumerate(["E4", "F4", "G#4"]):                           # pickup into the Hurry (J-cut)
+    add(26.6 - 0.3 + k * (60 / 144 / 3), n(s_), 0.5, 0.12)
+
+# ---------------------------------------------------------------------------
+# B · Hurry (crate digging; the reveal; the double take; the pull), 144 bpm stride, A minor
 bB = 60 / 144
 prog_hurry = [("A1", ["A3", "C4", "E4"]), ("E1", ["G#3", "B3", "D4"]), ("A1", ["A3", "C4", "E4"]), ("E1", ["G#3", "B3", "D4"]),
               ("D2", ["A3", "D4", "F4"]), ("A1", ["A3", "C4", "E4"]), ("E1", ["G#3", "B3", "D4"]), ("A1", ["A3", "C4", "E4"])]
@@ -143,89 +249,42 @@ def stride(t0, t1, beat, prog, vel=0.5, start=0):
             chord(t, [n(x) for x in ch], vel * 0.7, beat * 0.55, damp=0.05)
         k += 1
         t += beat
-stride(8.0, H["reveal"], bB, prog_hurry, 0.5)
-flip_notes = ["E5", "G5", "A5", "B5", "C6", "D6", "E6", "G6"]
-for f, s_ in zip(H["flips"], flip_notes):
-    add(f, n(s_), 0.6, 0.09, 0.04)                                   # a plink on every flip
-    cue("flip", f)
-chord(H["reveal"], [n("A2"), n("E3"), n("A3"), n("C#4"), n("E4"), n("A4")], 0.85, 1.0, roll=0.025)   # the reveal: rolled A major
-cue("reveal (rolled chord)", H["reveal"])
+stride(26.6, H["reveal"], bB, prog_hurry, 0.5)
+for f, s_ in zip(H["flips"], ["E5", "G5", "A5", "B5", "C6", "D6", "E6", "G6"]):
+    add(f, n(s_), 0.6, 0.09, 0.04); cue("flip", f)                     # a plink on every flip
+chord(H["reveal"], [n("A2"), n("E3"), n("A3"), n("C#4"), n("E4"), n("A4")], 0.85, 0.8, roll=0.025)
+cue("reveal (rolled A major)", H["reveal"])
 add(H["doubleTake"] - 0.06, n("D5"), 0.5, 0.05)
-chord(H["doubleTake"], [n("C#2"), n("C#4"), n("E4"), n("G4"), n("Bb4")], 0.95, 0.28, damp=0.05)   # diminished sforzando
+chord(H["doubleTake"], [n("C#2"), n("C#4"), n("E4"), n("G4"), n("Bb4")], 0.95, 0.28, damp=0.05)
 cue("double take (sforzando)", H["doubleTake"])
 grace(H["backToSleeve"], n("B4"), n("C5"), 0.4, 0.3); cue("back to the sleeve (grace)", H["backToSleeve"])
-for k, s_ in enumerate(["E5", "D#5", "D5", "C#5", "C5", "B4", "A#4", "A4"]):   # the iris closes: a soft chromatic slide
-    add(H["irisSleeve"][0] + k * 0.12, n(s_), 0.32 - k * 0.02, 0.14)
-# S3: the push (stride resumes), the getaway, the hop, the wobble, the settle
-stride(H["push"], H["plinthHop"], bB, prog_hurry, 0.55)
-k = 0
-t = H["push"]
-while t < H["getaway"] - 0.01:                                       # strained rising three-note push, each beat
-    for j, s_ in enumerate(["C5", "D5", "E5"]):
-        add(t + j * bB / 3, n(s_) + (k % 2) * 2, 0.4 + 0.02 * k, bB / 3 * 0.8, 0.04)
-    k += 1
-    t += bB
-for j in range(14):                                                  # upward glissando: it gets away
-    add(H["getaway"] + j * 0.022, n("A4") + [0, 2, 3, 5, 7, 8, 11, 12, 14, 15, 17, 19, 20, 24][j], 0.5 + j * 0.02, 0.06, 0.03)
-cue("getaway (glissando)", H["getaway"])
-run = ["E6", "D6", "C6", "B5", "A5", "B5", "C6", "D6", "E6", "F6", "E6", "D6", "C6", "B5", "A5", "G#5"]
-for j, s_ in enumerate(run):                                         # Hurry run while he chases
-    tt = H["getaway"] + 0.36 + j * bB / 2
-    if tt < H["plinthHop"] - 0.02:
-        add(tt, n(s_), 0.55, bB / 2 * 0.8, 0.04)
-add(H["plinthHop"], n("A1"), 0.75, 0.2); add(H["plinthHop"] + 0.08, n("A2"), 0.65, 0.3)   # low boing
-cue("onto the plinth (boing)", H["plinthHop"])
-t = H["plinthHop"] + 0.1
-k = 0
-while t < H["settle"] - 0.05:                                        # nervous trill, speeding up, fading
-    u = (t - H["plinthHop"]) / (H["settle"] - H["plinthHop"])
-    add(t, n("E5") if k % 2 == 0 else n("F5"), 0.42 * (1 - 0.6 * u), 0.07, 0.03)
-    t += 0.085 * (1 - 0.55 * u)
-    k += 1
-add(H["settle"], n("E6"), 0.5, 0.25); add(H["settle"] + bB, n("A1"), 0.6, 0.6)   # plink … plonk
-cue("settle (plink … plonk)", H["settle"])
+stride(H["backToSleeve"] + bB, 33.6, bB, prog_hurry, 0.5, start=2)
+for k, s_ in enumerate(["A3", "C4", "E4", "A4", "C5", "E5", "A5"]):    # the pull: the sleeve rises
+    add(H["pull"][0] + k * (H["pull"][1] - H["pull"][0]) / 7, n(s_), 0.45 + 0.04 * k, 0.12)
+chord(H["pull"][1], [n("A4"), n("C#5"), n("E5"), n("A5")], 0.62, 0.35, roll=0.02); cue("pull (rising, ta)", H["pull"][1])
 
 # ---------------------------------------------------------------------------
-# the wait under "Now, the needle." — a swelling diminished tremolo
-w0, w1 = 21.05, 23.55
+# M · Misterioso (the disc goes on, the arm swings across), D minor, 72 bpm
 k = 0
-t = w0
-while t < w1:
-    u = (t - w0) / (w1 - w0)
-    ms = [n("B2"), n("F3")] if k % 2 == 0 else [n("D3"), n("Ab3")]
-    chord(t, ms, 0.12 + 0.4 * u * u, 0.1, damp=0.05)
-    t += 0.09
-    k += 1
+t = 33.62
+while t < H["release"] - 0.05:
+    u = (t - 33.62) / (H["release"] - 33.62)
+    add(t, n("D2") if k % 2 == 0 else n("A2"), 0.16 + 0.2 * u, 0.13, 0.04)
+    t += 0.125; k += 1
+cue("M misterioso", 33.6)
+pd0, pd1 = H["placeDisc"]
+for k, s_ in enumerate(["D6", "A5", "F5", "D5", "A4"]):                # lowering the disc
+    add(pd0 + k * (pd1 - pd0) / 5, n(s_), 0.38 - 0.03 * k, 0.16)
+add(pd1, n("D3"), 0.42, 0.1, 0.03); cue("disc lands", pd1)
+grace(H["grabArm"], n("Bb5"), n("A5"), 0.42, 0.25); cue("grab the arm (grace)", H["grabArm"])
+a0, a1 = H["armAcross"]
+for k, s_ in enumerate(["A4", "Bb4", "B4", "C5", "C#5", "D5", "D#5", "E5"]):   # the arm creeps across
+    tt = a0 + k * (H["release"] - a0) / 8
+    add(tt, n(s_), 0.34 + 0.04 * k, 0.12, 0.04)
+cue("SILENCE: the pianist stops", H["release"])
 
 # ---------------------------------------------------------------------------
-# C · Agitato (onto the plinth, dragging the arm), 112 bpm
-bC = 60 / 112
-c0, c1 = 23.6, H["pushEnd"]
-k = 0
-t = c0
-while t < c1 - 0.01:                                                 # low octave tremolo, rising
-    u = (t - c0) / (c1 - c0)
-    add(t, n("D2") if k % 2 == 0 else n("D3"), 0.25 + 0.35 * u, 0.07, 0.03)
-    t += 0.0667
-    k += 1
-chord(H["crouch"], [n("C2"), n("Db2"), n("D2")], 0.35, 0.3, damp=0.05); cue("crouch", H["crouch"])
-for j in range(8):
-    add(H["hop"] + j * 0.03, n("D4") + [0, 2, 3, 5, 7, 9, 10, 12][j], 0.45 + j * 0.03, 0.06, 0.03)
-cue("hop (glissando)", H["hop"])
-add(H["land"], n("D2"), 0.7, 0.18); add(H["land"] + 0.08, n("D3"), 0.6, 0.25); cue("land (boing)", H["land"])
-for j, s_ in enumerate(["D4", "Eb4", "E4", "F4", "F#4", "G4", "G#4", "A4"]):
-    tt = H["land"] + 0.12 + j * bC / 2 * 0.95
-    if tt < H["grab"] - 0.05:
-        add(tt, n(s_), 0.5, 0.1, 0.04)
-chord(H["grab"], [n("D3"), n("F3"), n("A3"), n("C4"), n("F4")], 0.7, 0.5, roll=0.03); cue("grab (rolled chord)", H["grab"])
-for j, s_ in enumerate(["A4", "Bb4", "B4", "C5", "C#5", "D5", "D#5", "E5"]):
-    tt = H["grab"] + 0.12 + j * bC / 2 * 0.9
-    if tt < c1 - 0.06:
-        add(tt, n(s_), 0.5 + j * 0.04, 0.12, 0.04)
-cue("SILENCE: the pianist stops", c1)
-
-# ---------------------------------------------------------------------------
-# D · Foxtrot (the record plays, the shop wakes), 120 bpm, F major; E · Finale
+# D · Foxtrot (the needle drops; the shop wakes; the toy; the smoke ring), 120 bpm, F major
 bD = 0.5
 prog_fox = [("F1", "C2", ["A3", "C4", "F4"]), ("D2", "A1", ["F#3", "C4", "D4"]), ("G1", "D2", ["Bb3", "D4", "F4"]), ("C2", "G1", ["Bb3", "E4", "G4"]),
             ("F1", "C2", ["A3", "C4", "F4"]), ("F1", "C2", ["A3", "Eb4", "F4"]), ("Bb1", "F2", ["Bb3", "D4", "F4"]), ("C2", "G1", ["Bb3", "E4", "G4"]),
@@ -238,43 +297,76 @@ theme = [
     [(0, "C6", 1.0), (1.5, "A5", 0.5), (2, "G5", 0.5), (2.5, "F5", 1.0), (3.5, "A5", 0.5)],
     [(0, "C6", 0.5), (0.5, "Eb6", 1.0), (1.5, "C6", 0.5), (2, "A5", 1.5), (3.5, "F5", 0.5)],
 ]
-def fox_bar(bar_t, bi, vel=0.5, melody=None, mel_vel=0.6, octave=False):
+def fox_bar(bar_t, bi, vel=0.5, melody=None, mel_vel=0.6, octave=False, up=0, stacc=1.0, until=1e9):
     b1, b3, ch = prog_fox[bi % len(prog_fox)]
     for k in range(4):
         tt = bar_t + k * bD
+        if tt >= until - 0.02:
+            break
         if k % 2 == 0:
             m = n(b1 if k == 0 else b3)
-            add(tt, m, vel, bD * 0.85, 0.06); add(tt, m + 12, vel * 0.6, bD * 0.85, 0.06)
+            add(tt, m, vel, bD * 0.85 * stacc, 0.06); add(tt, m + 12, vel * 0.6, bD * 0.85 * stacc, 0.06)
         else:
-            chord(tt, [n(x) for x in ch], vel * 0.62, bD * 0.5, damp=0.05)
-    if melody:
-        for off, s_, d in melody:
-            add(bar_t + off * bD, n(s_), mel_vel, d * bD * 0.95)
-            if octave:
-                add(bar_t + off * bD, n(s_) - 12, mel_vel * 0.7, d * bD * 0.95)
-
+            chord(tt, [n(x) for x in ch], vel * 0.62, bD * 0.5 * stacc, damp=0.05)
+    for off, s_, d in melody or []:
+        tt = bar_t + off * bD
+        if tt >= until - 0.02:
+            continue
+        add(tt, n(s_) + up, mel_vel, min(d, 0.45 if stacc < 1 else d) * bD * 0.95)
+        if octave:
+            add(tt, n(s_) + up - 12, mel_vel * 0.7, d * bD * 0.95)
 d0 = H["themeIn"]
-add(d0, n("C5"), 0.32, 0.6)                                          # the needle finds the groove: the first sound after the silence
-cue("needle drop: the theme", d0)
-for bi in range(6):
-    bt = d0 + bi * 2.0
-    mel = theme[bi] if bi < 6 else None
-    ramp = min(1.0, 0.72 + bi * 0.1)
-    if bi == 4:                                                      # the cap tip bar: leave a hole for the turn
-        mel = [x for x in theme[4] if bt + x[0] * bD < H["turnToUs"] - 0.05]
-    fox_bar(bt, bi, 0.42 * ramp + 0.12, mel, 0.55 * ramp + 0.12)
-for i, tl in enumerate(H["lamps"]):                                  # each lamp catches with a high ting
+db = lambda i: d0 + i * 4 * bD
+add(d0, n("C5"), 0.32, 0.6); cue("needle drop: the theme", d0)        # the first sound after the silence
+fox_bar(db(0), 0, 0.42, theme[0], 0.55)
+fox_bar(db(1), 1, 0.48, theme[1], 0.6)
+fox_bar(db(2), 2, 0.52, theme[2], 0.64)
+for i, tl in enumerate(H["lamps"]):                                    # each lamp catches with a high ting
     add(tl, n(["C7", "E7", "G7", "C8", "E7", "G7"][i]), 0.35, 0.3)
     add(tl + 0.03, n(["G6", "C7", "E7", "G7", "C7", "E7"][i]), 0.25, 0.3)
     cue("lamp", tl)
-grace(H["turnToUs"], n("E6"), n("F6"), 0.55, 0.2); cue("turn to us (grace)", H["turnToUs"])
-chord(H["capTip"][0] + 0.5, [n("F5"), n("A5"), n("C6"), n("F6")], 0.55, 0.7, roll=0.04); cue("cap tip (rolled)", H["capTip"][0] + 0.5)
-# Finale under the end card: the theme in octaves, louder; breaks off when the print burns
-fox_bar(40.8, 0, 0.62, theme[0], 0.8, octave=True)
-fox_bar(42.8, 1, 0.66, [x for x in theme[1] if 42.8 + x[0] * bD < H["pianistStops"] - 0.1], 0.84, octave=True)
+# the toy dances to a tiptoe version of the theme, up an octave, staccato …
+fox_bar(db(3), 3, 0.4, theme[3], 0.55, up=12, stacc=0.5); cue("toy starts dancing", H["toyStart"])
+fox_bar(db(4), 4, 0.4, theme[0], 0.55, up=12, stacc=0.5)
+fox_bar(db(5), 5, 0.4, theme[1], 0.55, up=12, stacc=0.5)
+fox_bar(db(6), 6, 0.5, theme[4], 0.62)                                 # … both nod along (from bothNod: see the gate)
+fox_bar(db(7), 7, 0.4, theme[5], 0.5)
+fox_bar(db(8), 8, 0.32, None)
+fox_bar(db(9), 9, 0.32, None)
+# … and stops dead whenever he looks: stop-time (the gate), a clunk on each look
+looks = [list(w) for w in H["looks"]]
+looks[-1][1] = H["bothNod"][0]                                         # the last look holds through the shrug
+tt_ = np.arange(NS) / SR
+gate = np.ones(NS)
+for a, b in looks:
+    gate *= 1 - np.clip((tt_ - a) / 0.012, 0, 1) * np.clip((b - tt_) / 0.012, 0, 1)
+L *= gate; R *= gate
+for a, b in H["looks"]:
+    chord(a, [n("C2"), n("F#5"), n("C6")], 0.6, 0.09, damp=0.03); cue("he looks: clunk, stop-time", a)
+add(H["shrug"] + 0.05, n("C6"), 0.45, 0.15); add(H["shrug"] + 0.4, n("C3"), 0.5, 0.35); cue("shrug: plink … plonk", H["shrug"])
+cue("both nod: the theme again", H["bothNod"][0])
+# S8: the drag, the smoke ring (an arpeggio that grows with it), the salute, the iris
+add(H["drag"], n("F2"), 0.35, 0.9); add(H["drag"] + 0.1, n("C3"), 0.25, 0.8); cue("drag", H["drag"])
+r0, r1 = H["ring"]
+arp = ["F3", "A3", "C4", "E4", "F4", "A4", "C5", "E5", "F5", "A5", "C6", "E6", "F6"]
+for k, s_ in enumerate(arp):
+    add(r0 + k * (r1 - r0) / len(arp), n(s_), 0.3 + 0.3 * k / len(arp), 0.9 - 0.04 * k)
+cue("smoke ring (arpeggio)", r0)
+s0, s1 = H["salute"]
+grace(s0, n("E6"), n("F6"), 0.55, 0.2)
+chord(s0 + 0.3, [n("F4"), n("A4"), n("C5"), n("F5")], 0.55, 0.6, roll=0.04); cue("salute (grace, rolled)", s0)
+for k, s_ in enumerate(["E5", "Eb5", "D5", "Db5", "C5", "B4", "Bb4", "A4"]):   # the iris closes
+    add(H["irisShut"][0] + k * 0.18, n(s_), 0.32 - 0.02 * k, 0.16)
+
+# ---------------------------------------------------------------------------
+# E · Finale under the sign card: the motif, then the theme in octaves; it breaks off when the print burns
+jdv_motif(58.62, 0.5, [n("C5"), n("F5"), n("G5"), n("A5")], [n("F2"), n("C3"), n("A3"), n("C4"), n("F4")], 0.72)
+fox_bar(58.6, 0, 0.6, None, until=60.6)
+cue("E finale: the motif", 58.62)
+fox_bar(60.6, 0, 0.62, theme[0], 0.8, octave=True)
+fox_bar(62.6, 1, 0.66, theme[1], 0.84, octave=True, until=H["pianistStops"] - 0.0)
 chord(H["pianistStops"], [n("C3"), n("C#4"), n("D4"), n("G4")], 0.6, 0.12, damp=0.04)   # the pianist stops dead
 cue("the print burns: piano breaks off", H["pianistStops"])
-# cut anything still sounding at the break
 cut = int(H["pianistStops"] * SR) + int(0.14 * SR)
 fade = np.exp(-np.arange(NS - cut) / (SR * 0.05))
 L[cut:] *= fade; R[cut:] *= fade
@@ -302,7 +394,9 @@ hiss = fft_filter(rng.standard_normal(NS), bandpass(900, 0.5)) * 0.012
 proj += claw * 0.11 + hiss * motor
 # louder in the silence, quieter under the music
 level = np.full(NS, 0.55)
-level += 0.4 * ((t > H["pushEnd"]) & (t < H["themeIn"] + 0.3))
+level += 0.4 * ((t > H["release"]) & (t < H["themeIn"] + 0.3))
+for a_, b_ in H["looks"]:
+    level += 0.25 * ((t > a_) & (t < b_))
 level += 0.6 * (t < H["musicIn"])
 level += 0.7 * (t > H["burn"])
 level = fft_filter(level, lowpass(3))

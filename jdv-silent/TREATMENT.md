@@ -1,119 +1,136 @@
-# "The Early Shift" (첫 판) — a JEON DE VERO silent film
+# "The Early Shift" (첫 판) — a JEON DE VERO silent film, v2
 
 Style: **1920s Silent Film** (Lemo-Opuscar `silent-film/STYLE.md`). Topic: JEON DE VERO (JDV Records & Goods).
-Length 47 s · 1920×1080 · 24 fps output, motion hand-cranked at 16 fps (20 fps undercranked in the hurry) ·
-no voice · intertitles in Korean with an English line beneath · original piano score (synthesised) + projector.
+Length 65.6 s · 1920×1080 · 24 fps output, motion hand-cranked at 16 fps (20 fps undercranked on the board and in the
+crates) · no voice · **no words at all**: the cards carry only the brand's own marks · original piano score
+(synthesised) + projector.
+
+v2 brief from the client: more of it, much more *Jeon de Vero*, and the character must be him. So the toy figure of v1
+becomes a cameo, and the lead is the brand's mascot at full size: lanky skater, JDV cap, sleepy eyes, moustache,
+cigarette, black tee with the oval JDV mark, very baggy trousers, skate shoes (the skate poster). Subtitles were
+dropped at the client's request, so the cards are wordless.
 
 ## 1. Three structures
 
-1. **Newsreel ("JDV Gazette")**: headline cards and short "reports" from the shop (a new crate arrives, a shot is pulled,
-   the terrace opens). Informative, but a list has no turn and no character; it reads like an ad, not a film.
-2. **The chain in one take**: one locked extreme wide; a figure nudges a record, which tips a stack, which drops the
-   needle, which lights the shop. Elegant, but a many-step chain at small figure scale is exactly the style's first
-   pitfall ("noise in a thumbnail").
-3. **One goal, one turn (chosen)**: before opening, the shop's mascot figure wants the first record of the day playing.
-   He finds it, chases it to the turntable, can't quite manage the needle, the film goes silent, and when the needle
-   drops the whole shop wakes up. One subject, one goal, one turn, and the silence before the turn is something only a
-   silent film with a live pianist can do: the pianist stops.
+1. **"A day at JDV" montage**: skate, coffee, records, toys, terrace, a cut each. Covers the brand, but a list has no turn
+   and no character; it reads as an ad.
+2. **One long gag (him vs. the toy that only moves when he isn't looking)**: strong, but one joke for a minute is thin
+   and hides most of the brand.
+3. **One goal, one turn, his marks as punctuation (chosen)**: before opening, Jeon de Vero skates in, makes his coffee,
+   digs out the house record and puts it on; the pianist stops; the needle drops and the shop wakes up. Each of his
+   logo marks is a pose he strikes in the film and then becomes a card: he peeks over the bar → the *peek* mark; he
+   signs off behind a smoke ring → the *sign* mark. The toy gag is the reward after the turn, not the spine.
 
-Why 3: it keeps the subject large and legible, it gives the score a real arc (Misterioso → Hurry → silence → Tenderly →
-Maestoso), and its ending echoes the opening (the same figure beside the same turntable, now spinning, now addressing us).
+Why 3: one subject and one goal keep him large and legible; the brand's marks become the film's grammar (a match cut
+from his pose to his logo) instead of logos pasted on; and the silence before the needle drop is the one turn only a
+silent film with a pianist can make.
 
 ## 2. Logline and arc
 
-An hour before JEON DE VERO opens, the shop's 22 cm mascot figure digs out the house record and wrestles it onto the
-turntable, so the shop can start its day with music.
+An hour before JEON DE VERO opens, Jeon de Vero rolls in on his board, makes his espresso, finds the house record and
+puts it on, so the shop starts its day with music.
 
-- **Setup**: dark shop, still turntable; Mr. Vero (the mascot as a vinyl figure: JDV cap, moustache, deadpan) shrugs.
-- **Turn**: he finds the house record (with his own face on the sleeve: a double take), loses it in a chase, it lands on
-  the platter by itself; he climbs, pushes the arm, and the pianist stops. Silence. The needle drops.
-- **Ending**: the shop's lamps come on with the music; he dances on the plinth and tips his cap to us. The end card
-  addresses the audience, and then the print, worn out by its own morning, burns through to the white of the lamp.
+- **Setup**: the terrace at dawn; he pushes along it, ollies, carves in through the glass doors; skids, flips the board
+  up into his hand, a puff of smoke; espresso at the bar; he sinks behind the counter and peeks at us: the iris closes on
+  his face and opens on the *peek* mark.
+- **Turn**: digging in the crates, flick after flick; the house sleeve (his own face) stops him: a double take. He puts
+  the disc on, drags the arm across, and the pianist stops. Silence. A nudge. The needle drops.
+- **Ending**: the lamps come on with the foxtrot; a toy of himself dances behind his back and freezes whenever he looks;
+  he shrugs and they nod along together. He takes a drag, blows a smoke ring that becomes the iris, salutes inside it,
+  and the ring shuts on the *sign* mark. The print, worn out by its morning, burns through to the white of the lamp.
 
 ## 3. Benchmark (grammar only)
 
-- **Buster Keaton, *The Electric House* (1922)**: learn the locked wide where cause and effect are seen whole and the
-  wait is the joke. Don't take: any gag, the house, the gadgets.
-- **Ladislas Starevich's toy films (1920s–30s)**: learn toys as actors with no facial animation, the body doing all the
-  acting, a shop as a world at small scale. Don't take: characters, designs, stories.
-- **Silent-era photoplay cue sheets**: learn music by mood section, the piano as the sound effects. Don't take: any
-  published melody (the score is original).
+- **Buster Keaton, *The Electric House* (1922)**: the locked full shot where cause and effect are seen whole and the wait
+  is the joke. Don't take: any gag, the house, the gadgets.
+- **Cut-out and paper-puppet animation (1920s)**: a drawn head that faces the lens and flips crisply when the figure turns
+  (a double take is a flip); the body does the acting. Don't take: any character or design.
+- **Silent-era photoplay cue sheets**: music by mood section, the piano as the sound effects, stop-time for a gag. Don't
+  take: any published melody (the score is original).
 
 ## 4. Shot list
 
 | # | Time (s) | Framing / angle | Camera | Why |
 |---|---|---|---|---|
-| C0 | 0.0–4.2 | theatre: curtains part on a question card | curtain | opens on a question before any image |
-| S1 | 4.2–8.0 | FULL: cabinet top beside the turntable, eye level of the figure | locked | premise in one frame: a small figure, a silent machine |
-| S2 | 8.0–14.5 | FULL: crate seen from the aisle, figure beside it | locked; iris closes on the sleeve | the digging gag whole; iris = attention on one object |
-| S3 | 14.5–21.0 | MEDIUM-WIDE along the cabinet top, low | **tracking with foreground passing** (crate edges, books) | pursuit and momentum: the disc gets away |
-| C2 | 21.0–23.6 | intertitle (twist) | — | reframes the next shot in four words |
-| S4 | 23.6–31.0 | FULL → MEDIUM on the turntable | **slow motivated push-in** | realisation; the held silence |
-| S5 | 31.0–35.6 | EXTREME WIDE: the whole shop from the entrance | locked | the effect seen whole: lamps come on with the music |
-| S6 | 35.6–40.0 | FULL on the figure + spinning record | locked; a half-open iris for the cap tip | he shares the moment with us |
-| C3 | 40.0–45.0 | end card (addresses the audience), brand script | — | ending, ≥ 4 s |
-| — | 45.0–47.0 | the print burns through to white, the projector clatters to a stop | the medium itself | the film breaks |
+| C0 | 0.0–3.8 | theatre: curtains part on the oval JDV mark | curtain | the brand before any image |
+| S1 | 3.8–11.0 | FULL: the terrace from the street, the shop lit behind the glass | **tracking** with him, lateral; 20 fps | momentum: the skate, the ollie (the poster pose), the carve |
+| S2 | 11.0–16.0 | FULL: inside the doors | locked | the skid and the catch whole; the doors close behind him |
+| S3 | 16.0–24.4 | MEDIUM: across the bar | locked; **iris closes on his face** | espresso, the sip; he sinks into the peek pose |
+| C1 | 24.4–26.6 | the *peek* mark | — | match cut: pose → logo |
+| S4 | 26.6–33.6 | FULL: 3/4 back, the crates | locked; 20 fps | the digging gag; the reveal and the double take |
+| S5 | 33.6–41.0 | FULL → MEDIUM: side-on, him and the turntable | **slow push-in** | the arm, the silence, the drop |
+| S6 | 41.0–44.6 | EXTREME WIDE: the whole shop | locked | the effect seen whole: the lamps come on with the music |
+| S7 | 44.6–52.6 | FULL two-shot: him and the toy on the cabinet | locked | stop-time gag |
+| S8 | 52.6–58.6 | MEDIUM: him against the mural | locked; **the smoke ring becomes the iris** | the sign-off |
+| C3 | 58.6–65.6 | the *sign* mark | — | ending; then the burn |
+| — | 62.6–65.6 | the print burns through to white; the projector clatters to a stop; curtains close | the medium itself | the film breaks |
 
-Camera moves used: locked (3×), tracking with foreground, push-in, iris in, half-open iris, curtain, the burn-through.
+Camera moves: tracking (S1), push-in (S5), two irises (on the face; the smoke ring), curtain, burn; the rest locked.
 Transitions only from the medium: iris, straight cut, card, curtain, burn.
 
 ## 5. Beat sheet
 
-- 0.15 lamp click · 0.2–1.2 motor spin-up · 0.0–1.4 curtains part on C0 "가게의 첫 곡은 누가 틀까? / Who plays the shop's first record?"
-- S1: 4.4–5.4 looks at the silent turntable · 5.8 head turns to the crates · 6.4–7.2 shrug · 7.5 turns his body.
-- S2 (undercranked): 8.6–11.9 flicks nine records forward, one per beat, accelerating his arm · 12.35 the house sleeve
-  (his own face) is revealed, he freezes · 12.9 double take to camera (two-frame snap) · 13.3 back to the sleeve ·
-  13.4–14.5 iris closes on the sleeve.
-- S3 (undercranked): 14.5–17.4 he rolls the disc like a hoop, running behind it · 17.4 it speeds ahead, he chases ·
-  18.6 it reaches the turntable, wobbles like a coin · 20.2 it settles exactly on the spindle · 20.4–21.0 hands on knees.
-- C2 "이제, 바늘만 남았다. / Now, only the needle."
-- S4: 24.2 crouch · 24.5 hop · 24.8 lands on the plinth · 25.0–25.8 walks to the arm · 26.0–27.2 pushes the arm across ·
-  **27.2 the piano stops: projector only** · 28.6 a last nudge · 28.8 the needle drops · 28.9 the house theme begins ·
-  29–30.5 the platter spins up · print warms over 28.9–31.0.
-- S5: lamps on the theme's beats: mushroom lamp, pendant, lightbox, track lights, terrace string lights.
-- S6: 35.6–37.5 he dances to the foxtrot · 37.6 turns to us (snap), the iris closes half-way · 38.0–38.8 tips his cap (grace note) · 39.4–40.0 iris shuts.
-- C3 script logo + "오늘도 판은 돌아갑니다. / The record is already playing."
-- 44.2 the print bubbles and burns through from the centre · 44.6–46.4 white lamp light, the film flapping on the reel ·
-  piano breaks off mid-phrase at 44.3 · 46.4 lamp click, black · 47.0 end.
+- 0.15 lamp click · 0.2–1.2 motor spin-up · 0.1–1.4 curtains part on the oval mark.
+- S1 (undercranked): pushes at 4.25, 5.62, 6.98 · 8.35 ollie (arms flung, knees tucked: the poster) · 8.80 lands ·
+  9.4–10.4 the glass doors swing open · 9.71 carves toward them · 10.62 through.
+- S2: 12.44 skids sideways · 13.35 kicks the tail · 13.45 catches the board · 14.26 a puff of smoke · 14.71 strolls off
+  to the bar · 13.6–14.6 the doors close behind him.
+- S3: 16.71 reaches for the machine · 17.4–18.9 steam from the wands · 18.86 mug up · 19.57 turns to us · 20.3–21.0 the
+  sip · 21.0 exhale · 21.7–23.1 sinks behind the bar until only his head shows over it, mug at his side ·
+  23.1–24.4 the iris closes on his face.
+- C1 the *peek* mark.
+- S4 (undercranked): flicks eight records, one per beat (27.43–30.35) · 30.77 the house sleeve, his own face · freeze ·
+  31.60 double take (the head flips) · 32.02 back to the sleeve · 32.4–33.3 pulls it out.
+- S5: 34.2–34.9 sets the disc on the platter · 35.4 takes the arm · 35.6–36.6 drags it across ·
+  **36.8 the piano stops: projector only** · arms folded, waiting · 38.4 a nudge · 38.6 the needle drops, the foxtrot
+  begins; the print warms over 38.6–40.8.
+- S6: lamps on the beats: mushroom lamp 41.1, pendant 41.6, corner 42.1, track 42.6, bar 43.6, terrace 44.1.
+- S7: 44.6 the toy starts dancing behind him · looks at 46.1, 48.1, 49.1 (the toy freezes mid-step, the music stops
+  dead) · 50.6 shrug · 51.1–52.6 both nod along.
+- S8: 53.1 a drag · 54.1–55.6 the smoke ring grows from his mouth until it frames his head · 56.1–56.9 salute ·
+  57.1–58.6 the ring shuts.
+- C3 the *sign* mark · 62.6 the print bubbles and burns from the centre, the piano breaks off at 62.65 ·
+  62.8–64.4 the film flapping on the reel · 64.4 lamp click, black · 64.5–65.3 curtains close.
 
 ## 6. Cue map
 
 | Section | Time | Tempo / metre | Instrumentation and state |
 |---|---|---|---|
-| A Misterioso | 0.6–8.0 | 72 bpm, 4/4 | upright piano, low; chromatic creep in the bass; the theme hinted in minor under the question card |
-| B Hurry | 8.0–21.0 | 144 bpm, 2/4 stride | stride left hand; a staccato plink on every flip (beat grid); rolled chord at the reveal; grace notes on the double take; running scales for the roll; nervous trill for the wobble; "plink … plonk" for the settle |
-| C2 wait | 21.0–23.6 | free | swelling diminished tremolo |
-| C Agitato | 23.6–27.2 | 112 bpm | climbing chromatic line; low "boing" on the landing; stepwise push |
-| Silence | 27.2–28.8 | — | music stops; projector alone |
-| D Foxtrot | 28.8–40.0 | 120 bpm, 4/4 | the record "playing": the house theme in major as a bright foxtrot, stride bass; lamps land on downbeats; grace note on the cap tip |
-| E Finale | 40.0–44.3 | 120 bpm | the theme's last phrase, louder, under the end card; breaks off mid-phrase when the print burns |
+| A Maestoso | 0.35–3.8 | free | rolled F major; the brand motif "Jeon de Ve-ro" (four notes, the last held); turn to G7 and run up |
+| K Skate rag | 3.8–16.0 | 132 bpm, 2/4 stride, C | syncopated rag; low thump on each push; white-key glissando on the ollie, crash on the landing; swoop on the carve; the shop's door bell; trill screech on the skid then stop-time; pop, "ta!" on the catch; a sigh for the puff |
+| L Coffee blues | 16.0–24.4 | 84 bpm, swung, F | slow blues; blue-note pickup on the reach; high trill for the steam; slurping slide for the sip; falling sigh for the exhale; tiptoe thirds sinking with him; a plink on the peek |
+| P Logo tag | 24.4–26.6 | free | the brand motif as a "ta-da" under the *peek* mark; J-cut pickup into the Hurry |
+| B Hurry | 26.6–33.6 | 144 bpm stride, A minor | a plink on every flip; rolled A major at the reveal; diminished sforzando on the double take; grace note back; rising arpeggio on the pull |
+| M Misterioso | 33.6–36.8 | 72 bpm, D minor | low tremolo; the disc lowered in a falling arpeggio; grace on the arm; chromatic creep as it crosses |
+| Silence | 36.8–38.6 | — | music stops; the projector alone |
+| D Foxtrot | 38.6–58.6 | 120 bpm, 4/4, F | the house theme; lamps land with high tings; the toy dances to the theme up an octave, staccato; **stop-time**: a clunk and dead silence on each look; plink … plonk on the shrug; full theme as they nod; the smoke ring is an arpeggio that grows with it; grace + rolled chord on the salute; chromatic fall as the iris shuts |
+| E Finale | 58.6–62.65 | 120 bpm | the brand motif, then the theme in octaves, louder; breaks off mid-phrase when the print burns |
 
-The theme (original): a falling-then-rising five-note figure, minor and creeping in A, bright and syncopated in D/E.
-Every hit time lives in `timeline.json`, which drives both the picture and the score.
+The house theme and the brand motif are original. Every hit lives in `timeline.json`, which drives both the picture and
+the score.
 
 ## 7. Sound design
 
 | Section | Ambience | Foley | Music |
 |---|---|---|---|
 | Opening | projector lamp click, motor spin-up, claw purr | none (silent film) | — |
-| A | projector purr | — | Misterioso |
-| B | projector purr | — (the piano plays every flip, roll, wobble) | Hurry |
+| K, L, B, M | projector purr | — (the piano plays every push, skid, flip, sip) | rag, blues, hurry, misterioso |
 | Silence | projector purr, louder, alone | — | stops |
-| D/E | projector purr, quieter under the theme | — | Tenderly → Maestoso |
-| Ending | the burn: the film flapping on the take-up reel, the motor running down, lamp click | — | breaks off |
+| D | projector purr, quieter under the theme; louder in each stop-time | — | foxtrot |
+| Ending | the burn: film flapping on the take-up reel, motor running down, lamp click | — | breaks off |
 
-Silences: 27.2–28.8 (the turn) and the beat before the reveal at 12.35. Sound as transition: the foxtrot starts under the
-end of S4 and carries over the cut to S5 (L-cut); the Hurry stride starts on the last beat of S1 (J-cut).
+Silences: 36.8–38.6 (the turn) and the three stop-time looks in S7. Sound as transition: the brand motif carries the
+peek card into a J-cut pickup of the Hurry; the foxtrot starts in S5 and carries over the cut to the wide (L-cut).
 
-Compared with the library's demo (*The Runaway Loaf*): structure, opening (question card, no iris), signature shot
-(the shop waking up in one wide), score shape (no tender section; a foxtrot after the silence) and ending (the print
-burns through) all differ; the tracking chase and the push-in are shared grammar of the style.
+## 8. Cards
 
-## 8. Intertitles
+Black painted cards, deco borders (one rule for the opening, heavier for the peek and the ending), and on each one the
+brand's own mark, cut from the client's logo sheet: the oval *JDV · Jeon de Vero Records* (C0), the *peek* (C1), the
+*sign* (C3). No words and no subtitles.
 
-Black painted cards, deco borders that follow the emotion: the question = double rule with stepped corners and fans (C0),
-the twist = the same with a heavier inner rule (C2), the ending = vines and small flowers (C3). Korean line on top
-(Nanum Myeongjo), English beneath in an italic old-style serif (Old Standard TT Italic); titles in a small-caps display
-serif (Playfair Display SC). Cards hold 2.6–5 s. They are the subtitles: `subtitles_ko.srt`.
-Tint plan: cold and scratchy until the needle drops (sepia ≈ 0.12, more damage, faster flicker in the hurry), warm and
-clean after (sepia ≈ 0.34, little damage).
+Character build: the body is a rigged 3D figure (so he lights, shadows and occludes in the set); the head is the brand's
+drawn head, a paper-puppet sprite that always faces the lens and flips when he turns. The mirrored head keeps the cap
+lettering readable ("JDV", never "VDJ").
+
+Tint plan: cold and scratchy until the needle drops (sepia ≈ 0.12–0.18, more damage, faster flicker on the board and in
+the crates), warm and clean after (sepia ≈ 0.34–0.36).

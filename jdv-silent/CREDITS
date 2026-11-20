@@ -12,14 +12,17 @@ Code
   three.js 0.186.1 — MIT, Copyright © 2010–2026 three.js authors (via ../jdv-store/node_modules).
   Everything else (set, rig, shots, score, projector, pipeline) was written for this film.
 
-Fonts (SIL Open Font License 1.1; subsets in fonts/, licence texts alongside)
+Fonts (SIL Open Font License 1.1; subsets in fonts/, licence texts alongside; unused by v2, whose cards carry no text; kept for src/cards.js intertitle())
   Nanum Myeongjo — NHN Corporation (subset renamed "JDV Card KO": Reserved Font Name)
   Playfair Display SC — The Playfair Display Project Authors (subset renamed "JDV Card Title": Reserved Font Name)
   Old Standard TT — The Old Standard Project Authors
 
 Brand
-  JEON DE VERO name, script logo and mascot: the client's own marks, from the store reference image supplied by the client.
-  The 3D shop set is ../jdv-store (built for the client in this repository).
+  JEON DE VERO name, logo marks and mascot: the client's own. Supplied by the client: reference/jdv_logo_sheet.webp
+  (the oval, peek, sign, pennant and other marks, and the drawn head used for the character), reference/jdv_skate_poster.webp
+  (the character's look and the ollie pose; also hung in the shop), reference/jdv_store_reference_v2.webp (the shop).
+  tools/extract_art.py cuts the marks from the sheet; nothing is redrawn except the mirrored head, whose cap lettering
+  is re-set unmirrored. The 3D shop set is ../jdv-store (built for the client in this repository).
 
 Music and sound
   Original score, composed and synthesised for this film (numpy; no samples, no third-party recordings).
