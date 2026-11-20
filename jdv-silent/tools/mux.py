@@ -17,7 +17,7 @@ ln = (f"loudnorm=I=-14:TP=-1.5:LRA=11:measured_I={m['input_i']}:measured_TP={m['
       f"measured_thresh={m['input_thresh']}:offset={m['target_offset']}:linear=true")
 # pass 2: encode
 run(["ffmpeg", "-hide_banner", "-y", "-framerate", str(TL["fps"]), "-i", str(frames), "-i", str(mix),
-     "-vf", "noise=alls=3:allf=t,format=yuv420p", "-c:v", "libx264", "-preset", "slow", "-crf", "21", "-tune", "grain",
+     "-vf", "format=yuv420p", "-c:v", "libx264", "-preset", "slow", "-crf", "29", "-tune", "grain",   # grain is already in the print
      "-af", ln + ",aresample=48000", "-c:a", "aac", "-b:a", "192k", "-shortest", "-movflags", "+faststart", str(out)])
 # poster: the end card before the burn
 run(["ffmpeg", "-hide_banner", "-y", "-ss", "42.5", "-i", str(out), "-frames:v", "1", "-q:v", "3", str(HERE / "poster.jpg")])

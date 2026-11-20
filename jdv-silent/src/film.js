@@ -305,7 +305,7 @@ function poseAt(t) {
   const ab = num([[c0, 0.12], [c0 + 0.28, 2.35, "out"], [c1 - 0.2, 2.35], [c1, 0.12]], t);
   const fl = num([[c0 + 0.18, 0], [c0 + 0.4, 0.42, "out"], [c1 - 0.25, 0.42], [c1, 0]], t);
   if (t > c0) { p.aRab = ab; p.aRfl = fl; }
-  p.capLift = num([[c0 + 0.35, 0], [c0 + 0.55, 0.07, "out"], [c1 - 0.3, 0.07], [c1 - 0.05, 0]], t);
+  p.capLift = num([[c0 + 0.35, 0], [c0 + 0.55, 0.12, "out"], [c1 - 0.3, 0.12], [c1 - 0.05, 0]], t);
   p.hPitch = num([[c0 + 0.35, 0], [c0 + 0.55, 0.18], [c1 - 0.3, 0.18], [c1, 0]], t);
   return p;
 }
@@ -440,9 +440,9 @@ function render(t) {
       iris(fg, GW, HH, c[0], c[1], r);
     }
     if (s.id === "S6" && t > H.irisHalf[0]) {
-      const head = new THREE.Vector3(); J.neck.getWorldPosition(head); head.y += 0.04;
+      const head = new THREE.Vector3(); J.neck.getWorldPosition(head); head.y += 0.035;
       const c = toFilm(head);
-      const r = num([[H.irisHalf[0], 1100], [H.irisHalf[1], 330, "out"], [H.irisShut[0], 330], [H.irisShut[1], 0, "in"]], tm);
+      const r = num([[H.irisHalf[0], 1100], [H.irisHalf[1], 470, "out"], [H.irisShut[0], 470], [H.irisShut[1], 0, "in"]], tm);
       iris(fg, GW, HH, c[0], c[1], r);
     }
   }
