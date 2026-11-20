@@ -13,6 +13,7 @@ procedurally modelled, rigged characters inside a modelled house, filmed with mo
 | `reference/` | Key visual and storyboard board — **reference only** (mood, scale, character design). Never used as footage. |
 | `legacy/v1-concept/` | Superseded first-pass concept documents. |
 | [`jdv-store/`](jdv-store/) | **JEON DE VERO (JDV Records & Goods)**: walkable first-person 3D store with a terrace, crate digging, a playable turntable, inspectable merch and five hidden Mini Vero mascots. Start with [`jdv-store/README.md`](jdv-store/README.md). |
+| [`jdv-silent/`](jdv-silent/) | **The Early Shift (첫 판)**: a 47 s JEON DE VERO silent film made in code in the Lemo-Opuscar "1920s Silent Film" style, shot on the `jdv-store` set: ink redraw, silver print, intertitles, synthesised photoplay piano. Start with [`jdv-silent/README.md`](jdv-silent/README.md). |
 
 ## Status
 

@@ -67,6 +67,7 @@ function crates(g, ctx) {
   const r = rng(31);
   ctx.crates = [];
   F.crates.forEach((cr, ci) => {
+    if (ctx.skipCrates?.includes(ci)) return; // film staging can clear a crate
     const z0 = cr.z - 0.19, z1 = cr.z + 0.19, t = 0.016;
     const w = (a, b, c, d, e, f, grain) => g.add(bx(a, b, c, d, e, f, M.walnut, { tile: [1.2, 0.6], grain, round: 0.003 }));
     w(x0, y, z0, x1, y + t, z1, "x");                // floor
@@ -165,7 +166,7 @@ function turntable(g, ctx) {
 
   const REST = 0.0, START = -0.5, END = -0.86;
   const state = { playing: false, arm: REST, lift: 1, speed: 0, progress: 0 };
-  ctx.turntable = { state, pos: new THREE.Vector3(cx, top, cz) };
+  ctx.turntable = { state, pos: new THREE.Vector3(cx, top, cz), spin, armPivot, arm, hinge };
   ctx.anim.push((dt) => {
     const targetSpeed = state.playing ? 3.49 : 0; // 33⅓ rpm
     state.speed += (targetSpeed - state.speed) * (1 - Math.exp(-dt * 2.2));
@@ -205,6 +206,7 @@ export function mushroomLamp(g, ctx, { x, y, z }, id, { scale = 1, amber = false
   light.position.set(x, y + 0.26 * scale, z);
   ctx.scene.add(light);
   const state = { on: true, k: 1, base: light.intensity, emis: shadeMat.emissiveIntensity };
+  (ctx.lamps ??= []).push({ id, light, mat: shadeMat, state });
   ctx.anim.push((dt) => {
     state.k += ((state.on ? 1 : 0) - state.k) * (1 - Math.exp(-dt * 12));
     light.intensity = state.base * state.k;

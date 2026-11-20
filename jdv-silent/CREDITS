@@ -1,0 +1,26 @@
+The Early Shift (첫 판) — a JEON DE VERO silent film
+
+Style
+  "1920s Silent Film" style prompt (STYLE.md), DIRECTOR.md and TECHNIQUE.md from Lemo-Opuscar by Lemomo (LemoLab),
+  https://github.com/lemomo-ai/lemo-opuscar — followed and adapted to make this film, as its licence allows for one's
+  own films (CC BY-NC 4.0 plus the film-making permission in its LICENSE). The documents themselves are not copied here.
+
+Code
+  engine/redraw.js, engine/film.js — copied unchanged from Lemo-Opuscar, styles/silent-film/demo/engine/,
+  MIT License, Copyright (c) 2026 Lemomo (LemoLab). Full text: engine/LICENSE-MIT.txt
+  src/cards.js decoBorder() — adapted from the same demo's engine/cards.js (MIT, same notice).
+  three.js 0.186.1 — MIT, Copyright © 2010–2026 three.js authors (via ../jdv-store/node_modules).
+  Everything else (set, rig, shots, score, projector, pipeline) was written for this film.
+
+Fonts (SIL Open Font License 1.1; subsets in fonts/, licence texts alongside)
+  Nanum Myeongjo — NHN Corporation (subset renamed "JDV Card KO": Reserved Font Name)
+  Playfair Display SC — The Playfair Display Project Authors (subset renamed "JDV Card Title": Reserved Font Name)
+  Old Standard TT — The Old Standard Project Authors
+
+Brand
+  JEON DE VERO name, script logo and mascot: the client's own marks, from the store reference image supplied by the client.
+  The 3D shop set is ../jdv-store (built for the client in this repository).
+
+Music and sound
+  Original score, composed and synthesised for this film (numpy; no samples, no third-party recordings).
+  Projector sounds synthesised. No voice.

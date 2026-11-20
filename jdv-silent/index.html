@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>The Early Shift — JEON DE VERO</title>
+<style>
+@font-face { font-family: "JDV Card KO"; src: url("fonts/JDVCardKO-ExtraBold.woff2") format("woff2"); font-weight: 800; }
+@font-face { font-family: "JDV Card KO"; src: url("fonts/JDVCardKO-Bold.woff2") format("woff2"); font-weight: 700; }
+@font-face { font-family: "JDV Card Title"; src: url("fonts/JDVCardTitle-Regular.woff2") format("woff2"); font-weight: 400; }
+@font-face { font-family: "JDV Card Title"; src: url("fonts/JDVCardTitle-Bold.woff2") format("woff2"); font-weight: 700; }
+@font-face { font-family: "Old Standard TT"; src: url("fonts/OldStandard-Italic.woff2") format("woff2"); font-style: italic; }
+html, body { margin: 0; background: #000; }
+#film { display: block; width: 100vw; height: auto; max-height: 100vh; margin: 0 auto; }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "/jdv-store/node_modules/three/build/three.module.js",
+  "three/addons/": "/jdv-store/node_modules/three/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="film" width="1920" height="1080"></canvas>
+<script type="module">
+await Promise.all([
+  document.fonts.load('800 96px "JDV Card KO"'),
+  document.fonts.load('italic 44px "Old Standard TT"'),
+  document.fonts.load('400 40px "JDV Card Title"'),
+]).catch(() => {});
+try { await import("./src/film.js"); }
+catch (e) { console.error(e); window.__error = String(e && e.stack || e); }
+</script>
+</body>
+</html>
